@@ -7,20 +7,38 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="MainWindow" Height="675" Width="1200">
-    
+
+
     <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="MenuColumn" Width="40" />
+            <ColumnDefinition Width="{Binding Path=Width, ElementName=MenuToggleButton}" />
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <Rectangle x:Name="MenuToggleButton" Width="40" Visibility="Collapsed"/>
 
-        <ToggleButton x:Name="MenuToggleButton" FontSize="18" HorizontalAlignment="Center" Style="{StaticResource HamburgerButtonStyle}"/>
+        
+        <DockPanel>
+            <ToggleButton FontSize="18" HorizontalAlignment="Left" Style="{StaticResource HamburgerButtonStyle}">
+                <ToggleButton.Triggers>
+                    <!-- Expanded -->
+                    <EventTrigger RoutedEvent="ToggleButton.Checked">
+                        <BeginStoryboard Storyboard="{StaticResource OpenMenu}" />
+                    </EventTrigger>
+                    <!-- Hidden -->
+                    <EventTrigger RoutedEvent="ToggleButton.Unchecked">
+                        <BeginStoryboard Storyboard="{StaticResource CloseMenu}" />
+                    </EventTrigger>
+                </ToggleButton.Triggers>
+            </ToggleButton>
+            <TextBlock Text="Title"/>
+        </DockPanel>
 
-            <StackPanel Grid.Row="1" Grid.Column="0" ClipToBounds="True">
+
+        <StackPanel Grid.Row="1" Grid.Column="0" ClipToBounds="True">
             <Button Content="Пункт 1" Margin="5"/>
             <Button Content="Пункт 2" Margin="5"/>
             <Button Content="Пункт 3" Margin="5"/>
@@ -30,6 +48,4 @@
             <TextBlock Text="Основной контент приложения" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
         </Border>
     </Grid>
-
-
 </Window>

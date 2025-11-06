@@ -3,7 +3,7 @@
 
     <!-- Colors Palette Connect -->
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="ColorsPalette.xaml"/>
+        <ResourceDictionary Source="/Styles/_Colors.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
     <!--Hamburger Button-->
@@ -14,33 +14,30 @@
         <Setter Property="Width" Value="{Binding Path=ActualHeight, RelativeSource={RelativeSource Self}}"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
-
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Border Background="Transparent">
                         <Border x:Name="backgroundElement"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Width="30" Height="30"
-                        CornerRadius="5"
-                        Background="{TemplateBinding Background}">
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Width="30" Height="30"
+                                CornerRadius="5"
+                                Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Center"
-                                      VerticalAlignment="Center"
-                                      Content="{TemplateBinding Content}"/>
+                                              VerticalAlignment="Center"
+                                              Content="{TemplateBinding Content}"/>
                         </Border>
-
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="Content" Value="X"/>
+                            <Setter TargetName="backgroundElement" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-
-        <Style.Triggers>
-            <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Content" Value="X"/>
-                <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
-            </Trigger>
-        </Style.Triggers>
     </Style>
-    
+
 </ResourceDictionary>

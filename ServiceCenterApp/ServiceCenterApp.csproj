@@ -11,6 +11,7 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="ViewModels\" />
+    <Folder Include="Pages\" />
   </ItemGroup>
 
 </Project>
