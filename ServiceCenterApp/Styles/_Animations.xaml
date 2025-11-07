@@ -1,18 +1,16 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Storyboard x:Key="OpenMenu">
-        <DoubleAnimation Storyboard.TargetName="MenuToggleButton" 
-                         Storyboard.TargetProperty="Width" 
-                         To="200" 
-                         Duration="0:0:0.3"/>
+    <Storyboard x:Key="OpenMenuStyle">
+        <DoubleAnimation Storyboard.TargetProperty="Width" 
+                     To="200" 
+                     Duration="0:0:0.3"/>
     </Storyboard>
 
-    <Storyboard x:Key="CloseMenu">
-        <DoubleAnimation Storyboard.TargetName="MenuToggleButton" 
-                         Storyboard.TargetProperty="Width" 
-                         To="50" 
-                         Duration="0:0:0.3"/>
+    <Storyboard x:Key="CloseMenuStyle">
+        <DoubleAnimation Storyboard.TargetProperty="Width" 
+                     To="50" 
+                     Duration="0:0:0.3"/>
     </Storyboard>
 
 </ResourceDictionary>

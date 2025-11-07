@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using ServiceCenterApp.ViewModels;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,9 +17,17 @@ namespace ServiceCenterApp
     /// </summary>
     public partial class MainWindow : Window
     {
+        MainWindowViewModel viewModel;
         public MainWindow()
         {
             InitializeComponent();
+            viewModel = new MainWindowViewModel();
+            DataContext = viewModel;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            viewModel.IsMenuVisible = !viewModel.IsMenuVisible;
         }
     }
 }

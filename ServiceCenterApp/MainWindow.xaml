@@ -4,12 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ServiceCenterApp" 
+        xmlns:vm="clr-namespace:ServiceCenterApp.ViewModels"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="MainWindow" Height="675" Width="1200">
 
+    <Window.DataContext>
+        <vm:MainWindowViewModel/>
+    </Window.DataContext>
 
-    <Grid Background="{StaticResource BackgroundBrush}">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource ForegroundBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{Binding Path=Width, ElementName=MenuToggleButton}" />
             <ColumnDefinition Width="*"/>
@@ -18,37 +26,46 @@
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Rectangle x:Name="MenuToggleButton" Width="50" Visibility="Collapsed"/>
 
-        
-        <DockPanel Grid.Row="0" Grid.Column="0">
-            <ToggleButton FontSize="18" HorizontalAlignment="Left" Style="{StaticResource HamburgerButtonStyle}">
-                <ToggleButton.Triggers>
-                    <!-- Expanded -->
-                    <EventTrigger RoutedEvent="ToggleButton.Checked">
-                        <BeginStoryboard Storyboard="{StaticResource OpenMenu}" />
-                    </EventTrigger>
-                    <!-- Hidden -->
-                    <EventTrigger RoutedEvent="ToggleButton.Unchecked">
-                        <BeginStoryboard Storyboard="{StaticResource CloseMenu}" />
-                    </EventTrigger>
-                </ToggleButton.Triggers>
-            </ToggleButton>
-            <TextBlock Text="ServiceCRM" Foreground="{StaticResource WhiteTextBrush}" VerticalAlignment="Center" FontSize="20" Margin="10 0 0 0"/>
-        </DockPanel>
+        <!--Menu size helper for animation-->
+        <Rectangle x:Name="MenuToggleButton" Width="{Binding MenuWidth, Mode=TwoWay}" Visibility="{Binding IsMenuVisible, Converter={StaticResource BoolToVisConverter}}">
+            <Rectangle.Style>
+                <Style TargetType="Rectangle">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMenuExtended}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard Storyboard="{StaticResource OpenMenuStyle}"/>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard Storyboard="{StaticResource CloseMenuStyle}"/>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Rectangle.Style>
+        </Rectangle>
 
 
-        <StackPanel Grid.Row="1" Grid.Column="0" ClipToBounds="True">
-
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" ClipToBounds="True" 
+                Background="{StaticResource BackgroundBrush}" 
+                Visibility="{Binding IsMenuVisible, Converter={StaticResource BoolToVisConverter}}">
+            <DockPanel Grid.Row="0" Grid.Column="0" Height="50">
+                <ToggleButton IsChecked="{Binding IsMenuExtended, Mode=TwoWay}" FontSize="18" HorizontalAlignment="Left" Style="{StaticResource HamburgerButtonStyle}" />
+                <TextBlock Text="ServiceCRM" Foreground="{StaticResource WhiteTextBrush}" VerticalAlignment="Center" FontSize="20" Margin="10 0 0 0"/>
+            </DockPanel>
             <Separator Margin="0 0 0 0" Foreground="{StaticResource ForegroundBrush}"/>
-
             <Button Content="Пункт 1" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource HomeIcon}" />
             <Button Content="Пункт 2" Margin="5" Style="{StaticResource MenuButtonStyle}" />
             <Button Content="Пункт 3" Margin="5" Style="{StaticResource MenuButtonStyle}" />
         </StackPanel>
 
-        <Border Grid.Column="1" Grid.RowSpan="2" Background="WhiteSmoke">
-            <TextBlock Text="Основной контент приложения" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+        <Border Grid.Column="1" Grid.RowSpan="2" Background="{StaticResource ForegroundBrush}">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Основной контент приложения" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" />
+                <Button Content="Test Button" MaxWidth="300" Margin="30" Click="Button_Click" />
+            </StackPanel>
         </Border>
     </Grid>
 </Window>
+    
+    
