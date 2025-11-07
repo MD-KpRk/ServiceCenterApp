@@ -15,13 +15,13 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Rectangle x:Name="MenuToggleButton" Width="40" Visibility="Collapsed"/>
+        <Rectangle x:Name="MenuToggleButton" Width="50" Visibility="Collapsed"/>
 
         
-        <DockPanel>
+        <DockPanel Grid.Row="0" Grid.Column="0">
             <ToggleButton FontSize="18" HorizontalAlignment="Left" Style="{StaticResource HamburgerButtonStyle}">
                 <ToggleButton.Triggers>
                     <!-- Expanded -->
@@ -34,14 +34,17 @@
                     </EventTrigger>
                 </ToggleButton.Triggers>
             </ToggleButton>
-            <TextBlock Text="Title"/>
+            <TextBlock Text="ServiceCRM" Foreground="{StaticResource WhiteTextBrush}" VerticalAlignment="Center" FontSize="20" Margin="10 0 0 0"/>
         </DockPanel>
 
 
         <StackPanel Grid.Row="1" Grid.Column="0" ClipToBounds="True">
-            <Button Content="Пункт 1" Margin="5"/>
-            <Button Content="Пункт 2" Margin="5"/>
-            <Button Content="Пункт 3" Margin="5"/>
+
+            <Separator Margin="0 0 0 0" Foreground="{StaticResource ForegroundBrush}"/>
+
+            <Button Content="Пункт 1" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource HomeIcon}" />
+            <Button Content="Пункт 2" Margin="5" Style="{StaticResource MenuButtonStyle}" />
+            <Button Content="Пункт 3" Margin="5" Style="{StaticResource MenuButtonStyle}" />
         </StackPanel>
 
         <Border Grid.Column="1" Grid.RowSpan="2" Background="WhiteSmoke">

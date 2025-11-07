@@ -11,7 +11,7 @@
     <Storyboard x:Key="CloseMenu">
         <DoubleAnimation Storyboard.TargetName="MenuToggleButton" 
                          Storyboard.TargetProperty="Width" 
-                         To="40" 
+                         To="50" 
                          Duration="0:0:0.3"/>
     </Storyboard>
 

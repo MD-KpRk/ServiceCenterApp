@@ -4,11 +4,11 @@
     <!-- Colors Palette Connect -->
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/Styles/_Colors.xaml"/>
+        <ResourceDictionary Source="/Styles/_Icons.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
     <!--Hamburger Button-->
     <Style x:Key="HamburgerButtonStyle" TargetType="ToggleButton">
-        <Setter Property="Content" Value="☰"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="VerticalAlignment" Value="Stretch"/>
         <Setter Property="Width" Value="{Binding Path=ActualHeight, RelativeSource={RelativeSource Self}}"/>
@@ -17,23 +17,43 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
-                    <Border Background="Transparent">
-                        <Border x:Name="backgroundElement"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Width="30" Height="30"
-                                CornerRadius="5"
-                                Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Content="{TemplateBinding Content}"/>
-                        </Border>
+                    <Border x:Name="backgroundElement" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center" 
+                            Width="35" 
+                            Height="35" 
+                            CornerRadius="5" 
+                            Background="{TemplateBinding Background}">
+
+                        <Path x:Name="IconPath"
+                              Data="{StaticResource HamburgerIconOpen}" 
+                              Fill="{TemplateBinding Foreground}"
+                              Stretch="Uniform"
+                              Width="20" Height="20"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center">
+                        </Path>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Content" Value="X"/>
+                            <Setter TargetName="IconPath" Property="Data" Value="{StaticResource HamburgerIconClose}"/>
                             <Setter TargetName="backgroundElement" Property="Background" Value="{StaticResource PrimaryBrush}"/>
                         </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                                <Condition Property="IsChecked" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="backgroundElement" Property="Background" Value="{StaticResource PrimaryBrushLight}"/>
+                        </MultiTrigger>
+
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                                <Condition Property="IsChecked" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="backgroundElement" Property="Background" Value="{StaticResource PrimaryBrushLight}"/>
+                        </MultiTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
