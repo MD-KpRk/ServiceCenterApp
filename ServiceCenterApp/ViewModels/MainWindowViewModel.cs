@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace ServiceCenterApp.ViewModels
+﻿namespace ServiceCenterApp.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
     {

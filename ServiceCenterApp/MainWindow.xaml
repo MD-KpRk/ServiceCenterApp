@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ServiceCenterApp" 
         xmlns:vm="clr-namespace:ServiceCenterApp.ViewModels"
+        xmlns:converters="clr-namespace:ServiceCenterApp.Converters"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="MainWindow" Height="675" Width="1200">
@@ -14,12 +15,19 @@
     </Window.DataContext>
 
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+        <converters:MenuWidthConverter x:Key="MenuWidthConverter"/>
     </Window.Resources>
 
     <Grid Background="{StaticResource ForegroundBrush}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="{Binding Path=Width, ElementName=MenuToggleButton}" />
+            <ColumnDefinition>
+                <ColumnDefinition.Width>
+                    <MultiBinding Converter="{StaticResource MenuWidthConverter}">
+                        <Binding Path="IsMenuVisible"/>
+                        <Binding ElementName="MenuToggleButton" Path="Width"/>
+                    </MultiBinding>
+                </ColumnDefinition.Width>
+            </ColumnDefinition>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -28,7 +36,7 @@
         </Grid.RowDefinitions>
 
         <!--Menu size helper for animation-->
-        <Rectangle x:Name="MenuToggleButton" Width="{Binding MenuWidth, Mode=TwoWay}" Visibility="{Binding IsMenuVisible, Converter={StaticResource BoolToVisConverter}}">
+        <Rectangle x:Name="MenuToggleButton" Width="{Binding MenuWidth, Mode=TwoWay}" Visibility="Collapsed">
             <Rectangle.Style>
                 <Style TargetType="Rectangle">
                     <Style.Triggers>
@@ -46,10 +54,8 @@
         </Rectangle>
 
 
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" ClipToBounds="True" 
-                Background="{StaticResource BackgroundBrush}" 
-                Visibility="{Binding IsMenuVisible, Converter={StaticResource BoolToVisConverter}}">
-            <DockPanel Grid.Row="0" Grid.Column="0" Height="50">
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" ClipToBounds="True" Background="{StaticResource BackgroundBrush}">
+            <DockPanel Height="50">
                 <ToggleButton IsChecked="{Binding IsMenuExtended, Mode=TwoWay}" FontSize="18" HorizontalAlignment="Left" Style="{StaticResource HamburgerButtonStyle}" />
                 <TextBlock Text="ServiceCRM" Foreground="{StaticResource WhiteTextBrush}" VerticalAlignment="Center" FontSize="20" Margin="10 0 0 0"/>
             </DockPanel>
