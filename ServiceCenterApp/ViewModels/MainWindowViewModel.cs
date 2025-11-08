@@ -1,11 +1,30 @@
-﻿namespace ServiceCenterApp.ViewModels
+﻿using ServiceCenterApp.Services.Interfaces;
+
+namespace ServiceCenterApp.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
     {
         private string _title = "Сервисный Центр";
         private double _menuwidth = 50;
         private bool _isMenuExtended = false;
-        private bool _isMenuVisible = true;
+        private bool _isMenuVisible = false;
+
+        private readonly INavigationService _navigationService;
+        private readonly ICurrentUserService _currentUserService;
+
+        public MainWindowViewModel(INavigationService navigationService, ICurrentUserService currentUserService)
+        {
+            _navigationService = navigationService;
+            _currentUserService = currentUserService;
+
+            _currentUserService.AuthenticationStateChanged += OnAuthenticationStateChanged;
+
+            UpdateMenuVisibility();
+        }
+        public void StartNavigation()
+        {
+            _navigationService.NavigateTo<AuthPageViewModel>();
+        }
 
         public bool IsMenuExtended
         {
@@ -45,6 +64,17 @@
                 _title = value;
                 OnPropertyChanged(nameof(Title));
             }
+        }
+
+
+        private void OnAuthenticationStateChanged()
+        {
+            UpdateMenuVisibility();
+        }
+
+        private void UpdateMenuVisibility()
+        {
+            IsMenuVisible = _currentUserService.IsLoggedIn;
         }
     }
 }

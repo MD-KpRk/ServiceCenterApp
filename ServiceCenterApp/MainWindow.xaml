@@ -8,11 +8,8 @@
         xmlns:converters="clr-namespace:ServiceCenterApp.Converters"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="MainWindow" Height="675" Width="1200">
-
-    <Window.DataContext>
-        <vm:MainWindowViewModel/>
-    </Window.DataContext>
+        Title="MainWindow" Height="675" Width="1200"
+        Loaded="MainWindow_OnLoaded">
 
     <Window.Resources>
         <converters:MenuWidthConverter x:Key="MenuWidthConverter"/>
@@ -66,10 +63,7 @@
         </StackPanel>
 
         <Border Grid.Column="1" Grid.RowSpan="2" Background="{StaticResource ForegroundBrush}">
-            <StackPanel VerticalAlignment="Center">
-                <TextBlock Text="Основной контент приложения" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20" />
-                <Button Content="Test Button" MaxWidth="300" Margin="30" Click="Button_Click" />
-            </StackPanel>
+            <Frame Name="MainFrame" NavigationUIVisibility="Hidden" Source="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  />
         </Border>
     </Grid>
 </Window>

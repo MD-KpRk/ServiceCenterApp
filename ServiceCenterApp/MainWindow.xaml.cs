@@ -1,4 +1,6 @@
-﻿using ServiceCenterApp.ViewModels;
+﻿using ServiceCenterApp.Services;
+using ServiceCenterApp.Services.Interfaces;
+using ServiceCenterApp.ViewModels;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,22 +14,28 @@ using System.Windows.Shapes;
 
 namespace ServiceCenterApp
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        MainWindowViewModel viewModel;
-        public MainWindow()
+        private readonly INavigationService _navigationService;
+        private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
+        public MainWindow(INavigationService navigationService, ICurrentUserService currentUser)
         {
+            _navigationService = navigationService;
             InitializeComponent();
-            viewModel = new MainWindowViewModel();
-            DataContext = viewModel;
+        }
+
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            _navigationService.Initialize(MainFrame);
+
+            ViewModel.StartNavigation();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.IsMenuVisible = !viewModel.IsMenuVisible;
+            ViewModel.IsMenuVisible = !ViewModel.IsMenuVisible;
         }
+
+
     }
 }
