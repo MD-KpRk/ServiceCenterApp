@@ -13,11 +13,17 @@ namespace ServiceCenterApp.Converters
             {
                 return new GridLength(0);
             }
-
-            bool isVisible = (bool)values[0];
-            double animatedWidth = (double)values[1];
-            double finalWidth = isVisible ? animatedWidth : 0;
-            return new GridLength(finalWidth);
+            try
+            {
+                bool isVisible = (bool)values[0];
+                double animatedWidth = (double)values[1];
+                double finalWidth = isVisible ? animatedWidth : 0;
+                return new GridLength(finalWidth);
+            }
+            catch (Exception ex)
+            {
+                return new GridLength(0);
+            }
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

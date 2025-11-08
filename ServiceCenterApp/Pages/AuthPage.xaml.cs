@@ -21,17 +21,21 @@ namespace ServiceCenterApp.Pages
     /// </summary>
     public partial class AuthPage : Page
     {
-        ICurrentUserService? _currentUserService;
+        AuthPageViewModel ViewModel;
         public AuthPage(AuthPageViewModel viewModel)
         {
             InitializeComponent();
-            this.DataContext = viewModel;
+            DataContext = viewModel;
+            ViewModel = viewModel;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentUserService == null) throw new NullReferenceException();
-            MessageBox.Show(_currentUserService.CurrentUser);
+            if (ViewModel.Login("testmock"))
+                MessageBox.Show("Success");
+            else
+                MessageBox.Show("Grand Fail");
+            
         }
     }
 }

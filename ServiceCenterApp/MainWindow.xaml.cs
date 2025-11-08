@@ -16,18 +16,15 @@ namespace ServiceCenterApp
 {
     public partial class MainWindow : Window
     {
-        private readonly INavigationService _navigationService;
         private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
-        public MainWindow(INavigationService navigationService, ICurrentUserService currentUser)
+        public MainWindow()
         {
-            _navigationService = navigationService;
             InitializeComponent();
         }
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            _navigationService.Initialize(MainFrame);
-
+            ViewModel.InitializeNavigation(MainFrame);
             ViewModel.StartNavigation();
         }
 

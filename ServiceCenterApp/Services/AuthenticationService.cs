@@ -10,13 +10,12 @@ public class AuthenticationService : IAuthenticationService
         _currentUserService = currentUserService;
     }
 
-    //Login mock
-    public string Login(string username, string password)
+    //Login mock. Always Success
+    public bool Login(string username, string password)
     {
-        
         string user = "UserMock"; 
         _currentUserService.SetCurrentUser(user); 
-        return user;
+        return true;
     }
 
     public Task<int> LoginAsync(string username, string password)

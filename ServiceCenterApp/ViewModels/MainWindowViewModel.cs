@@ -1,4 +1,6 @@
 ﻿using ServiceCenterApp.Services.Interfaces;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace ServiceCenterApp.ViewModels
 {
@@ -21,6 +23,12 @@ namespace ServiceCenterApp.ViewModels
 
             UpdateMenuVisibility();
         }
+
+        public void InitializeNavigation(Frame frame)
+        {
+            _navigationService.Initialize(frame);
+        }
+
         public void StartNavigation()
         {
             _navigationService.NavigateTo<AuthPageViewModel>();

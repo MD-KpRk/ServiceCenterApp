@@ -31,7 +31,7 @@ namespace ServiceCenterApp
 
             // VIEWS
             services.AddTransient<AuthPage>(); // Page
-            services.AddSingleton<MainWindow>(s => new MainWindow(s.GetRequiredService<INavigationService>(), s.GetRequiredService<ICurrentUserService>()) // Window
+            services.AddSingleton<MainWindow>(s => new MainWindow() // Window
             {
                 DataContext = s.GetRequiredService<MainWindowViewModel>()
             });
