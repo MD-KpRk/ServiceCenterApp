@@ -1,36 +1,70 @@
 ﻿using ServiceCenterApp.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Windows; // Для MessageBox
 
 namespace ServiceCenterApp.ViewModels
 {
     public class AuthPageViewModel : BaseViewModel
     {
-        ICurrentUserService? _currentUserService;
-        IAuthenticationService? _authenticationService;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthenticationService _authenticationService;
+        private readonly INavigationService _navigationService;
 
-        public AuthPageViewModel(ICurrentUserService currentUserService, IAuthenticationService authenticationService)
+        private string _realPassword = "";
+
+        public string StarPassword => new string('●', _realPassword.Length);
+
+        public AuthPageViewModel(ICurrentUserService currentUserService,
+                                 IAuthenticationService authenticationService,
+                                 INavigationService navigationService)
         {
             _currentUserService = currentUserService;
             _authenticationService = authenticationService;
-
+            _navigationService = navigationService; 
         }
 
-        public bool Login(string password)
+        public void ProcessNumpadInput(string key)
         {
-            bool? result = _authenticationService?.Login("username", password);
+            switch (key)
+            {
+                case "Delete":
+                    if (_realPassword.Length > 0)
+                    {
+                        _realPassword = _realPassword.Substring(0, _realPassword.Length - 1);
+                    }
+                    break;
 
-            //MessageBox.Show(_currentUserService.CurrentUser);
+                case "Apply":
+                    Login();
+                    break;
 
-            if (result == null) result = false;
+                default:
+                    if (_realPassword.Length < 10) 
+                    {
+                        _realPassword += key;
+                    }
+                    break;
+            }
+            OnPropertyChanged(nameof(StarPassword));
+        }
 
-            if (result == false) return false;
-            else return true;
+        private void Login()
+        {
+            if (string.IsNullOrEmpty(_realPassword)) return;
 
+            bool success = _authenticationService.Login("username", _realPassword);
+
+            if (success)
+            {
+                MessageBox.Show("Вход выполнен успешно!");
+                // _navigationService.NavigateTo<MainPageViewModel>();
+            }
+            else
+            {
+                MessageBox.Show("Неверный ПИН-код!");
+            }
+
+            _realPassword = "";
+            OnPropertyChanged(nameof(StarPassword));
         }
     }
 }

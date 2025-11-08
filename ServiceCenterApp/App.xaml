@@ -8,9 +8,23 @@
                 <ResourceDictionary Source="/Styles/_Colors.xaml"/>
                 <ResourceDictionary Source="/Styles/_Icons.xaml"/>
                 <ResourceDictionary Source="/Styles/_Animations.xaml"/>
-                <ResourceDictionary Source="/Styles/ToggleButton.xaml"/>
+
                 <ResourceDictionary Source="/Styles/Button.xaml"/>
+                <ResourceDictionary Source="/Styles/Path.xaml"/>
+                <ResourceDictionary Source="/Styles/ToggleButton.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <FontFamily x:Key="Roboto">./Fonts/#Roboto</FontFamily>
+            <Style TargetType="{x:Type Control}">
+                <Setter Property="FontFamily" Value="{StaticResource Roboto}"/>
+            </Style>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="FontFamily" Value="{StaticResource Roboto}"/>
+            </Style>
+
+
         </ResourceDictionary>
+
+
     </Application.Resources>
 </Application>

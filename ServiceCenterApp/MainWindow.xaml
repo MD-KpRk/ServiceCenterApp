@@ -15,7 +15,7 @@
         <converters:MenuWidthConverter x:Key="MenuWidthConverter"/>
     </Window.Resources>
 
-    <Grid Background="{StaticResource ForegroundBrush}">
+    <Grid Background="{StaticResource LightBackgroundBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition>
                 <ColumnDefinition.Width>
@@ -51,18 +51,18 @@
         </Rectangle>
 
 
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" ClipToBounds="True" Background="{StaticResource BackgroundBrush}">
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" ClipToBounds="True" Background="{StaticResource DarkBackgroundBrush}">
             <DockPanel Height="50">
                 <ToggleButton IsChecked="{Binding IsMenuExtended, Mode=TwoWay}" FontSize="18" HorizontalAlignment="Left" Style="{StaticResource HamburgerButtonStyle}" />
                 <TextBlock Text="ServiceCRM" Foreground="{StaticResource WhiteTextBrush}" VerticalAlignment="Center" FontSize="20" Margin="10 0 0 0"/>
             </DockPanel>
-            <Separator Margin="0 0 0 0" Foreground="{StaticResource ForegroundBrush}"/>
+            <Separator Margin="0 0 0 0" Foreground="{StaticResource LightBackgroundBrush}"/>
             <Button Content="Пункт 1" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource HomeIcon}" />
             <Button Content="Пункт 2" Margin="5" Style="{StaticResource MenuButtonStyle}" />
             <Button Content="Пункт 3" Margin="5" Style="{StaticResource MenuButtonStyle}" />
         </StackPanel>
 
-        <Border Grid.Column="1" Grid.RowSpan="2" Background="{StaticResource ForegroundBrush}">
+        <Border Grid.Column="1" Grid.RowSpan="2" Background="{StaticResource LightBackgroundBrush}">
             <Frame Name="MainFrame" NavigationUIVisibility="Hidden" Source="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  />
         </Border>
     </Grid>

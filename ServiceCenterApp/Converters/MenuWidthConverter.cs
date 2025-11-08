@@ -20,7 +20,7 @@ namespace ServiceCenterApp.Converters
                 double finalWidth = isVisible ? animatedWidth : 0;
                 return new GridLength(finalWidth);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new GridLength(0);
             }

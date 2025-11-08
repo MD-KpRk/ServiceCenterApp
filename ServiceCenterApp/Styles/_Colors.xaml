@@ -4,7 +4,9 @@
 
     <!-- Colors -->
     <Color x:Key="BackgroundColor">#1A2A40</Color>
-    <Color x:Key="ForegroundColor">#F2F2F2</Color>
+    <Color x:Key="LightBackgroundColor">#F2F2F2</Color>
+    <Color x:Key="SmokeWhite">#F2F2F2</Color>
+    <Color x:Key="White">#FFFFFF</Color>
     <Color x:Key="PrimaryColor">#0078D4</Color>
     <Color x:Key="PrimaryColorDark">#005BA1</Color>
     <Color x:Key="PrimaryColorLight">#0089F2</Color>
@@ -13,13 +15,15 @@
     <Color x:Key="SecondaryTextColor">#FF757575</Color>
 
     <!-- Brushes -->
-    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
-    <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource ForegroundColor}"/>
+    <SolidColorBrush x:Key="DarkBackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+    <SolidColorBrush x:Key="LightBackgroundBrush" Color="{StaticResource LightBackgroundColor}"/>
+    <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource SmokeWhite}"/>
+    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
     <SolidColorBrush x:Key="PrimaryBrushDark" Color="{StaticResource PrimaryColorDark}"/>
     <SolidColorBrush x:Key="PrimaryBrushLight" Color="{StaticResource PrimaryColorLight}"/>
 
-    <SolidColorBrush x:Key="WhiteTextBrush" Color="{StaticResource ForegroundColor}"/>
+    <SolidColorBrush x:Key="WhiteTextBrush" Color="{StaticResource SmokeWhite}"/>
     <SolidColorBrush x:Key="DarkTextBrush" Color="{StaticResource BackgroundColor}"/>
 
 </ResourceDictionary>
