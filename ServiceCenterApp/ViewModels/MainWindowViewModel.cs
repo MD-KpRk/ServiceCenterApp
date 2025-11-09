@@ -31,7 +31,7 @@ namespace ServiceCenterApp.ViewModels
 
         public void StartNavigation()
         {
-            _navigationService.NavigateTo<AuthPageViewModel>();
+            _navigationService.StartNavigation();
         }
 
         public bool IsMenuExtended

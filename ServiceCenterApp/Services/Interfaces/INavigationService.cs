@@ -11,6 +11,7 @@ namespace ServiceCenterApp.Services.Interfaces
     {
         void Initialize(Frame frame);
         void NavigateTo<TViewModel>() where TViewModel : class;
+        void StartNavigation();
         void GoBack();
     }
 }

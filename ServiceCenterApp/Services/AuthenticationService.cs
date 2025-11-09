@@ -4,33 +4,36 @@ using ServiceCenterApp.ViewModels;
 using System.Diagnostics;
 using System.Windows;
 
-public class AuthenticationService : IAuthenticationService
+namespace ServiceCenterApp.Services
 {
-    private readonly ICurrentUserService _currentUserService;
-    private readonly ApplicationDbContext _dbcontext;
-
-    public AuthenticationService(ApplicationDbContext dbcontext, ICurrentUserService currentUserService)
+    public class AuthenticationService : IAuthenticationService
     {
-        _currentUserService = currentUserService;
-        _dbcontext = dbcontext;
-    }
+        private readonly ICurrentUserService _currentUserService;
+        private readonly ApplicationDbContext _dbcontext;
 
-    //Login mock. Always Success
-    public bool Login(string username, string password)
-    {
-        string user = "UserMock"; 
-        _currentUserService.SetCurrentUser(user);
-        MessageBox.Show(_dbcontext.Roles.First().RoleName);
-        return true;
-    }
+        public AuthenticationService(ApplicationDbContext dbcontext, ICurrentUserService currentUserService)
+        {
+            _currentUserService = currentUserService;
+            _dbcontext = dbcontext;
+        }
 
-    public Task<int> LoginAsync(string username, string password)
-    {
-        throw new NotImplementedException();
-    }
+        //Login mock. Always Success
+        public bool Login(string username, string password)
+        {
+            string user = "UserMock";
+            _currentUserService.SetCurrentUser(user);
+            MessageBox.Show(_dbcontext.Roles.First().RoleName);
+            return true;
+        }
 
-    public void Logout()
-    {
-        throw new NotImplementedException();
+        public Task<int> LoginAsync(string username, string password)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Logout()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

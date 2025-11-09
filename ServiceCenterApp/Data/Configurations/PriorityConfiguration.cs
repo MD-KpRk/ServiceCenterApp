@@ -2,16 +2,19 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ServiceCenterApp.Models.Lookup;
 
-public class PriorityConfiguration : IEntityTypeConfiguration<Priority>
+namespace ServiceCenterApp.Data.Configurations
 {
-    public void Configure(EntityTypeBuilder<Priority> builder)
+    public class PriorityConfiguration : IEntityTypeConfiguration<Priority>
     {
-        builder.HasIndex(p => p.PriorityName).IsUnique();
-        builder.HasData(
-            new Priority { PriorityId = 1, PriorityName = "Низкий" },
-            new Priority { PriorityId = 2, PriorityName = "Обычный" },
-            new Priority { PriorityId = 3, PriorityName = "Высокий" },
-            new Priority { PriorityId = 4, PriorityName = "Наивысший" }
-        );
+        public void Configure(EntityTypeBuilder<Priority> builder)
+        {
+            builder.HasIndex(p => p.PriorityName).IsUnique();
+            builder.HasData(
+                new Priority { PriorityId = 1, PriorityName = "Низкий" },
+                new Priority { PriorityId = 2, PriorityName = "Обычный" },
+                new Priority { PriorityId = 3, PriorityName = "Высокий" },
+                new Priority { PriorityId = 4, PriorityName = "Наивысший" }
+            );
+        }
     }
 }

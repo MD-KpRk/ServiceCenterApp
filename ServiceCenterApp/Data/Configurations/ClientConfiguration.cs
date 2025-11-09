@@ -2,14 +2,17 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ServiceCenterApp.Models;
 
-public class ClientConfiguration : IEntityTypeConfiguration<Client>
+namespace ServiceCenterApp.Data.Configurations
 {
-    public void Configure(EntityTypeBuilder<Client> builder)
+    public class ClientConfiguration : IEntityTypeConfiguration<Client>
     {
-        builder.HasIndex(c => c.PhoneNumber).IsUnique();
+        public void Configure(EntityTypeBuilder<Client> builder)
+        {
+            builder.HasIndex(c => c.PhoneNumber).IsUnique();
 
-        builder.HasIndex(c => c.Email)
-               .IsUnique()
-               .HasFilter("[Email] IS NOT NULL");
+            builder.HasIndex(c => c.Email)
+                   .IsUnique()
+                   .HasFilter("[Email] IS NOT NULL");
+        }
     }
 }

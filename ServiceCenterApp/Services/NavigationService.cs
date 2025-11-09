@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using ServiceCenterApp.Services.Interfaces;
+using ServiceCenterApp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
+using System.Windows.Navigation;
 
 namespace ServiceCenterApp.Services
 {
@@ -54,6 +56,12 @@ namespace ServiceCenterApp.Services
             }
 
             _mainFrame.Navigate(page);
+        }
+
+        public void StartNavigation()
+        {
+#warning IF USERS.COUNT == 0 -> START PAGE = INSTALLATION.PAGE
+            NavigateTo<AuthPageViewModel>();
         }
 
         public void Configure<TViewModel, TView>() where TView : Page
