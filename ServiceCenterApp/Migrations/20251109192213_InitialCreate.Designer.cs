@@ -12,7 +12,7 @@ using ServiceCenterApp.Data;
 namespace ServiceCenterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251109161528_InitialCreate")]
+    [Migration("20251109192213_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -58,6 +58,68 @@ namespace ServiceCenterApp.Migrations
                     b.HasIndex("PermissionId");
 
                     b.ToTable("RolePermissions");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 1
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 2
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 3
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 4
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 5
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 6
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 1
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 2
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 5
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 1
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 3
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 4
+                        });
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Client", b =>
@@ -277,6 +339,23 @@ namespace ServiceCenterApp.Migrations
                         .IsUnique();
 
                     b.ToTable("DocumentTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            DocumentTypeId = 1,
+                            TypeName = "Акт приема-передачи"
+                        },
+                        new
+                        {
+                            DocumentTypeId = 2,
+                            TypeName = "Акт выполненных работ"
+                        },
+                        new
+                        {
+                            DocumentTypeId = 3,
+                            TypeName = "Гарантийный талон"
+                        });
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Lookup.OrderStatus", b =>
@@ -298,6 +377,43 @@ namespace ServiceCenterApp.Migrations
                         .IsUnique();
 
                     b.ToTable("OrderStatuses");
+
+                    b.HasData(
+                        new
+                        {
+                            StatusId = 1,
+                            StatusName = "Новая"
+                        },
+                        new
+                        {
+                            StatusId = 2,
+                            StatusName = "В диагностике"
+                        },
+                        new
+                        {
+                            StatusId = 3,
+                            StatusName = "Ожидает запчасть"
+                        },
+                        new
+                        {
+                            StatusId = 4,
+                            StatusName = "В работе"
+                        },
+                        new
+                        {
+                            StatusId = 5,
+                            StatusName = "Готов к выдаче"
+                        },
+                        new
+                        {
+                            StatusId = 6,
+                            StatusName = "Выдан"
+                        },
+                        new
+                        {
+                            StatusId = 7,
+                            StatusName = "Отменен"
+                        });
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Lookup.PaymentStatus", b =>
@@ -319,6 +435,23 @@ namespace ServiceCenterApp.Migrations
                         .IsUnique();
 
                     b.ToTable("PaymentStatuses");
+
+                    b.HasData(
+                        new
+                        {
+                            PaymentStatusId = 1,
+                            StatusName = "Ожидает оплаты"
+                        },
+                        new
+                        {
+                            PaymentStatusId = 2,
+                            StatusName = "Оплачен"
+                        },
+                        new
+                        {
+                            PaymentStatusId = 3,
+                            StatusName = "Отменён"
+                        });
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Lookup.PaymentType", b =>
@@ -340,6 +473,18 @@ namespace ServiceCenterApp.Migrations
                         .IsUnique();
 
                     b.ToTable("PaymentTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            PaymentTypeId = 1,
+                            TypeName = "Наличный"
+                        },
+                        new
+                        {
+                            PaymentTypeId = 2,
+                            TypeName = "Безналичный"
+                        });
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Lookup.Permission", b =>
@@ -361,7 +506,48 @@ namespace ServiceCenterApp.Migrations
 
                     b.HasKey("PermissionId");
 
+                    b.HasIndex("PermissionKey")
+                        .IsUnique();
+
                     b.ToTable("Permissions");
+
+                    b.HasData(
+                        new
+                        {
+                            PermissionId = 1,
+                            Description = "Доступ к модулю заказов",
+                            PermissionKey = "Orders"
+                        },
+                        new
+                        {
+                            PermissionId = 2,
+                            Description = "Доступ к модулю клиентов",
+                            PermissionKey = "Clients"
+                        },
+                        new
+                        {
+                            PermissionId = 3,
+                            Description = "Доступ к модулю склада и запчастей",
+                            PermissionKey = "SparePart"
+                        },
+                        new
+                        {
+                            PermissionId = 4,
+                            Description = "Доступ к модулю диагностики и ремонта",
+                            PermissionKey = "Diagnostic"
+                        },
+                        new
+                        {
+                            PermissionId = 5,
+                            Description = "Доступ к модулю Финансы и Платежи",
+                            PermissionKey = "Payment"
+                        },
+                        new
+                        {
+                            PermissionId = 6,
+                            Description = "Доступ к модулю Администрирование",
+                            PermissionKey = "Admin"
+                        });
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Lookup.Position", b =>
@@ -404,6 +590,28 @@ namespace ServiceCenterApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Priorities");
+
+                    b.HasData(
+                        new
+                        {
+                            PriorityId = 1,
+                            PriorityName = "Низкий"
+                        },
+                        new
+                        {
+                            PriorityId = 2,
+                            PriorityName = "Обычный"
+                        },
+                        new
+                        {
+                            PriorityId = 3,
+                            PriorityName = "Высокий"
+                        },
+                        new
+                        {
+                            PriorityId = 4,
+                            PriorityName = "Наивысший"
+                        });
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Order", b =>
@@ -521,6 +729,26 @@ namespace ServiceCenterApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            Description = "Полный доступ",
+                            RoleName = "Администратор"
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            Description = "Регистрация и выдача заказов",
+                            RoleName = "Приемщик"
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            Description = "Диагностика и ремонт",
+                            RoleName = "Мастер"
+                        });
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.SparePart", b =>

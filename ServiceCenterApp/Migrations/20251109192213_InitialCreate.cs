@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ServiceCenterApp.Migrations
 {
     /// <inheritdoc />
@@ -419,6 +421,102 @@ namespace ServiceCenterApp.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "DocumentTypes",
+                columns: new[] { "DocumentTypeId", "TypeName" },
+                values: new object[,]
+                {
+                    { 1, "Акт приема-передачи" },
+                    { 2, "Акт выполненных работ" },
+                    { 3, "Гарантийный талон" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "OrderStatuses",
+                columns: new[] { "StatusId", "StatusName" },
+                values: new object[,]
+                {
+                    { 1, "Новая" },
+                    { 2, "В диагностике" },
+                    { 3, "Ожидает запчасть" },
+                    { 4, "В работе" },
+                    { 5, "Готов к выдаче" },
+                    { 6, "Выдан" },
+                    { 7, "Отменен" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "PaymentStatuses",
+                columns: new[] { "PaymentStatusId", "StatusName" },
+                values: new object[,]
+                {
+                    { 1, "Ожидает оплаты" },
+                    { 2, "Оплачен" },
+                    { 3, "Отменён" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "PaymentTypes",
+                columns: new[] { "PaymentTypeId", "TypeName" },
+                values: new object[,]
+                {
+                    { 1, "Наличный" },
+                    { 2, "Безналичный" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Permissions",
+                columns: new[] { "PermissionId", "Description", "PermissionKey" },
+                values: new object[,]
+                {
+                    { 1, "Доступ к модулю заказов", "Orders" },
+                    { 2, "Доступ к модулю клиентов", "Clients" },
+                    { 3, "Доступ к модулю склада и запчастей", "SparePart" },
+                    { 4, "Доступ к модулю диагностики и ремонта", "Diagnostic" },
+                    { 5, "Доступ к модулю Финансы и Платежи", "Payment" },
+                    { 6, "Доступ к модулю Администрирование", "Admin" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Priorities",
+                columns: new[] { "PriorityId", "PriorityName" },
+                values: new object[,]
+                {
+                    { 1, "Низкий" },
+                    { 2, "Обычный" },
+                    { 3, "Высокий" },
+                    { 4, "Наивысший" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "RoleId", "Description", "RoleName" },
+                values: new object[,]
+                {
+                    { 1, "Полный доступ", "Администратор" },
+                    { 2, "Регистрация и выдача заказов", "Приемщик" },
+                    { 3, "Диагностика и ремонт", "Мастер" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "RolePermissions",
+                columns: new[] { "PermissionId", "RoleId" },
+                values: new object[,]
+                {
+                    { 1, 1 },
+                    { 2, 1 },
+                    { 3, 1 },
+                    { 4, 1 },
+                    { 5, 1 },
+                    { 6, 1 },
+                    { 1, 2 },
+                    { 2, 2 },
+                    { 5, 2 },
+                    { 1, 3 },
+                    { 3, 3 },
+                    { 4, 3 }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Clients_Email",
                 table: "Clients",
@@ -548,6 +646,12 @@ namespace ServiceCenterApp.Migrations
                 name: "IX_PaymentTypes_TypeName",
                 table: "PaymentTypes",
                 column: "TypeName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Permissions_PermissionKey",
+                table: "Permissions",
+                column: "PermissionKey",
                 unique: true);
 
             migrationBuilder.CreateIndex(
