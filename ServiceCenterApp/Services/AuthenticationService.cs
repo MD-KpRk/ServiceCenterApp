@@ -1,20 +1,26 @@
-﻿using ServiceCenterApp.Services.Interfaces;
+﻿using ServiceCenterApp.Data;
+using ServiceCenterApp.Services.Interfaces;
 using ServiceCenterApp.ViewModels;
+using System.Diagnostics;
+using System.Windows;
 
 public class AuthenticationService : IAuthenticationService
 {
     private readonly ICurrentUserService _currentUserService;
+    private readonly ApplicationDbContext _dbcontext;
 
-    public AuthenticationService(ICurrentUserService currentUserService)
+    public AuthenticationService(ApplicationDbContext dbcontext, ICurrentUserService currentUserService)
     {
         _currentUserService = currentUserService;
+        _dbcontext = dbcontext;
     }
 
     //Login mock. Always Success
     public bool Login(string username, string password)
     {
         string user = "UserMock"; 
-        _currentUserService.SetCurrentUser(user); 
+        _currentUserService.SetCurrentUser(user);
+        MessageBox.Show(_dbcontext.Roles.First().RoleName);
         return true;
     }
 

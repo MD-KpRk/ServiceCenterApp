@@ -7,13 +7,18 @@ using System.Threading.Tasks;
 
 namespace ServiceCenterApp.Models.Lookup
 {
-    public class Role
+    public class Permission
     {
         [Key]
-        public int RoleId { get; set; }
-        [Required, MaxLength(100)]
-        public string RoleName { get; set; }
-        [MaxLength(500)]
+        public int PermissionId { get; set; }
+
+        //Backend key
+        [Required]
+        [MaxLength(50)]
+        public string PermissionKey { get; set; }
+
+        // UI Title
+        [MaxLength(100)]
         public string? Description { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿// ApplicationDbContext.cs
 using Microsoft.EntityFrameworkCore;
 using ServiceCenterApp.Models;
+using ServiceCenterApp.Models.Associations;
 using ServiceCenterApp.Models.Lookup;
 
 namespace ServiceCenterApp.Data
@@ -21,9 +22,11 @@ namespace ServiceCenterApp.Data
         public DbSet<DiagnosticReport> DiagnosticReports { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
 
-        // --- Helper Table ---
+        // --- Association Helper Tables ---
         public DbSet<OrderSparePart> OrderSpareParts { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
 
         // --- Lookup Tables ---
         public DbSet<Role> Roles { get; set; }
