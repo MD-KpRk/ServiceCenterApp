@@ -10,9 +10,9 @@ namespace ServiceCenterApp.Models.Associations
 
         // Навигационные свойства
         [ForeignKey("OrderId")]
-        public virtual Order Order { get; set; }
+        public virtual Order? Order { get; set; }
 
         [ForeignKey("PartId")]
-        public virtual SparePart SparePart { get; set; }
+        public virtual SparePart? SparePart { get; set; }
     }
 }

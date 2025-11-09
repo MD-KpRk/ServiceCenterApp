@@ -19,8 +19,8 @@ namespace ServiceCenterApp.Migrations
                 {
                     ClientId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FullName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -35,10 +35,10 @@ namespace ServiceCenterApp.Migrations
                 {
                     DeviceId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DeviceType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Brand = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Model = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    SerialNumber = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeviceType = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Brand = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Model = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    SerialNumber = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
                     WarrantyStatus = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
@@ -104,8 +104,8 @@ namespace ServiceCenterApp.Migrations
                 {
                     PermissionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PermissionKey = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true)
+                    PermissionKey = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -145,7 +145,7 @@ namespace ServiceCenterApp.Migrations
                     RoleId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     RoleName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -158,8 +158,8 @@ namespace ServiceCenterApp.Migrations
                 {
                     SupplierId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Contacts = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Contacts = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -173,11 +173,11 @@ namespace ServiceCenterApp.Migrations
                 {
                     EmployeeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FullName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     PositionId = table.Column<int>(type: "int", nullable: false),
-                    Login = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    ContactInfo = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Login = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ContactInfo = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     RoleId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -258,9 +258,10 @@ namespace ServiceCenterApp.Migrations
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AcceptorId = table.Column<int>(type: "int", nullable: false),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<int>(type: "int", nullable: false),
-                    DeviceId = table.Column<int>(type: "int", nullable: false)
+                    DeviceId = table.Column<int>(type: "int", nullable: false),
+                    AcceptorId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -278,8 +279,8 @@ namespace ServiceCenterApp.Migrations
                         principalColumn: "DeviceId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Orders_Employees_AcceptorId",
-                        column: x => x.AcceptorId,
+                        name: "FK_Orders_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "EmployeeId",
                         onDelete: ReferentialAction.Restrict);
@@ -335,7 +336,7 @@ namespace ServiceCenterApp.Migrations
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     EmployeeId = table.Column<int>(type: "int", nullable: false),
                     DocumentTypeId = table.Column<int>(type: "int", nullable: false),
-                    FilePath = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()")
                 },
                 constraints: table =>
@@ -586,11 +587,6 @@ namespace ServiceCenterApp.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_AcceptorId",
-                table: "Orders",
-                column: "AcceptorId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Orders_ClientId",
                 table: "Orders",
                 column: "ClientId");
@@ -599,6 +595,11 @@ namespace ServiceCenterApp.Migrations
                 name: "IX_Orders_DeviceId",
                 table: "Orders",
                 column: "DeviceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_EmployeeId",
+                table: "Orders",
+                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_PriorityId",

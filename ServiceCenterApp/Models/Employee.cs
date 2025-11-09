@@ -14,30 +14,30 @@ namespace ServiceCenterApp.Models
         public int EmployeeId { get; set; }
 
         [Required]
-        [MaxLength(255)]
-        public string FullName { get; set; }
+        [MaxLength(128)]
+        public string? FullName { get; set; }
 
         public int PositionId { get; set; }
 
         [Required]
-        [MaxLength(100)]
-        public string Login { get; set; }
+        [MaxLength(32)]
+        public string? Login { get; set; }
 
         [Required]
-        [MaxLength(256)]
-        public string PasswordHash { get; set; }
+        [MaxLength(128)]
+        public string? PasswordHash { get; set; }
 
-        [MaxLength(255)]
+        [MaxLength(128)]
         public string? ContactInfo { get; set; }
 
         public int RoleId { get; set; }
 
         // Навигационные свойства
         [ForeignKey("PositionId")]
-        public virtual Position Position { get; set; }
+        public virtual Position? Position { get; set; }
 
         [ForeignKey("RoleId")]
-        public virtual Role Role { get; set; }
+        public virtual Role? Role { get; set; }
 
         public virtual ICollection<Order> AcceptedOrders { get; set; } = new List<Order>();
         public virtual ICollection<DiagnosticReport> AuthoredDiagnosticReports { get; set; } = new List<DiagnosticReport>();

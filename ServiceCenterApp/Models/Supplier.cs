@@ -9,12 +9,12 @@ namespace ServiceCenterApp.Models
         public int SupplierId { get; set; }
 
         [Required]
-        [MaxLength(255)]
-        public string Name { get; set; }
+        [MaxLength(128)]
+        public string? Name { get; set; }
 
         [Required]
-        [MaxLength(500)]
-        public string Contacts { get; set; }
+        [MaxLength(128)]
+        public string? Contacts { get; set; }
 
         public string? Details { get; set; }
 

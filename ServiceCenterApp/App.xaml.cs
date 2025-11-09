@@ -18,7 +18,7 @@ namespace ServiceCenterApp
     public partial class App : Application
     {
         private readonly ServiceProvider? _serviceProvider;
-        public static IConfiguration Configuration { get; private set; }
+        public static IConfiguration? Configuration { get; private set; }
 
         public App()
         {

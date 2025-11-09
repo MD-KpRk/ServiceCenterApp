@@ -18,7 +18,7 @@ namespace ServiceCenterApp.Models
         public int StatusId { get; set; }
 
         [Required]
-        public string ProblemDescription { get; set; }
+        public string? ProblemDescription { get; set; }
 
         public int PriorityId { get; set; }
 
@@ -27,25 +27,25 @@ namespace ServiceCenterApp.Models
 
         public string? Comment { get; set; }
 
-        public int AcceptorId { get; set; }
+        public int EmployeeId { get; set; }
         public int ClientId { get; set; }
         public int DeviceId { get; set; }
 
         // Навигационные свойства
         [ForeignKey("StatusId")]
-        public virtual OrderStatus Status { get; set; }
+        public virtual OrderStatus? Status { get; set; }
 
         [ForeignKey("PriorityId")]
-        public virtual Priority Priority { get; set; }
+        public virtual Priority? Priority { get; set; }
 
         [ForeignKey("AcceptorId")]
-        public virtual Employee Acceptor { get; set; }
+        public virtual Employee? Employee { get; set; }
 
         [ForeignKey("ClientId")]
-        public virtual Client Client { get; set; }
+        public virtual Client? Client { get; set; }
 
         [ForeignKey("DeviceId")]
-        public virtual Device Device { get; set; }
+        public virtual Device? Device { get; set; }
 
         public virtual DiagnosticReport? DiagnosticReport { get; set; }
 

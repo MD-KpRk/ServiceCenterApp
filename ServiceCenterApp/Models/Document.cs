@@ -18,19 +18,19 @@ namespace ServiceCenterApp.Models
         public int DocumentTypeId { get; set; }
 
         [Required]
-        [MaxLength(1000)]
-        public string FilePath { get; set; }
+        [MaxLength(128)]
+        public string? FilePath { get; set; }
 
         public DateTime CreationDate { get; set; } = DateTime.Now;
 
         // Навигационные свойства
         [ForeignKey("OrderId")]
-        public virtual Order Order { get; set; }
+        public virtual Order? Order { get; set; }
 
         [ForeignKey("EmployeeId")]
-        public virtual Employee Employee { get; set; }
+        public virtual Employee? Employee { get; set; }
 
         [ForeignKey("DocumentTypeId")]
-        public virtual DocumentType DocumentType { get; set; }
+        public virtual DocumentType? DocumentType { get; set; }
     }
 }

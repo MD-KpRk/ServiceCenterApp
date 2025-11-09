@@ -12,11 +12,11 @@ namespace ServiceCenterApp.Models
 
         [Required]
         [MaxLength(255)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [Required]
         [MaxLength(100)]
-        public string PartNumber { get; set; }
+        public string? PartNumber { get; set; }
 
         public string? Description { get; set; }
 
@@ -29,7 +29,7 @@ namespace ServiceCenterApp.Models
 
         // Навигационные свойства
         [ForeignKey("SupplierId")]
-        public virtual Supplier Supplier { get; set; }
+        public virtual Supplier? Supplier { get; set; }
 
         public virtual ICollection<OrderSparePart> OrderSpareParts { get; set; } = new List<OrderSparePart>();
     }

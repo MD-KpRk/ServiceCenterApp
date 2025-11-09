@@ -18,9 +18,9 @@ namespace ServiceCenterApp.Data.Configurations
                    .OnDelete(DeleteBehavior.Restrict);
 
             // Запрет на удаление Сотрудника, если он принял Заказы
-            builder.HasOne(o => o.Acceptor)
+            builder.HasOne(o => o.Employee)
                    .WithMany(e => e.AcceptedOrders)
-                   .HasForeignKey(o => o.AcceptorId)
+                   .HasForeignKey(o => o.EmployeeId)
                    .OnDelete(DeleteBehavior.Restrict);
         }
     }

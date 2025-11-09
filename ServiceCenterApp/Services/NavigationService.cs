@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using ServiceCenterApp.Data;
 using ServiceCenterApp.Services.Interfaces;
 using ServiceCenterApp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
 
@@ -15,11 +17,13 @@ namespace ServiceCenterApp.Services
         private readonly Dictionary<Type, Type> _viewModelToViewMapping = new();
 
         private readonly IServiceProvider _serviceProvider;
+        private readonly ApplicationDbContext _dbcontext;
         private Frame? _mainFrame;
 
-        public NavigationService(IServiceProvider serviceProvider)
+        public NavigationService(ApplicationDbContext dbcontext, IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
+            _dbcontext = dbcontext;
         }
 
         public void Initialize(Frame frame)
@@ -60,8 +64,21 @@ namespace ServiceCenterApp.Services
 
         public void StartNavigation()
         {
+            if(_dbcontext.Employees == null)
+            {
+#warning USE CUSTOM ERROR
+                MessageBox.Show("Users table not found ");
+                return;
+            }
+            if(_dbcontext.Employees.Count() == 0)
+            {
+                MessageBox.Show("Installation");
+            }
+            else
+            {
+                NavigateTo<AuthPageViewModel>();
+            }
 #warning IF USERS.COUNT == 0 -> START PAGE = INSTALLATION.PAGE
-            NavigateTo<AuthPageViewModel>();
         }
 
         public void Configure<TViewModel, TView>() where TView : Page

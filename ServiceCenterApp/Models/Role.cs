@@ -14,9 +14,9 @@ namespace ServiceCenterApp.Models
         public int RoleId { get; set; }
 
         [Required, MaxLength(100)]
-        public string RoleName { get; set; }
+        public string? RoleName { get; set; }
 
-        [MaxLength(500)]
+        [MaxLength(200)]
         public string? Description { get; set; }
 
         // Навигационное свойство к связующей таблице

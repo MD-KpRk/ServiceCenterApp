@@ -23,12 +23,12 @@ namespace ServiceCenterApp.Models
 
         // Навигационные свойства
         [ForeignKey("OrderId")]
-        public virtual Order Order { get; set; }
+        public virtual Order? Order { get; set; }
 
         [ForeignKey("PaymentTypeId")]
-        public virtual PaymentType PaymentType { get; set; }
+        public virtual PaymentType? PaymentType { get; set; }
 
         [ForeignKey("PaymentStatusId")]
-        public virtual PaymentStatus PaymentStatus { get; set; }
+        public virtual PaymentStatus? PaymentStatus { get; set; }
     }
 }

@@ -14,18 +14,18 @@ namespace ServiceCenterApp.Models
         public DateTime DiagnosisDate { get; set; } = DateTime.Now;
 
         [Required]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Required]
-        public string Recommendations { get; set; }
+        public string? Recommendations { get; set; }
 
         public int MasterId { get; set; }
 
         // Навигационные свойства
         [ForeignKey("OrderId")]
-        public virtual Order Order { get; set; }
+        public virtual Order? Order { get; set; }
 
         [ForeignKey("MasterId")]
-        public virtual Employee Master { get; set; }
+        public virtual Employee? Master { get; set; }
     }
 }

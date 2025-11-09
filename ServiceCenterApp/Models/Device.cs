@@ -10,18 +10,18 @@ namespace ServiceCenterApp.Models
         public int DeviceId { get; set; }
 
         [Required]
-        [MaxLength(100)]
-        public string DeviceType { get; set; }
+        [MaxLength(128)]
+        public string? DeviceType { get; set; }
 
         [Required]
-        [MaxLength(100)]
-        public string Brand { get; set; }
+        [MaxLength(128)]
+        public string? Brand { get; set; }
 
         [Required]
-        [MaxLength(100)]
-        public string Model { get; set; }
+        [MaxLength(128)]
+        public string? Model { get; set; }
 
-        [MaxLength(100)]
+        [MaxLength(64)]
         public string? SerialNumber { get; set; }
 
         public bool WarrantyStatus { get; set; }

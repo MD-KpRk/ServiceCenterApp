@@ -16,9 +16,9 @@ namespace ServiceCenterApp.Models.Associations
 
 
         [ForeignKey("RoleId")]
-        public virtual Role Role { get; set; }
+        public virtual Role? Role { get; set; }
 
         [ForeignKey("PermissionId")]
-        public virtual Permission Permission { get; set; }
+        public virtual Permission? Permission { get; set; }
     }
 }

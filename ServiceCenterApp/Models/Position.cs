@@ -12,6 +12,6 @@ namespace ServiceCenterApp.Models
         [Key]
         public int PositionId { get; set; }
         [Required, MaxLength(100)]
-        public string PositionName { get; set; }
+        public string? PositionName { get; set; }
     }
 }

@@ -14,11 +14,11 @@ namespace ServiceCenterApp.Models.Lookup
 
         //Backend key
         [Required]
-        [MaxLength(50)]
-        public string PermissionKey { get; set; }
+        [MaxLength(32)]
+        public string? PermissionKey { get; set; }
 
         // UI Title
-        [MaxLength(100)]
+        [MaxLength(128)]
         public string? Description { get; set; }
     }
 }

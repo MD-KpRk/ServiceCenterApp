@@ -12,7 +12,7 @@ using ServiceCenterApp.Data;
 namespace ServiceCenterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251109192213_InitialCreate")]
+    [Migration("20251109201748_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -139,13 +139,13 @@ namespace ServiceCenterApp.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
 
                     b.HasKey("ClientId");
 
@@ -169,22 +169,22 @@ namespace ServiceCenterApp.Migrations
 
                     b.Property<string>("Brand")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("DeviceType")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Model")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("SerialNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<bool>("WarrantyStatus")
                         .ValueGeneratedOnAdd()
@@ -258,8 +258,8 @@ namespace ServiceCenterApp.Migrations
 
                     b.Property<string>("FilePath")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -284,23 +284,23 @@ namespace ServiceCenterApp.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeId"));
 
                     b.Property<string>("ContactInfo")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Login")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<int>("PositionId")
                         .HasColumnType("int");
@@ -496,13 +496,13 @@ namespace ServiceCenterApp.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermissionId"));
 
                     b.Property<string>("Description")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("PermissionKey")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.HasKey("PermissionId");
 
@@ -548,27 +548,6 @@ namespace ServiceCenterApp.Migrations
                             Description = "Доступ к модулю Администрирование",
                             PermissionKey = "Admin"
                         });
-                });
-
-            modelBuilder.Entity("ServiceCenterApp.Models.Lookup.Position", b =>
-                {
-                    b.Property<int>("PositionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PositionId"));
-
-                    b.Property<string>("PositionName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("PositionId");
-
-                    b.HasIndex("PositionName")
-                        .IsUnique();
-
-                    b.ToTable("Positions");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Lookup.Priority", b =>
@@ -622,7 +601,7 @@ namespace ServiceCenterApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
-                    b.Property<int>("AcceptorId")
+                    b.Property<int?>("AcceptorId")
                         .HasColumnType("int");
 
                     b.Property<int>("ClientId")
@@ -632,6 +611,9 @@ namespace ServiceCenterApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DeviceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("EndDate")
@@ -657,11 +639,11 @@ namespace ServiceCenterApp.Migrations
 
                     b.HasKey("OrderId");
 
-                    b.HasIndex("AcceptorId");
-
                     b.HasIndex("ClientId");
 
                     b.HasIndex("DeviceId");
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("PriorityId");
 
@@ -706,6 +688,27 @@ namespace ServiceCenterApp.Migrations
                     b.ToTable("Payments");
                 });
 
+            modelBuilder.Entity("ServiceCenterApp.Models.Position", b =>
+                {
+                    b.Property<int>("PositionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PositionId"));
+
+                    b.Property<string>("PositionName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("PositionId");
+
+                    b.HasIndex("PositionName")
+                        .IsUnique();
+
+                    b.ToTable("Positions");
+                });
+
             modelBuilder.Entity("ServiceCenterApp.Models.Role", b =>
                 {
                     b.Property<int>("RoleId")
@@ -715,8 +718,8 @@ namespace ServiceCenterApp.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
 
                     b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("RoleName")
                         .IsRequired()
@@ -803,16 +806,16 @@ namespace ServiceCenterApp.Migrations
 
                     b.Property<string>("Contacts")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Details")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.HasKey("SupplierId");
 
@@ -908,7 +911,7 @@ namespace ServiceCenterApp.Migrations
 
             modelBuilder.Entity("ServiceCenterApp.Models.Employee", b =>
                 {
-                    b.HasOne("ServiceCenterApp.Models.Lookup.Position", "Position")
+                    b.HasOne("ServiceCenterApp.Models.Position", "Position")
                         .WithMany()
                         .HasForeignKey("PositionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -927,12 +930,6 @@ namespace ServiceCenterApp.Migrations
 
             modelBuilder.Entity("ServiceCenterApp.Models.Order", b =>
                 {
-                    b.HasOne("ServiceCenterApp.Models.Employee", "Acceptor")
-                        .WithMany("AcceptedOrders")
-                        .HasForeignKey("AcceptorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("ServiceCenterApp.Models.Client", "Client")
                         .WithMany("Orders")
                         .HasForeignKey("ClientId")
@@ -943,6 +940,12 @@ namespace ServiceCenterApp.Migrations
                         .WithMany("Orders")
                         .HasForeignKey("DeviceId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ServiceCenterApp.Models.Employee", "Employee")
+                        .WithMany("AcceptedOrders")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ServiceCenterApp.Models.Lookup.Priority", "Priority")
@@ -957,11 +960,11 @@ namespace ServiceCenterApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Acceptor");
-
                     b.Navigation("Client");
 
                     b.Navigation("Device");
+
+                    b.Navigation("Employee");
 
                     b.Navigation("Priority");
 

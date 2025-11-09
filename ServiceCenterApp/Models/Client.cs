@@ -10,12 +10,12 @@ namespace ServiceCenterApp.Models
         public int ClientId { get; set; }
 
         [Required]
-        [MaxLength(255)]
-        public string FullName { get; set; }
+        [MaxLength(128)]
+        public string? FullName { get; set; }
 
         [Required]
-        [MaxLength(20)]
-        public string PhoneNumber { get; set; }
+        [MaxLength(24)]
+        public string? PhoneNumber { get; set; }
 
         [MaxLength(255)]
         public string? Email { get; set; }

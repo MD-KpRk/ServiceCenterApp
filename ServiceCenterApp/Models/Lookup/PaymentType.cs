@@ -12,6 +12,6 @@ namespace ServiceCenterApp.Models.Lookup
         [Key]
         public int PaymentTypeId { get; set; }
         [Required, MaxLength(50)]
-        public string TypeName { get; set; }
+        public string? TypeName { get; set; }
     }
 }
