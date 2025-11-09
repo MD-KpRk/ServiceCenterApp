@@ -21,5 +21,7 @@ namespace ServiceCenterApp.Models
 
         // Навигационное свойство к связующей таблице
         public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
+
+        public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
     }
 }

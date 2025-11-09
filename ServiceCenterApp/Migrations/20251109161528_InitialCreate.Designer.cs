@@ -12,7 +12,7 @@ using ServiceCenterApp.Data;
 namespace ServiceCenterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251109135620_InitialCreate")]
+    [Migration("20251109161528_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,6 +24,41 @@ namespace ServiceCenterApp.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("ServiceCenterApp.Models.Associations.OrderSparePart", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.HasKey("OrderId", "PartId");
+
+                    b.HasIndex("PartId");
+
+                    b.ToTable("OrderSpareParts");
+                });
+
+            modelBuilder.Entity("ServiceCenterApp.Models.Associations.RolePermission", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermissions");
+                });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Client", b =>
                 {
@@ -307,6 +342,28 @@ namespace ServiceCenterApp.Migrations
                     b.ToTable("PaymentTypes");
                 });
 
+            modelBuilder.Entity("ServiceCenterApp.Models.Lookup.Permission", b =>
+                {
+                    b.Property<int>("PermissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermissionId"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PermissionKey")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("PermissionId");
+
+                    b.ToTable("Permissions");
+                });
+
             modelBuilder.Entity("ServiceCenterApp.Models.Lookup.Position", b =>
                 {
                     b.Property<int>("PositionId")
@@ -347,31 +404,6 @@ namespace ServiceCenterApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Priorities");
-                });
-
-            modelBuilder.Entity("ServiceCenterApp.Models.Lookup.Role", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("RoleId");
-
-                    b.HasIndex("RoleName")
-                        .IsUnique();
-
-                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Order", b =>
@@ -430,26 +462,6 @@ namespace ServiceCenterApp.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("ServiceCenterApp.Models.OrderSparePart", b =>
-                {
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PartId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
-
-                    b.HasKey("OrderId", "PartId");
-
-                    b.HasIndex("PartId");
-
-                    b.ToTable("OrderSpareParts");
-                });
-
             modelBuilder.Entity("ServiceCenterApp.Models.Payment", b =>
                 {
                     b.Property<int>("PaymentId")
@@ -484,6 +496,31 @@ namespace ServiceCenterApp.Migrations
                     b.HasIndex("PaymentTypeId");
 
                     b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("ServiceCenterApp.Models.Role", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("RoleId");
+
+                    b.HasIndex("RoleName")
+                        .IsUnique();
+
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.SparePart", b =>
@@ -557,6 +594,44 @@ namespace ServiceCenterApp.Migrations
                     b.ToTable("Suppliers");
                 });
 
+            modelBuilder.Entity("ServiceCenterApp.Models.Associations.OrderSparePart", b =>
+                {
+                    b.HasOne("ServiceCenterApp.Models.Order", "Order")
+                        .WithMany("OrderSpareParts")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ServiceCenterApp.Models.SparePart", "SparePart")
+                        .WithMany("OrderSpareParts")
+                        .HasForeignKey("PartId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("SparePart");
+                });
+
+            modelBuilder.Entity("ServiceCenterApp.Models.Associations.RolePermission", b =>
+                {
+                    b.HasOne("ServiceCenterApp.Models.Lookup.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ServiceCenterApp.Models.Role", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("ServiceCenterApp.Models.DiagnosticReport", b =>
                 {
                     b.HasOne("ServiceCenterApp.Models.Employee", "Master")
@@ -611,8 +686,8 @@ namespace ServiceCenterApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ServiceCenterApp.Models.Lookup.Role", "Role")
-                        .WithMany()
+                    b.HasOne("ServiceCenterApp.Models.Role", "Role")
+                        .WithMany("Employees")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -663,25 +738,6 @@ namespace ServiceCenterApp.Migrations
                     b.Navigation("Priority");
 
                     b.Navigation("Status");
-                });
-
-            modelBuilder.Entity("ServiceCenterApp.Models.OrderSparePart", b =>
-                {
-                    b.HasOne("ServiceCenterApp.Models.Order", "Order")
-                        .WithMany("OrderSpareParts")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ServiceCenterApp.Models.SparePart", "SparePart")
-                        .WithMany("OrderSpareParts")
-                        .HasForeignKey("PartId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("SparePart");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Payment", b =>
@@ -750,6 +806,13 @@ namespace ServiceCenterApp.Migrations
                     b.Navigation("OrderSpareParts");
 
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("ServiceCenterApp.Models.Role", b =>
+                {
+                    b.Navigation("Employees");
+
+                    b.Navigation("RolePermissions");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.SparePart", b =>

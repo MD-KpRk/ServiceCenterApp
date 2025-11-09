@@ -23,6 +23,7 @@ namespace ServiceCenterApp.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<Permission> Permissions { get; set; }
+        public DbSet<Position> Positions { get; set; }
 
         // --- Association Helper Tables ---
         public DbSet<OrderSparePart> OrderSpareParts { get; set; }
@@ -30,7 +31,6 @@ namespace ServiceCenterApp.Data
 
         // --- Lookup Tables ---
         public DbSet<Role> Roles { get; set; }
-        public DbSet<Position> Positions { get; set; }
         public DbSet<OrderStatus> OrderStatuses { get; set; }
         public DbSet<Priority> Priorities { get; set; }
         public DbSet<PaymentType> PaymentTypes { get; set; }
@@ -113,6 +113,9 @@ namespace ServiceCenterApp.Data
 
             // RELATIONSHIPS & ON DELETE
 
+            modelBuilder.Entity<RolePermission>()
+                .HasKey(rp => new { rp.RoleId, rp.PermissionId });
+
             modelBuilder.Entity<OrderSparePart>()
                 .HasKey(osp => new { osp.OrderId, osp.PartId });
 
@@ -149,6 +152,16 @@ namespace ServiceCenterApp.Data
                .WithMany(sp => sp.OrderSpareParts)
                .HasForeignKey(os => os.PartId)
                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions) 
+                .HasForeignKey(rp => rp.RoleId);
+
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Permission)
+                .WithMany()
+                .HasForeignKey(rp => rp.PermissionId);
         }
     }
 }
