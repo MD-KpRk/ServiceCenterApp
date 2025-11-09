@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using ServiceCenterApp.Data;
 using ServiceCenterApp.Pages;
 using ServiceCenterApp.Services;
 using ServiceCenterApp.Services.Interfaces;
@@ -7,6 +10,7 @@ using System;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 
 namespace ServiceCenterApp
@@ -14,10 +18,29 @@ namespace ServiceCenterApp
     public partial class App : Application
     {
         private readonly ServiceProvider? _serviceProvider;
+        public static IConfiguration Configuration { get; private set; }
 
         public App()
         {
+
+            // CONFIG
+
+            IConfigurationBuilder builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            Configuration = builder.Build();
+
+            // DI CONTAINER INIT
+
             IServiceCollection services = new ServiceCollection();
+
+            // DATABASE REGISTATION
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             // --- SERVICE REGISTRATION ---
 
@@ -53,6 +76,14 @@ namespace ServiceCenterApp
         protected override void OnStartup(StartupEventArgs e)
         {
             if (_serviceProvider == null) throw new ArgumentNullException();
+
+
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                dbContext.Database.Migrate();
+            }
+
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
 
