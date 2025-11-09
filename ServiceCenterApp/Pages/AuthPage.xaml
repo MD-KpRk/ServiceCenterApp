@@ -9,7 +9,7 @@
       Title="AuthPage"
       PreviewKeyDown="Page_PreviewKeyDown">
 
-    <Viewbox Stretch="Uniform" Margin="30 100 30 100" MinHeight="300">
+    <Viewbox Stretch="Uniform" Margin="30 100 30 100" MinHeight="300" MaxHeight="800">
         <Border Background="{StaticResource WhiteBrush}" 
                 CornerRadius="15" 
                 Padding="20"
