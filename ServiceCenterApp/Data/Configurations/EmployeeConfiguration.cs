@@ -8,7 +8,7 @@ namespace ServiceCenterApp.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Employee> builder)
         {
-            builder.HasIndex(e => e.Login).IsUnique();
+            builder.HasIndex(e => e.PINHash).IsUnique();
         }
     }
 }

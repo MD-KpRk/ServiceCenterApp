@@ -12,6 +12,6 @@ namespace ServiceCenterApp.Models.Lookup
         [Key]
         public int DocumentTypeId { get; set; }
         [Required, MaxLength(100)]
-        public string TypeName { get; set; }
+        public string? TypeName { get; set; }
     }
 }

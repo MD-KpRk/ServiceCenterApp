@@ -131,8 +131,8 @@ namespace ServiceCenterApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(48)
+                        .HasColumnType("nvarchar(48)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -207,7 +207,8 @@ namespace ServiceCenterApp.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<DateTime>("DiagnosisDate")
                         .ValueGeneratedOnAdd()
@@ -222,7 +223,8 @@ namespace ServiceCenterApp.Migrations
 
                     b.Property<string>("Recommendations")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("ReportId");
 
@@ -289,12 +291,7 @@ namespace ServiceCenterApp.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<string>("Login")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<string>("PasswordHash")
+                    b.Property<string>("PINHash")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
@@ -307,7 +304,7 @@ namespace ServiceCenterApp.Migrations
 
                     b.HasKey("EmployeeId");
 
-                    b.HasIndex("Login")
+                    b.HasIndex("PINHash")
                         .IsUnique();
 
                     b.HasIndex("PositionId");
@@ -605,7 +602,8 @@ namespace ServiceCenterApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Comment")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<int>("DeviceId")
                         .HasColumnType("int");
@@ -621,7 +619,8 @@ namespace ServiceCenterApp.Migrations
 
                     b.Property<string>("ProblemDescription")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<DateTime>("RegistrationDate")
                         .ValueGeneratedOnAdd()
@@ -764,8 +763,8 @@ namespace ServiceCenterApp.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("PartNumber")
                         .IsRequired()
@@ -807,7 +806,8 @@ namespace ServiceCenterApp.Migrations
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
                         .IsRequired()

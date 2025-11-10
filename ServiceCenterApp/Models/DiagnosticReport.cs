@@ -14,9 +14,11 @@ namespace ServiceCenterApp.Models
         public DateTime DiagnosisDate { get; set; } = DateTime.Now;
 
         [Required]
+        [MaxLength(256)]
         public string? Description { get; set; }
 
         [Required]
+        [MaxLength(256)]
         public string? Recommendations { get; set; }
 
         public int MasterId { get; set; }

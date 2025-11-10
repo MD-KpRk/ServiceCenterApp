@@ -21,7 +21,7 @@ namespace ServiceCenterApp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(48)", maxLength: 48, nullable: true),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -160,7 +160,7 @@ namespace ServiceCenterApp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     Contacts = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Details = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Details = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -175,8 +175,7 @@ namespace ServiceCenterApp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     PositionId = table.Column<int>(type: "int", nullable: false),
-                    Login = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    PINHash = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     ContactInfo = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     RoleId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -227,7 +226,7 @@ namespace ServiceCenterApp.Migrations
                 {
                     PartId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     PartNumber = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Price = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
@@ -253,11 +252,11 @@ namespace ServiceCenterApp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
                     StatusId = table.Column<int>(type: "int", nullable: false),
-                    ProblemDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProblemDescription = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     PriorityId = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Comment = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     EmployeeId = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<int>(type: "int", nullable: false),
                     DeviceId = table.Column<int>(type: "int", nullable: false),
@@ -306,8 +305,8 @@ namespace ServiceCenterApp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     DiagnosisDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Recommendations = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Recommendations = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     MasterId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -571,9 +570,9 @@ namespace ServiceCenterApp.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Employees_Login",
+                name: "IX_Employees_PINHash",
                 table: "Employees",
-                column: "Login",
+                column: "PINHash",
                 unique: true);
 
             migrationBuilder.CreateIndex(

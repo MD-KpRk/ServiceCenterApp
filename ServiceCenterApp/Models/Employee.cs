@@ -20,12 +20,8 @@ namespace ServiceCenterApp.Models
         public int PositionId { get; set; }
 
         [Required]
-        [MaxLength(32)]
-        public string? Login { get; set; }
-
-        [Required]
         [MaxLength(128)]
-        public string? PasswordHash { get; set; }
+        public string? PINHash { get; set; }
 
         [MaxLength(128)]
         public string? ContactInfo { get; set; }

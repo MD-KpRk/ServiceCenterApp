@@ -11,7 +11,7 @@ namespace ServiceCenterApp.Models
         public int PartId { get; set; }
 
         [Required]
-        [MaxLength(255)]
+        [MaxLength(128)]
         public string? Name { get; set; }
 
         [Required]

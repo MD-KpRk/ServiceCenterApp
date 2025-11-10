@@ -16,6 +16,7 @@ namespace ServiceCenterApp.Models
         [MaxLength(128)]
         public string? Contacts { get; set; }
 
+        [MaxLength(128)]
         public string? Details { get; set; }
 
         // Навигационное свойство: один поставщик может поставлять много запчастей

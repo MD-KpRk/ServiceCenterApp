@@ -17,7 +17,7 @@ namespace ServiceCenterApp.Models
         [MaxLength(24)]
         public string? PhoneNumber { get; set; }
 
-        [MaxLength(255)]
+        [MaxLength(48)]
         public string? Email { get; set; }
 
         public string? Comment { get; set; }

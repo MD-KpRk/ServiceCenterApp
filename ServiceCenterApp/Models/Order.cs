@@ -18,6 +18,7 @@ namespace ServiceCenterApp.Models
         public int StatusId { get; set; }
 
         [Required]
+        [MaxLength(256)]
         public string? ProblemDescription { get; set; }
 
         public int PriorityId { get; set; }
@@ -25,6 +26,7 @@ namespace ServiceCenterApp.Models
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
 
+        [MaxLength(128)]
         public string? Comment { get; set; }
 
         public int EmployeeId { get; set; }
