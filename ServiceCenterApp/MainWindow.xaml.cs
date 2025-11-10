@@ -16,20 +16,29 @@ namespace ServiceCenterApp
 {
     public partial class MainWindow : Window
     {
-        private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
-        public MainWindow()
+        private MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
+        public MainWindow(MainWindowViewModel viewModel)
         {
             InitializeComponent();
+            DataContext = viewModel;
         }
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
+            if(ViewModel == null)
+            {
+                throw new NullReferenceException();
+            }
             ViewModel.InitializeNavigation(MainFrame);
             ViewModel.StartNavigation();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            if (ViewModel == null)
+            {
+                throw new NullReferenceException();
+            }
             ViewModel.IsMenuVisible = !ViewModel.IsMenuVisible;
         }
 

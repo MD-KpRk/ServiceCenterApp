@@ -5,41 +5,36 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:ServiceCenterApp.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="1920" d:DesignWidth="1080"
+      d:DesignHeight="1080" d:DesignWidth="1920"
       Title="AuthPage"
       PreviewKeyDown="Page_PreviewKeyDown">
 
-    <Viewbox Stretch="Uniform" Margin="30 100 30 100" MinHeight="300" MaxHeight="800">
+    <Border>
         <Border Background="{StaticResource WhiteBrush}" 
-                CornerRadius="15" 
+                CornerRadius="10" 
                 Padding="20"
-                Width="450" Height="700">
+                MaxHeight="620" MaxWidth="440" Margin="10">
             <Border.Effect>
                 <DropShadowEffect ShadowDepth="2" Color="Black" Opacity="0.2" BlurRadius="15"/>
             </Border.Effect>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0"
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top">
+                    <TextBlock Grid.Row="0"
                            Text="Введите ПИН для доступа к системе"   
                            Foreground="{StaticResource DarkTextBrush}"
                            FontSize="32"
-                           Margin="20,20,20,0"
+                           Margin="20,10,20,0"
                            FontFamily="{StaticResource Roboto}" 
                            TextWrapping="Wrap" 
                            TextAlignment="Center"/>
 
-                <TextBox Grid.Row="1"
-                         Margin="60,30,60,0"
-                         MinHeight="60"
+                    <TextBox Grid.Row="1"
+                         Margin="60,20,60,0"
+                         MinHeight="26"
                          BorderThickness="2"
                          FontFamily="{StaticResource Roboto}"
-                         FontSize="50"
+                         FontSize="40"
                          VerticalContentAlignment="Center"
                          Foreground="{StaticResource DarkTextBrush}"
                          HorizontalContentAlignment="Center"
@@ -47,48 +42,41 @@
                          IsReadOnly="True"
                          BorderBrush="{StaticResource DarkTextBrush}"/>
 
-                <Grid Grid.Row="2"
-                      HorizontalAlignment="Center"
-                      VerticalAlignment="Center"
-                      Margin="10,0,10,10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+                </StackPanel>
 
+                <StackPanel Margin="0 6 0 0" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Style="{StaticResource AuthButton}" Content="1" Grid.Column="0" Grid.Row="0" Click="Button_Click" Tag="1" />
+                        <Button Style="{StaticResource AuthButton}" Content="2" Grid.Column="1" Grid.Row="0" Click="Button_Click" Tag="2"/>
+                        <Button Style="{StaticResource AuthButton}" Content="3" Grid.Column="2" Grid.Row="0" Click="Button_Click" Tag="3"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Style="{StaticResource AuthButton}" Content="4" Grid.Column="0" Grid.Row="1" Click="Button_Click" Tag="4"/>
+                        <Button Style="{StaticResource AuthButton}" Content="5" Grid.Column="1" Grid.Row="1" Click="Button_Click" Tag="5"/>
+                        <Button Style="{StaticResource AuthButton}" Content="6" Grid.Column="2" Grid.Row="1" Click="Button_Click" Tag="6"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Style="{StaticResource AuthButton}" Content="7" Grid.Column="0" Grid.Row="2" Click="Button_Click" Tag="7"/>
+                        <Button Style="{StaticResource AuthButton}" Content="8" Grid.Column="1" Grid.Row="2" Click="Button_Click" Tag="8"/>
+                        <Button Style="{StaticResource AuthButton}" Content="9" Grid.Column="2" Grid.Row="2" Click="Button_Click" Tag="9"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Style="{StaticResource AuthButton}" Grid.Column="0" Grid.Row="3" Click="Button_Click" Tag="Delete">
+                            <Button.Content>
+                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource BackspaceIcon}"/>
+                            </Button.Content>
+                        </Button>
+                        <Button Style="{StaticResource AuthButton}" Content="0" Grid.Column="1" Grid.Row="3" Click="Button_Click" Tag="0"/>
+                        <Button Style="{StaticResource AuthButton}" Grid.Column="2" Grid.Row="3" Click="Button_Click" Tag="Apply">
+                            <Button.Content>
+                                <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource ApplyIcon}"/>
+                            </Button.Content>
+                        </Button>
+                    </StackPanel>
 
-                    <Button Style="{StaticResource AuthButton}" Content="1" Grid.Column="0" Grid.Row="0" Click="Button_Click" Tag="1" />
-                    <Button Style="{StaticResource AuthButton}" Content="2" Grid.Column="1" Grid.Row="0" Click="Button_Click" Tag="2"/>
-                    <Button Style="{StaticResource AuthButton}" Content="3" Grid.Column="2" Grid.Row="0" Click="Button_Click" Tag="3"/>
+                </StackPanel>
 
-                    <Button Style="{StaticResource AuthButton}" Content="4" Grid.Column="0" Grid.Row="1" Click="Button_Click" Tag="4"/>
-                    <Button Style="{StaticResource AuthButton}" Content="5" Grid.Column="1" Grid.Row="1" Click="Button_Click" Tag="5"/>
-                    <Button Style="{StaticResource AuthButton}" Content="6" Grid.Column="2" Grid.Row="1" Click="Button_Click" Tag="6"/>
-
-                    <Button Style="{StaticResource AuthButton}" Content="7" Grid.Column="0" Grid.Row="2" Click="Button_Click" Tag="7"/>
-                    <Button Style="{StaticResource AuthButton}" Content="8" Grid.Column="1" Grid.Row="2" Click="Button_Click" Tag="8"/>
-                    <Button Style="{StaticResource AuthButton}" Content="9" Grid.Column="2" Grid.Row="2" Click="Button_Click" Tag="9"/>
-
-                    <Button Style="{StaticResource AuthButton}" Grid.Column="0" Grid.Row="3" Click="Button_Click" Tag="Delete">
-                        <Button.Content>
-                            <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource BackspaceIcon}"/>
-                        </Button.Content>
-                    </Button>
-                    <Button Style="{StaticResource AuthButton}" Content="0" Grid.Column="1" Grid.Row="3" Click="Button_Click" Tag="0"/>
-                    <Button Style="{StaticResource AuthButton}" Grid.Column="2" Grid.Row="3" Click="Button_Click" Tag="Apply">
-                        <Button.Content>
-                            <Path Style="{StaticResource IconPathStyle}" Data="{StaticResource ApplyIcon}"/>
-                        </Button.Content>
-                    </Button>
-                </Grid>
-            </Grid>
+            </DockPanel>
         </Border>
-    </Viewbox>
+    </Border>
 </Page>
