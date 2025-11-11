@@ -27,12 +27,8 @@ namespace ServiceCenterApp.Services
         public async Task CreateAdministratorAsync(string firstName, string surName, string? patronymic, string positionName, string pin)
         {
 
-            Role? adminRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.RoleId == 1);
-
-            if(adminRole == null)
-            {
-                throw new InvalidOperationException("Роль администратора не найдена в базе данных");
-            }
+            Role? adminRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.RoleId == 1) 
+                ?? throw new InvalidOperationException("Роль администратора не найдена в базе данных");
 
             if (await _dbContext.Employees.AnyAsync())
             {

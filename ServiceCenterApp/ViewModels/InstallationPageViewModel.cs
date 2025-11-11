@@ -12,7 +12,7 @@ namespace ServiceCenterApp.ViewModels
 {
     public class InstallationPageViewModel : BaseViewModel
     {
-        IAuthenticationService? _authenticationService;
+        private readonly IAuthenticationService? _authenticationService;
         private string? _firstName;
         private string? _surName;
         private string? _patronymic;
@@ -66,6 +66,7 @@ namespace ServiceCenterApp.ViewModels
         public InstallationPageViewModel(IAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
+
             MaxFirstNameLength = ModelHelper.GetMaxLength(typeof(Employee), nameof(Employee.FirstName));
             MaxSurNameLength = ModelHelper.GetMaxLength(typeof(Employee), nameof(Employee.SurName));
             MaxPatronymicLength = ModelHelper.GetMaxLength(typeof(Employee), nameof(Employee.Patronymic));

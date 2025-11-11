@@ -64,9 +64,7 @@ namespace ServiceCenterApp
 
         private void ConfigureNavigation()
         {
-            NavigationService? navService = _serviceProvider?.GetRequiredService<INavigationService>() as NavigationService;
-
-            if (navService == null) return;
+            if (_serviceProvider?.GetRequiredService<INavigationService>() is not NavigationService navService) return;
 
             // VIEWMODEL - PAGE MAPPING
             navService?.Configure<AuthPageViewModel, AuthPage>();

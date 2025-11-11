@@ -9,7 +9,7 @@ namespace ServiceCenterApp.ViewModels
         private readonly INavigationService _navigationService;
 
         private string _realPassword = "";
-        public string StarPassword => new string('●', _realPassword.Length);
+        public string StarPassword => new('●', _realPassword.Length);
 
         public AuthPageViewModel(ICurrentUserService currentUserService,
                                  IAuthenticationService authenticationService,

@@ -52,12 +52,8 @@ namespace ServiceCenterApp.Services
                 throw new InvalidOperationException($"Нет сопоставления для ViewModel: {viewModelType.Name}");
             }
 
-            var page = _serviceProvider.GetRequiredService(viewType) as Page;
-
-            if (page == null)
-            {
-                throw new InvalidOperationException($"Не удалось создать страницу для ViewModel: {viewModelType.Name}");
-            }
+            Page page = _serviceProvider.GetRequiredService(viewType) as Page 
+                ?? throw new InvalidOperationException($"Не удалось создать страницу для ViewModel: {viewModelType.Name}");
 
             _mainFrame.Navigate(page);
         }
@@ -73,7 +69,7 @@ namespace ServiceCenterApp.Services
                 MessageBox.Show("Users table not found ");
                 return;
             }
-            if(_dbcontext.Employees.Count() == 0)
+            if(_dbcontext.Employees.Any())
             {
                 NavigateTo<InstallationPageViewModel>();
             }
