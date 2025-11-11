@@ -12,6 +12,8 @@
                 <ResourceDictionary Source="/Styles/Button.xaml"/>
                 <ResourceDictionary Source="/Styles/Path.xaml"/>
                 <ResourceDictionary Source="/Styles/ToggleButton.xaml"/>
+                <ResourceDictionary Source="/Styles/TextBox.xaml"/>
+                <ResourceDictionary Source="/Styles/PasswordBox.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
             <FontFamily x:Key="Roboto">./Fonts/#Roboto</FontFamily>

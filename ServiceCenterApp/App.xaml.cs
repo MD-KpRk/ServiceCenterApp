@@ -36,28 +36,25 @@ namespace ServiceCenterApp
             IServiceCollection services = new ServiceCollection();
 
             // DATABASE REGISTATION
-
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
 
             // --- SERVICE REGISTRATION ---
-
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<INavigationService, NavigationService>();
 
             // --- VIEWMODELS ---
             services.AddSingleton<MainWindowViewModel>();
+            services.AddSingleton<InstallationPageViewModel>();
             services.AddTransient<AuthPageViewModel>();
 
             // VIEWS
             services.AddTransient<AuthPage>(); // Page
-            services.AddSingleton<MainWindow>(s => new MainWindow() // Window
-            {
-                DataContext = s.GetRequiredService<MainWindowViewModel>()
-            });
+            services.AddSingleton<InstallationPage>(); // Page
+            services.AddSingleton<MainWindow>(); // Window
 
 
             _serviceProvider = services.BuildServiceProvider();
@@ -70,7 +67,10 @@ namespace ServiceCenterApp
 
             if (navService == null) return;
 
+            // VIEWMODEL - PAGE MAPPING
             navService?.Configure<AuthPageViewModel, AuthPage>();
+            navService?.Configure<InstallationPageViewModel, InstallationPage>();
+
         }
 
         protected override void OnStartup(StartupEventArgs e)

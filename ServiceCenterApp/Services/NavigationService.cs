@@ -72,13 +72,12 @@ namespace ServiceCenterApp.Services
             }
             if(_dbcontext.Employees.Count() == 0)
             {
-                MessageBox.Show("Installation");
+                NavigateTo<InstallationPageViewModel>();
             }
             else
             {
                 NavigateTo<AuthPageViewModel>();
             }
-#warning IF USERS.COUNT == 0 -> START PAGE = INSTALLATION.PAGE
         }
 
         public void Configure<TViewModel, TView>() where TView : Page
