@@ -17,10 +17,10 @@ namespace ServiceCenterApp.Services
         private readonly Dictionary<Type, Type> _viewModelToViewMapping = new();
 
         private readonly IServiceProvider _serviceProvider;
-        private readonly ApplicationDbContext _dbcontext;
+        private readonly ApplicationDbContext? _dbcontext;
         private Frame? _mainFrame;
 
-        public NavigationService(ApplicationDbContext dbcontext, IServiceProvider serviceProvider)
+        public NavigationService(ApplicationDbContext? dbcontext, IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _dbcontext = dbcontext;
@@ -64,6 +64,9 @@ namespace ServiceCenterApp.Services
 
         public void StartNavigation()
         {
+            if (_dbcontext == null)
+                MessageBox.Show("Oh");
+
             if(_dbcontext.Employees == null)
             {
 #warning USE CUSTOM ERROR

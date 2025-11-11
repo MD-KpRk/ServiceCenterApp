@@ -9,6 +9,7 @@
     <Color x:Key="White">#FFFFFF</Color>
     <Color x:Key="PrimaryColor">#0078D4</Color>
     <Color x:Key="PrimaryColorDark">#005BA1</Color>
+    <Color x:Key="PrimaryColorLightHover">#0095F7</Color>
     <Color x:Key="PrimaryColorLight">#0089F2</Color>
     
     <Color x:Key="PrimaryTextColor">#FF212121</Color>
@@ -22,6 +23,7 @@
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
     <SolidColorBrush x:Key="PrimaryBrushDark" Color="{StaticResource PrimaryColorDark}"/>
     <SolidColorBrush x:Key="PrimaryBrushLight" Color="{StaticResource PrimaryColorLight}"/>
+    <SolidColorBrush x:Key="PrimaryBrushLightHover" Color="{StaticResource PrimaryColorLightHover}"/>
 
     <SolidColorBrush x:Key="WhiteTextBrush" Color="{StaticResource SmokeWhite}"/>
     <SolidColorBrush x:Key="DarkTextBrush" Color="{StaticResource BackgroundColor}"/>

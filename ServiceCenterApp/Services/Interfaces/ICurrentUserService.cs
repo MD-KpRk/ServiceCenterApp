@@ -1,16 +1,16 @@
-﻿using System;
+﻿using ServiceCenterApp.Models;
+using System;
 
 namespace ServiceCenterApp.Services.Interfaces
 {
     public interface ICurrentUserService
     {
-        // User mock
-        string? CurrentUser { get; }
+        Employee? CurrentUser { get; }
         bool IsLoggedIn { get; }
 
         event Action? AuthenticationStateChanged;
 
-        void SetCurrentUser(string user);
+        void SetCurrentUser(Employee user);
         void ClearCurrentUser();
     }
 }

@@ -1,4 +1,6 @@
-﻿using ServiceCenterApp.Models; // Предполага се, че този using е нужен
+﻿using ServiceCenterApp.Helpers;
+using ServiceCenterApp.Models;
+using ServiceCenterApp.Services.Interfaces;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -10,6 +12,7 @@ namespace ServiceCenterApp.ViewModels
 {
     public class InstallationPageViewModel : BaseViewModel
     {
+        IAuthenticationService? _authenticationService;
         private string? _firstName;
         private string? _surName;
         private string? _patronymic;
@@ -55,38 +58,21 @@ namespace ServiceCenterApp.ViewModels
 
         public ICommand CreateAdminCommand { get; }
 
-        // Свойствата за максимална дължина (остават същите)
         public int MaxFirstNameLength { get; }
         public int MaxSurNameLength { get; }
         public int MaxPatronymicLength { get; }
         public int MaxPositionLength { get; }
 
-        public InstallationPageViewModel()
+        public InstallationPageViewModel(IAuthenticationService authenticationService)
         {
-            // Получаем максимальную длину для свойств класса Employee
-            MaxFirstNameLength = GetMaxLength(typeof(Employee), nameof(Employee.FirstName));
-            MaxSurNameLength = GetMaxLength(typeof(Employee), nameof(Employee.SurName));
-            MaxPatronymicLength = GetMaxLength(typeof(Employee), nameof(Employee.Patronymic));
-
-            // Получаем максимальную длину для свойства из связанного класса Position
-            MaxPositionLength = GetMaxLength(typeof(Position), nameof(Models.Position.PositionName));
-
+            _authenticationService = authenticationService;
+            MaxFirstNameLength = ModelHelper.GetMaxLength(typeof(Employee), nameof(Employee.FirstName));
+            MaxSurNameLength = ModelHelper.GetMaxLength(typeof(Employee), nameof(Employee.SurName));
+            MaxPatronymicLength = ModelHelper.GetMaxLength(typeof(Employee), nameof(Employee.Patronymic));
+            MaxPositionLength = ModelHelper.GetMaxLength(typeof(Position), nameof(Models.Position.PositionName));
             CreateAdminCommand = new RelayCommand(CreateAdministrator, CanCreateAdministrator);
         }
 
-        private int GetMaxLength(Type type, string propertyName)
-        {
-            PropertyInfo? propInfo = type.GetProperty(propertyName);
-            if (propInfo != null)
-            {
-                var maxLengthAttr = propInfo.GetCustomAttribute<MaxLengthAttribute>();
-                if (maxLengthAttr != null)
-                {
-                    return maxLengthAttr.Length;
-                }
-            }
-            return int.MaxValue; 
-        }
 
         private bool CanCreateAdministrator(object? parameter)
         {
@@ -94,11 +80,17 @@ namespace ServiceCenterApp.ViewModels
                    !string.IsNullOrWhiteSpace(SurName) &&
                    !string.IsNullOrWhiteSpace(Position) &&
                    !string.IsNullOrWhiteSpace(Pin1) &&
-                   Pin1 == Pin2; // Проверката вече използва правилните свойства
+                   Pin1 == Pin2;
         }
 
         private void CreateAdministrator(object? parameter)
         {
+            if (_authenticationService == null) throw new NullReferenceException("Auth Service not found");
+
+            if (FirstName == null || SurName == null || Position == null || Pin1 == null) return;
+
+            _authenticationService.CreateAdministratorAsync(FirstName, SurName, Patronymic, Position, Pin1);
+
             MessageBox.Show($"Администратор создан! PIN: {Pin1}", "Успешно");
         }
     }

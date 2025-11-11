@@ -1,16 +1,17 @@
-﻿using ServiceCenterApp.Services.Interfaces;
+﻿using ServiceCenterApp.Models;
+using ServiceCenterApp.Services.Interfaces;
 using System;
 
 namespace ServiceCenterApp.Services
 {
     public class CurrentUserService : ICurrentUserService
     {
-        public string? CurrentUser { get; private set; }
+        public Employee? CurrentUser { get; private set; }
         public bool IsLoggedIn => CurrentUser != null;
 
         public event Action? AuthenticationStateChanged;
 
-        public void SetCurrentUser(string user)
+        public void SetCurrentUser(Employee user)
         {
             CurrentUser = user;
             AuthenticationStateChanged?.Invoke();

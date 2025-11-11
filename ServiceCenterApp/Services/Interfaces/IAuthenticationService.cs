@@ -8,8 +8,10 @@ namespace ServiceCenterApp.Services.Interfaces
 {
     public interface IAuthenticationService
     {
-        bool Login(string username, string password);
-        //Task<int> LoginAsync(string username, string password);
+        Task CreateAdministratorAsync(string firstName, string surName, string? patronymic, string positionName, string pin);
+
+        Task<bool> LoginAsync(string pin);
+
         void Logout();
     }
 

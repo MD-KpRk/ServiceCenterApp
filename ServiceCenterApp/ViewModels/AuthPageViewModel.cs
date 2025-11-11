@@ -1,5 +1,4 @@
 ﻿using ServiceCenterApp.Services.Interfaces;
-using System.Windows; // Для MessageBox
 
 namespace ServiceCenterApp.ViewModels
 {
@@ -49,18 +48,7 @@ namespace ServiceCenterApp.ViewModels
         private void Login()
         {
             if (string.IsNullOrEmpty(_realPassword)) return;
-
-            bool success = _authenticationService.Login("username", _realPassword);
-
-            if (success)
-            {
-                MessageBox.Show("Вход выполнен успешно!");
-                // _navigationService.NavigateTo<MainPageViewModel>();
-            }
-            else
-            {
-                MessageBox.Show("Неверный ПИН-код!");
-            }
+            _authenticationService.LoginAsync(_realPassword);
 
             _realPassword = "";
             OnPropertyChanged(nameof(StarPassword));
