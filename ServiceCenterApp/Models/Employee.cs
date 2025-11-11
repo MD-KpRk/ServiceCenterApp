@@ -28,7 +28,7 @@ namespace ServiceCenterApp.Models
 
         [Required]
         [MaxLength(128)]
-        public string? PINHash { get; set; }
+        public required string PINHash { get; set; }
 
         [MaxLength(128)]
         public string? ContactInfo { get; set; }

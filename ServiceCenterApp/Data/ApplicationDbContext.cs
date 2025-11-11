@@ -1,5 +1,4 @@
-﻿// ApplicationDbContext.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ServiceCenterApp.Models;
 using ServiceCenterApp.Models.Associations;
 using ServiceCenterApp.Models.Lookup;

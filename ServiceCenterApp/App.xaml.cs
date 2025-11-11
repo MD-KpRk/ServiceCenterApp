@@ -45,6 +45,7 @@ namespace ServiceCenterApp
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<IPasswordHasher, PasswordHashService>();
 
             // --- VIEWMODELS ---
             services.AddSingleton<MainWindowViewModel>();
