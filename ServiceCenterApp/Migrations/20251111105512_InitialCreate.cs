@@ -19,7 +19,9 @@ namespace ServiceCenterApp.Migrations
                 {
                     ClientId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FullName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    SurName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    Patronymic = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
                     PhoneNumber = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(48)", maxLength: 48, nullable: true),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -173,7 +175,9 @@ namespace ServiceCenterApp.Migrations
                 {
                     EmployeeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FullName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    SurName = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    Patronymic = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
                     PositionId = table.Column<int>(type: "int", nullable: false),
                     PINHash = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     ContactInfo = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),

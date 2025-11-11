@@ -14,8 +14,15 @@ namespace ServiceCenterApp.Models
         public int EmployeeId { get; set; }
 
         [Required]
-        [MaxLength(128)]
-        public string? FullName { get; set; }
+        [MaxLength(64)]
+        public string? FirstName { get; set; }
+
+        [Required]
+        [MaxLength(64)]
+        public string? SurName { get; set; }
+
+        [MaxLength(64)]
+        public string? Patronymic { get; set; }
 
         public int PositionId { get; set; }
 
