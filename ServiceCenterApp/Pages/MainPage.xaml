@@ -5,10 +5,84 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:ServiceCenterApp.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="600" d:DesignWidth="1000"
       Title="MainPage">
 
-    <Grid>
-        <TextBlock Text="WELCOME" />
+    <Page.Resources>
+        <Style x:Key="KpiBorderStyle" TargetType="Border">
+            <Setter Property="Width" Value="220"/>
+            <Setter Property="Height" Value="120"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Margin" Value="0,0,20,20"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="1" Color="LightGray" Opacity="0.3" BlurRadius="10"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--Стиль для заголовка внутри блока (напр., "НОВЫХ ЗАКАЗОВ")-->
+        <Style x:Key="KpiTitleStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!--Стиль для значения KPI (напр., "15")-->
+        <Style x:Key="KpiValueStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource DarkBackgroundBrush}"/>
+            <Setter Property="FontSize" Value="38"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,5,0,0"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Информационная панель" FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,0,0,20"/>
+
+        <!-- WrapPanel автоматически перенесет блоки на новую строку, если не хватит места -->
+        <WrapPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
+
+            <!-- Блок 1: Новые заказы -->
+            <Border Style="{StaticResource KpiBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="НОВЫХ ЗАКАЗОВ" Style="{StaticResource KpiTitleStyle}"/>
+                    <TextBlock Text="{Binding NewOrdersCount}" Style="{StaticResource KpiValueStyle}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Блок 2: Заказы в работе -->
+            <Border Style="{StaticResource KpiBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="ЗАКАЗОВ В РАБОТЕ" Style="{StaticResource KpiTitleStyle}"/>
+                    <TextBlock Text="{Binding InProgressOrdersCount}" Style="{StaticResource KpiValueStyle}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Блок 3: Завершено сегодня -->
+            <Border Style="{StaticResource KpiBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="ЗАВЕРШЕНО СЕГОДНЯ" Style="{StaticResource KpiTitleStyle}"/>
+                    <TextBlock Text="{Binding CompletedTodayCount}" Style="{StaticResource KpiValueStyle}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Блок 4: Сумма к оплате -->
+            <Border Style="{StaticResource KpiBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="СУММА К ОПЛАТЕ" Style="{StaticResource KpiTitleStyle}"/>
+                    <!-- StringFormat={}{0:C} форматирует число как валюту (напр., 1 234,56 ₽) -->
+                    <TextBlock Text="{Binding TotalAmountDue, StringFormat={}{0:C}}" Style="{StaticResource KpiValueStyle}"/>
+                </StackPanel>
+            </Border>
+
+        </WrapPanel>
     </Grid>
 </Page>
