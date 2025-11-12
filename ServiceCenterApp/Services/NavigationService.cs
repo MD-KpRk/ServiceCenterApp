@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceCenterApp.Data;
 using ServiceCenterApp.Services.Interfaces;
 using ServiceCenterApp.ViewModels;
@@ -18,10 +19,16 @@ namespace ServiceCenterApp.Services
 
         private readonly IServiceProvider _serviceProvider;
         private readonly ApplicationDbContext? _dbcontext;
+        private readonly IDatabaseHealthService _databaseHealthService;
         private Frame? _mainFrame;
 
-        public NavigationService(ApplicationDbContext? dbcontext, IServiceProvider serviceProvider)
+        public NavigationService(
+            ApplicationDbContext? dbcontext, 
+            IServiceProvider serviceProvider,
+            IDatabaseHealthService databaseHealthService
+            )
         {
+            _databaseHealthService = databaseHealthService;
             _serviceProvider = serviceProvider;
             _dbcontext = dbcontext;
         }
@@ -64,12 +71,13 @@ namespace ServiceCenterApp.Services
                 MessageBox.Show("Oh");
 
             if(_dbcontext.Employees == null)
-            {
-#warning USE CUSTOM ERROR
+                {
                 MessageBox.Show("Users table not found ");
-                return;
-            }
-            if(_dbcontext.Employees.Any())
+                    return;
+                }
+
+            //RoleId == 1 - AdminRole HARDCODE
+            if(_dbcontext.Employees.Where(e => e.RoleId == 1).Count() == 0)
             {
                 NavigateTo<InstallationPageViewModel>();
             }

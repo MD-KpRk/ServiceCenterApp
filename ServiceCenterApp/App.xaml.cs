@@ -12,6 +12,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace ServiceCenterApp
 {
@@ -31,11 +32,11 @@ namespace ServiceCenterApp
 
             Configuration = builder.Build();
 
-            // DI CONTAINER INIT
+            // --- DI CONTAINER INIT ---
 
             IServiceCollection services = new ServiceCollection();
 
-            // DATABASE REGISTATION
+            // --- DATABASE REGISTATION ---
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
@@ -46,16 +47,19 @@ namespace ServiceCenterApp
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordHasher, PasswordHashService>();
+            services.AddScoped<IDatabaseHealthService, DatabaseHealthService>();
 
             // --- VIEWMODELS ---
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<InstallationPageViewModel>();
             services.AddTransient<AuthPageViewModel>();
+            services.AddSingleton<MainPageViewModel>();
 
-            // VIEWS
+            // --- VIEWS ---
             services.AddTransient<AuthPage>(); // Page
             services.AddSingleton<InstallationPage>(); // Page
             services.AddSingleton<MainWindow>(); // Window
+            services.AddSingleton<MainPage>(); // Page
 
 
             _serviceProvider = services.BuildServiceProvider();
@@ -69,21 +73,42 @@ namespace ServiceCenterApp
             // VIEWMODEL - PAGE MAPPING
             navService?.Configure<AuthPageViewModel, AuthPage>();
             navService?.Configure<InstallationPageViewModel, InstallationPage>();
+            navService?.Configure<MainPageViewModel, MainPage>();
 
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             if (_serviceProvider == null) throw new ArgumentNullException();
 
-
             using (var scope = _serviceProvider.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                dbContext.Database.Migrate();
+                IDatabaseHealthService healthService = scope.ServiceProvider.GetRequiredService<IDatabaseHealthService>();
+                ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                try
+                {
+                    dbContext.Database.Migrate();
+                }
+                catch (Exception)
+                {
+
+                }
+
+                bool isConnected = await healthService.CanConnectAsync();
+                if (!isConnected)
+                {
+                    MessageBox.Show("Не удалось установить соединение с SQL Server. " +
+                                    "Пожалуйста, проверьте строку подключения в appsettings.json и доступность сервера.",
+                                    "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Shutdown();
+                    return;
+                }
+
             }
 
-            var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+            //Show MainWindow
+            MainWindow mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
 
             base.OnStartup(e);

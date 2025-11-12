@@ -13,12 +13,15 @@ namespace ServiceCenterApp.Services
         private readonly ICurrentUserService _currentUserService;
         private readonly ApplicationDbContext _dbContext;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly INavigationService _navigationService;
 
         public AuthenticationService(
+            INavigationService navigationService,
             ApplicationDbContext dbcontext, 
             ICurrentUserService currentUserService, 
             IPasswordHasher passwordHasher)
         {
+            _navigationService = navigationService;
             _currentUserService = currentUserService;
             _dbContext = dbcontext;
             _passwordHasher = passwordHasher;
@@ -89,14 +92,15 @@ namespace ServiceCenterApp.Services
                 if (_passwordHasher.Verify(pin, employee.PINHash))
                 {
                     _currentUserService.SetCurrentUser(employee);
-                    MessageBox.Show($"Вход выполнен: {employee.FirstName} {employee.SurName}");
-
+                    //MessageBox.Show($"Вход выполнен: {employee.FirstName} {employee.SurName}");
+                    _navigationService.NavigateTo<MainPageViewModel>();
                     return true;
                 }
             }
 
+ 
 
-
+            MessageBox.Show("Error");
 #warning Custom ErrorBox
 
 

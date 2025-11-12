@@ -84,15 +84,23 @@ namespace ServiceCenterApp.ViewModels
                    Pin1 == Pin2;
         }
 
-        private void CreateAdministrator(object? parameter)
+        public void ClearAll()
+        {
+            FirstName = SurName = Patronymic = Position = Pin1 = Pin2 = null;
+        }
+
+        private async void CreateAdministrator(object? parameter)
         {
             if (_authenticationService == null) throw new NullReferenceException("Auth Service not found");
 
             if (FirstName == null || SurName == null || Position == null || Pin1 == null) return;
 
-            _authenticationService.CreateAdministratorAsync(FirstName, SurName, Patronymic, Position, Pin1);
+            await _authenticationService.CreateAdministratorAsync(FirstName, SurName, Patronymic, Position, Pin1);
 
             MessageBox.Show($"Администратор создан! PIN: {Pin1}", "Успешно");
+            ClearAll();
+
+            await _authenticationService.LoginAsync(Pin1);
         }
     }
 }
