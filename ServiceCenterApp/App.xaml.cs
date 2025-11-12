@@ -10,6 +10,7 @@ using System;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using static System.Formats.Asn1.AsnWriter;
@@ -80,6 +81,11 @@ namespace ServiceCenterApp
         protected override async void OnStartup(StartupEventArgs e)
         {
             if (_serviceProvider == null) throw new ArgumentNullException();
+
+            // --- УСТАНОВКА КУЛЬТУРЫ ДЛЯ ОТОБРАЖЕНИЯ ВАЛЮТЫ ---
+            var culture = new CultureInfo("be-BY");
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
 
             using (var scope = _serviceProvider.CreateScope())
             {

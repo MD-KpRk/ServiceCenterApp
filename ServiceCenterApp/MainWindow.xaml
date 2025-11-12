@@ -9,7 +9,8 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="MainWindow" Height="675" Width="1200" MinHeight="600" MinWidth="600"
-        Loaded="MainWindow_OnLoaded">
+        Loaded="MainWindow_OnLoaded"
+        Language="be-BY">
 
     <Window.Resources>
         <converters:MenuWidthConverter x:Key="MenuWidthConverter"/>

@@ -93,6 +93,7 @@ namespace ServiceCenterApp.Services
                 {
                     _currentUserService.SetCurrentUser(employee);
                     //MessageBox.Show($"Вход выполнен: {employee.FirstName} {employee.SurName}");
+
                     _navigationService.NavigateTo<MainPageViewModel>();
                     return true;
                 }

@@ -6,7 +6,8 @@
       xmlns:local="clr-namespace:ServiceCenterApp.Pages"
       mc:Ignorable="d" 
       d:DesignHeight="600" d:DesignWidth="1000"
-      Title="MainPage">
+      Title="MainPage"
+      Language="be-BY">
 
     <Page.Resources>
         <Style x:Key="KpiBorderStyle" TargetType="Border">
@@ -37,52 +38,153 @@
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Margin" Value="0,5,0,0"/>
         </Style>
+
+        <Style x:Key="MainDataGridStyle" TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource LightBackgroundBrush}"/>
+            <Setter Property="VerticalGridLinesBrush" Value="{StaticResource LightBackgroundBrush}"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+        </Style>
+
+        <Style x:Key="MainDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="{StaticResource LightBackgroundBrush}"/>
+        </Style>
+
+        <Style x:Key="MainDataGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="{StaticResource DarkBackgroundBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#f4f8ff"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="MainDataGridCellStyle" TargetType="DataGridCell">
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                        <Border Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{StaticResource PrimaryBrushLightHover}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Page.Resources>
 
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <TextBlock Text="Информационная панель" FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,0,0,20"/>
+            <!--ЗАГОЛОВОК СТРАНИЦЫ-->
+            <TextBlock Grid.Row="0" Text="Информационная панель" FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,0,0,20"/>
 
-        <!-- WrapPanel автоматически перенесет блоки на новую строку, если не хватит места -->
-        <WrapPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <!--БЛОК 1: ИНФОРМАЦИЯ О ЗАКАЗАХ-->
+            <TextBlock Grid.Row="1" Text="Информация о заказах" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,10,0,10"/>
+            <WrapPanel Grid.Row="2" Orientation="Horizontal">
+                <Border Style="{StaticResource KpiBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="ВСЕГО ЗАКАЗОВ" Style="{StaticResource KpiTitleStyle}"/>
+                        <TextBlock Text="{Binding TotalOrdersCount}" Style="{StaticResource KpiValueStyle}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource KpiBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="НОВЫХ ЗАКАЗОВ" Style="{StaticResource KpiTitleStyle}"/>
+                        <TextBlock Text="{Binding NewOrdersCount}" Style="{StaticResource KpiValueStyle}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource KpiBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="ЗАКАЗОВ В РАБОТЕ" Style="{StaticResource KpiTitleStyle}"/>
+                        <TextBlock Text="{Binding InProgressOrdersCount}" Style="{StaticResource KpiValueStyle}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource KpiBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="ГОТОВЫ К ВЫДАЧЕ" Style="{StaticResource KpiTitleStyle}"/>
+                        <TextBlock Text="{Binding ReadyForPickupCount}" Style="{StaticResource KpiValueStyle}"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
 
-            <!-- Блок 1: Новые заказы -->
-            <Border Style="{StaticResource KpiBorderStyle}">
-                <StackPanel>
-                    <TextBlock Text="НОВЫХ ЗАКАЗОВ" Style="{StaticResource KpiTitleStyle}"/>
-                    <TextBlock Text="{Binding NewOrdersCount}" Style="{StaticResource KpiValueStyle}"/>
-                </StackPanel>
+            <!--БЛОК 2: ИНФОРМАЦИЯ О ДЕНЬГАХ-->
+            <TextBlock Grid.Row="3" Text="Финансовая сводка" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,20,0,10"/>
+            <WrapPanel Grid.Row="4" Orientation="Horizontal">
+                <Border Style="{StaticResource KpiBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="СУММА К ОПЛАТЕ" Style="{StaticResource KpiTitleStyle}"/>
+                        <TextBlock Text="{Binding TotalAmountDue, StringFormat={}{0:C}}" Style="{StaticResource KpiValueStyle}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource KpiBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="ВЫРУЧКА СЕГОДНЯ" Style="{StaticResource KpiTitleStyle}"/>
+                        <TextBlock Text="{Binding EarnedToday, StringFormat={}{0:C}}" Style="{StaticResource KpiValueStyle}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource KpiBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="ВЫРУЧКА ЗА МЕСЯЦ" Style="{StaticResource KpiTitleStyle}"/>
+                        <TextBlock Text="{Binding EarnedThisMonth, StringFormat={}{0:C}}" Style="{StaticResource KpiValueStyle}"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource KpiBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="ОБЩАЯ ВЫРУЧКА" Style="{StaticResource KpiTitleStyle}"/>
+                        <TextBlock Text="{Binding TotalRevenue, StringFormat={}{0:C}}" Style="{StaticResource KpiValueStyle}"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+            <!--БЛОК 3: ИНФОРМАЦИЯ О СОТРУДНИКАХ-->
+            <TextBlock Grid.Row="5" Text="Результативность сотрудников" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,20,0,10"/>
+            <Border Grid.Row="6" Background="White" CornerRadius="8" Padding="5" Margin="0,0,0,20">
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="1" Color="LightGray" Opacity="0.3" BlurRadius="10"/>
+                </Border.Effect>
+                <DataGrid ItemsSource="{Binding EmployeePerformanceData}"
+                          Style="{StaticResource MainDataGridStyle}"
+                          ColumnHeaderStyle="{StaticResource MainDataGridColumnHeaderStyle}"
+                          RowStyle="{StaticResource MainDataGridRowStyle}"
+                          CellStyle="{StaticResource MainDataGridCellStyle}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="СОТРУДНИК" Binding="{Binding FullName}" Width="*"/>
+                        <DataGridTextColumn Header="ДОЛЖНОСТЬ" Binding="{Binding Position}" Width="*"/>
+                        <DataGridTextColumn Header="ЗАКАЗОВ В РАБОТЕ" Binding="{Binding InProgressOrdersCount}" Width="Auto"/>
+                        <DataGridTextColumn Header="ЗАВЕРШЕНО В ЭТОМ МЕСЯЦЕ" Binding="{Binding CompletedThisMonthCount}" Width="Auto"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Border>
 
-            <!-- Блок 2: Заказы в работе -->
-            <Border Style="{StaticResource KpiBorderStyle}">
-                <StackPanel>
-                    <TextBlock Text="ЗАКАЗОВ В РАБОТЕ" Style="{StaticResource KpiTitleStyle}"/>
-                    <TextBlock Text="{Binding InProgressOrdersCount}" Style="{StaticResource KpiValueStyle}"/>
-                </StackPanel>
-            </Border>
-
-            <!-- Блок 3: Завершено сегодня -->
-            <Border Style="{StaticResource KpiBorderStyle}">
-                <StackPanel>
-                    <TextBlock Text="ЗАВЕРШЕНО СЕГОДНЯ" Style="{StaticResource KpiTitleStyle}"/>
-                    <TextBlock Text="{Binding CompletedTodayCount}" Style="{StaticResource KpiValueStyle}"/>
-                </StackPanel>
-            </Border>
-
-            <!-- Блок 4: Сумма к оплате -->
-            <Border Style="{StaticResource KpiBorderStyle}">
-                <StackPanel>
-                    <TextBlock Text="СУММА К ОПЛАТЕ" Style="{StaticResource KpiTitleStyle}"/>
-                    <!-- StringFormat={}{0:C} форматирует число как валюту (напр., 1 234,56 ₽) -->
-                    <TextBlock Text="{Binding TotalAmountDue, StringFormat={}{0:C}}" Style="{StaticResource KpiValueStyle}"/>
-                </StackPanel>
-            </Border>
-
-        </WrapPanel>
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </Page>
