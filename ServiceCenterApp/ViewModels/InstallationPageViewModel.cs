@@ -95,12 +95,16 @@ namespace ServiceCenterApp.ViewModels
 
             if (FirstName == null || SurName == null || Position == null || Pin1 == null) return;
 
-            await _authenticationService.CreateAdministratorAsync(FirstName, SurName, Patronymic, Position, Pin1);
+            string pinToLogin = Pin1;
 
-            MessageBox.Show($"Администратор создан! PIN: {Pin1}", "Успешно");
-            ClearAll();
+            await _authenticationService.CreateAdministratorAsync(FirstName, SurName, Patronymic, Position, pinToLogin);
 
-            await _authenticationService.LoginAsync(Pin1);
+            bool loggedIn = await _authenticationService.LoginAsync(pinToLogin);
+
+            if (loggedIn)
+            {
+                ClearAll();
+            }
         }
     }
 }
