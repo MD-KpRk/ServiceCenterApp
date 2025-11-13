@@ -473,10 +473,10 @@ namespace ServiceCenterApp.Migrations
                 columns: new[] { "PermissionId", "Description", "PermissionKey" },
                 values: new object[,]
                 {
-                    { 1, "Доступ к модулю заказов", "Orders" },
-                    { 2, "Доступ к модулю клиентов", "Clients" },
-                    { 3, "Доступ к модулю склада и запчастей", "SparePart" },
-                    { 4, "Доступ к модулю диагностики и ремонта", "Diagnostic" },
+                    { 1, "Доступ к модулю Заявок", "Orders" },
+                    { 2, "Доступ к модулю Клиентов", "Clients" },
+                    { 3, "Доступ к модулю Склада", "SparePart" },
+                    { 4, "Доступ к модулю Диагностики и ремонта", "Diagnostic" },
                     { 5, "Доступ к модулю Финансы и Платежи", "Payment" },
                     { 6, "Доступ к модулю Администрирование", "Admin" }
                 });

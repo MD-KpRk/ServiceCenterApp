@@ -527,25 +527,25 @@ namespace ServiceCenterApp.Migrations
                         new
                         {
                             PermissionId = 1,
-                            Description = "Доступ к модулю заказов",
+                            Description = "Доступ к модулю Заявок",
                             PermissionKey = "Orders"
                         },
                         new
                         {
                             PermissionId = 2,
-                            Description = "Доступ к модулю клиентов",
+                            Description = "Доступ к модулю Клиентов",
                             PermissionKey = "Clients"
                         },
                         new
                         {
                             PermissionId = 3,
-                            Description = "Доступ к модулю склада и запчастей",
+                            Description = "Доступ к модулю Склада",
                             PermissionKey = "SparePart"
                         },
                         new
                         {
                             PermissionId = 4,
-                            Description = "Доступ к модулю диагностики и ремонта",
+                            Description = "Доступ к модулю Диагностики и ремонта",
                             PermissionKey = "Diagnostic"
                         },
                         new
