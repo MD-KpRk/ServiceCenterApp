@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ServiceCenterApp.Data;
+using ServiceCenterApp.Data.Configurations;
 using ServiceCenterApp.Models;
 using ServiceCenterApp.Services.Interfaces;
 using ServiceCenterApp.ViewModels;
@@ -30,7 +31,7 @@ namespace ServiceCenterApp.Services
         public async Task CreateAdministratorAsync(string firstName, string surName, string? patronymic, string positionName, string pin)
         {
 
-            Role? adminRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.RoleId == 1) 
+            Role? adminRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.RoleId == ((int)RoleEnum.Administrator)) 
                 ?? throw new InvalidOperationException("Роль администратора не найдена в базе данных");
 
             if (await _dbContext.Employees.AnyAsync())
@@ -49,7 +50,7 @@ namespace ServiceCenterApp.Services
                     _dbContext.Positions.Add(position);
                 }
 
-                var newAdmin = new Employee
+                Employee newAdmin = new Employee
                 {
                     FirstName = firstName,
                     SurName = surName,
@@ -69,7 +70,6 @@ namespace ServiceCenterApp.Services
             }
             catch (Exception)
             {
-                // Если произошла ошибка, откатываем все изменения
                 await transaction.RollbackAsync();
                 throw;
             }
@@ -81,31 +81,42 @@ namespace ServiceCenterApp.Services
             {
                 return false;
             }
+            List<Employee> allEmployees = await _dbContext.Employees.ToListAsync();
+            Employee? loggedInEmployee = null;
 
-            List<Employee> allEmployees = await _dbContext.Employees
-                .Include(e => e.Role)
-                .Include(e => e.Position)
-                .ToListAsync();
-
-            foreach (Employee employee in allEmployees)
+            foreach (Employee emp in allEmployees)
             {
-                if (_passwordHasher.Verify(pin, employee.PINHash))
+                if (_passwordHasher.Verify(pin, emp.PINHash))
                 {
-                    _currentUserService.SetCurrentUser(employee);
-                    //MessageBox.Show($"Вход выполнен: {employee.FirstName} {employee.SurName}");
-
-                    _navigationService.NavigateTo<MainPageViewModel>();
-                    return true;
+                    loggedInEmployee = emp;
+                    break;
                 }
             }
 
- 
+            if (loggedInEmployee == null)
+            {
+                MessageBox.Show("Неверный PIN-код"); 
+                return false;
+            }
 
-            MessageBox.Show("Error");
-#warning Custom ErrorBox
+            Employee? userToAuthenticate = await _dbContext.Employees
+                .Include(e => e.Position)
+                .Include(e => e.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                        .ThenInclude(rp => rp.Permission)
+                .FirstOrDefaultAsync(e => e.EmployeeId == loggedInEmployee.EmployeeId);
 
+            if (userToAuthenticate == null)
+            {
+                MessageBox.Show("Ошибка аутентификации: пользователь не найден после проверки PIN.");
+                return false;
+            }
 
-            return false;
+            _currentUserService.SetCurrentUser(userToAuthenticate);
+
+            _navigationService.NavigaToRoleMainPage();
+
+            return true;
         }
 
         public void Logout()

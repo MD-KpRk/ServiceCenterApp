@@ -1,24 +1,50 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ServiceCenterApp.Helpers;
 using ServiceCenterApp.Models.Lookup;
+using System.ComponentModel;
 
 
 namespace ServiceCenterApp.Data.Configurations
 {
+    public enum PermissionEnum
+    {
+        [Description("Доступ к модулю заказов")]
+        Orders = 1,
+
+        [Description("Доступ к модулю клиентов")]
+        Clients = 2,
+
+        [Description("Доступ к модулю склада и запчастей")]
+        SparePart = 3,
+
+        [Description("Доступ к модулю диагностики и ремонта")]
+        Diagnostic = 4,
+
+        [Description("Доступ к модулю Финансы и Платежи")]
+        Payment = 5,
+
+        [Description("Доступ к модулю Администрирование")]
+        Admin = 6
+    }
+
     public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
     {
         public void Configure(EntityTypeBuilder<Permission> builder)
         {
             builder.HasIndex(p => p.PermissionKey).IsUnique();
 
-            builder.HasData(
-                new Permission { PermissionId = 1, PermissionKey = "Orders", Description = "Доступ к модулю заказов" },
-                new Permission { PermissionId = 2, PermissionKey = "Clients", Description = "Доступ к модулю клиентов" },
-                new Permission { PermissionId = 3, PermissionKey = "SparePart", Description = "Доступ к модулю склада и запчастей" },
-                new Permission { PermissionId = 4, PermissionKey = "Diagnostic", Description = "Доступ к модулю диагностики и ремонта" },
-                new Permission { PermissionId = 5, PermissionKey = "Payment", Description = "Доступ к модулю Финансы и Платежи" },
-                new Permission { PermissionId = 6, PermissionKey = "Admin", Description = "Доступ к модулю Администрирование" }
-            );
+            List<Permission> permissionsToSeed = Enum.GetValues(typeof(PermissionEnum))
+                .Cast<PermissionEnum>()
+                .Select(p => new Permission
+                {
+                    PermissionId = (int)p,
+                    PermissionKey = p.ToString(),
+                    Description = p.GetDescription()
+                })
+                .ToList();
+
+            builder.HasData(permissionsToSeed);
         }
     }
 }

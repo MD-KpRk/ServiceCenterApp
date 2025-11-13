@@ -1,11 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using ServiceCenterApp.Attributes;
 using ServiceCenterApp.Data;
+using ServiceCenterApp.Data.Configurations;
 using ServiceCenterApp.Services.Interfaces;
 using ServiceCenterApp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
@@ -19,17 +22,20 @@ namespace ServiceCenterApp.Services
 
         private readonly IServiceProvider _serviceProvider;
         private readonly ApplicationDbContext? _dbcontext;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IDatabaseHealthService _databaseHealthService;
         private Frame? _mainFrame;
 
         public NavigationService(
             ApplicationDbContext? dbcontext, 
             IServiceProvider serviceProvider,
-            IDatabaseHealthService databaseHealthService
+            IDatabaseHealthService databaseHealthService,
+            ICurrentUserService currentUserService
             )
         {
             _databaseHealthService = databaseHealthService;
             _serviceProvider = serviceProvider;
+            _currentUserService = currentUserService;
             _dbcontext = dbcontext;
         }
 
@@ -48,36 +54,50 @@ namespace ServiceCenterApp.Services
             }
         }
 
-        public void NavigateTo<TViewModel>() where TViewModel : class
+        public void NavigateTo<TViewModel>() where TViewModel : BaseViewModel
         {
-            if (_mainFrame == null) throw new ArgumentNullException(nameof(_mainFrame));
+            if (_mainFrame == null)
+                throw new InvalidOperationException("NavigationService is not initialized.");
 
-            Type viewModelType = typeof(TViewModel);
+            if (!_viewModelToViewMapping.ContainsKey(typeof(TViewModel)))
+                throw new KeyNotFoundException($"No page configured for ViewModel {typeof(TViewModel).Name}");
 
-            if (!_viewModelToViewMapping.TryGetValue(viewModelType, out var viewType))
+            Type pageType = _viewModelToViewMapping[typeof(TViewModel)];
+            RequiredPermissionAttribute? requiredPermissionAttribute = pageType.GetCustomAttribute<RequiredPermissionAttribute>();
+
+            if (requiredPermissionAttribute != null)
             {
-                throw new InvalidOperationException($"Нет сопоставления для ViewModel: {viewModelType.Name}");
+                PermissionEnum[] requiredPermissions = requiredPermissionAttribute.RequiredPermissions;
+                if (!_currentUserService.HasAllPermissions(requiredPermissions))
+                {
+                    MessageBox.Show("У вас нет прав для доступа к этому разделу.", "Доступ запрещен", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
             }
 
-            Page page = _serviceProvider.GetRequiredService(viewType) as Page 
-                ?? throw new InvalidOperationException($"Не удалось создать страницу для ViewModel: {viewModelType.Name}");
+            BaseViewModel? viewModel = _serviceProvider.GetService(typeof(TViewModel)) as BaseViewModel;
+            Page? page = _serviceProvider.GetService(pageType) as Page;
 
+            if (page == null || viewModel == null)
+            {
+                throw new NullReferenceException($"Could not resolve page or ViewModel from DI container for {typeof(TViewModel).Name}");
+            }
+
+            page.DataContext = viewModel;
             _mainFrame.Navigate(page);
+        }
+
+        public void NavigaToRoleMainPage()
+        {
+            NavigateTo<MainAdminPageViewModel>();
         }
 
         public void StartNavigation()
         {
             if (_dbcontext == null)
-                MessageBox.Show("Oh");
+                throw new ArgumentNullException(nameof(_dbcontext));
 
-            if(_dbcontext.Employees == null)
-                {
-                MessageBox.Show("Users table not found ");
-                    return;
-                }
-
-            //RoleId == 1 - AdminRole HARDCODE
-            if(_dbcontext.Employees.Where(e => e.RoleId == 1).Count() == 0)
+            if(_dbcontext.Employees.Where(e => e.RoleId == ((int)RoleEnum.Administrator)).Count() == 0)
             {
                 NavigateTo<InstallationPageViewModel>();
             }

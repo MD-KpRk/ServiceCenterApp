@@ -1,6 +1,8 @@
-﻿using ServiceCenterApp.Models;
+﻿using ServiceCenterApp.Data.Configurations;
+using ServiceCenterApp.Models;
 using ServiceCenterApp.Services.Interfaces;
 using System;
+using System.Windows;
 
 namespace ServiceCenterApp.Services
 {
@@ -21,6 +23,34 @@ namespace ServiceCenterApp.Services
         {
             CurrentUser = null;
             AuthenticationStateChanged?.Invoke();
+        }
+
+        public bool HasAllPermissions(params PermissionEnum[] permissions)
+        {
+            if (permissions == null || permissions.Length == 0)
+            {
+                return true;
+            }
+
+            if (CurrentUser?.Role?.RolePermissions == null)
+            {
+                return false;
+            }
+
+            HashSet<string?> userPermissionKeys = CurrentUser.Role.RolePermissions
+                .Where(rp => rp.Permission != null)
+                .Select(rp => rp.Permission.PermissionKey)
+                .ToHashSet();
+
+            foreach (PermissionEnum requiredPermission in permissions)
+            {
+                if (!userPermissionKeys.Contains(requiredPermission.ToString()))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

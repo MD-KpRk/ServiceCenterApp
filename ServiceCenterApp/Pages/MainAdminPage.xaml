@@ -1,17 +1,17 @@
-﻿<Page x:Class="ServiceCenterApp.Pages.MainPage"
+﻿<Page x:Class="ServiceCenterApp.Pages.MainAdminPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:ServiceCenterApp.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="600" d:DesignWidth="1000"
-      Title="MainPage"
+      d:DesignHeight="1080" d:DesignWidth="1920"
+      Title="MainAdminPage"
       Language="be-BY">
 
     <Page.Resources>
         <Style x:Key="KpiBorderStyle" TargetType="Border">
-            <Setter Property="Width" Value="220"/>
+            <Setter Property="Width" Value="260"/>
             <Setter Property="Height" Value="120"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="CornerRadius" Value="8"/>
@@ -31,7 +31,6 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
 
-        <!--Стиль для значения KPI (напр., "15")-->
         <Style x:Key="KpiValueStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource DarkBackgroundBrush}"/>
             <Setter Property="FontSize" Value="38"/>
@@ -92,24 +91,13 @@
         </Style>
     </Page.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <Grid Margin="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
 
-            <!--ЗАГОЛОВОК СТРАНИЦЫ-->
-            <TextBlock Grid.Row="0" Text="Информационная панель" FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,0,0,20"/>
 
-            <!--БЛОК 1: ИНФОРМАЦИЯ О ЗАКАЗАХ-->
-            <TextBlock Grid.Row="1" Text="Информация о заказах" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,10,0,10"/>
-            <WrapPanel Grid.Row="2" Orientation="Horizontal">
+    <ScrollViewer x:Name="PageScrollViewer" VerticalScrollBarVisibility="Auto" Grid.RowSpan="8" >
+        <StackPanel Margin="20">
+            <TextBlock Text="Краткая информационная сводка" FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" HorizontalAlignment="Center" Margin="0 20 0 20"/>
+            <TextBlock Grid.Row="1" Text="Информация о заказах" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource DarkBackgroundBrush}" TextAlignment="Center" Margin="0 20 0 20"/>
+            <WrapPanel x:Name="FirstWrapPanel" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 20 0 20">
                 <Border Style="{StaticResource KpiBorderStyle}">
                     <StackPanel>
                         <TextBlock Text="ВСЕГО ЗАКАЗОВ" Style="{StaticResource KpiTitleStyle}"/>
@@ -135,47 +123,45 @@
                     </StackPanel>
                 </Border>
             </WrapPanel>
-
-            <!--БЛОК 2: ИНФОРМАЦИЯ О ДЕНЬГАХ-->
-            <TextBlock Grid.Row="3" Text="Финансовая сводка" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,20,0,10"/>
-            <WrapPanel Grid.Row="4" Orientation="Horizontal">
+            <TextBlock Grid.Row="3" Text="Финансовая сводка" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource DarkBackgroundBrush}" TextAlignment="Center" Margin="0 20 0 20"/>
+            <WrapPanel x:Name="SecondWrapPanel" Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 20 0 20">
                 <Border Style="{StaticResource KpiBorderStyle}">
                     <StackPanel>
                         <TextBlock Text="СУММА К ОПЛАТЕ" Style="{StaticResource KpiTitleStyle}"/>
-                        <TextBlock Text="{Binding TotalAmountDue, StringFormat={}{0:C}}" Style="{StaticResource KpiValueStyle}"/>
+                        <TextBlock Text="{Binding TotalAmountDue, StringFormat={}{0:C0}}" Style="{StaticResource KpiValueStyle}"/>
+
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource KpiBorderStyle}">
                     <StackPanel>
                         <TextBlock Text="ВЫРУЧКА СЕГОДНЯ" Style="{StaticResource KpiTitleStyle}"/>
-                        <TextBlock Text="{Binding EarnedToday, StringFormat={}{0:C}}" Style="{StaticResource KpiValueStyle}"/>
+                        <TextBlock Text="{Binding EarnedToday, StringFormat={}{0:C0}}" Style="{StaticResource KpiValueStyle}"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource KpiBorderStyle}">
                     <StackPanel>
                         <TextBlock Text="ВЫРУЧКА ЗА МЕСЯЦ" Style="{StaticResource KpiTitleStyle}"/>
-                        <TextBlock Text="{Binding EarnedThisMonth, StringFormat={}{0:C}}" Style="{StaticResource KpiValueStyle}"/>
+                        <TextBlock Text="{Binding EarnedThisMonth, StringFormat={}{0:C0}}" Style="{StaticResource KpiValueStyle}"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource KpiBorderStyle}">
                     <StackPanel>
                         <TextBlock Text="ОБЩАЯ ВЫРУЧКА" Style="{StaticResource KpiTitleStyle}"/>
-                        <TextBlock Text="{Binding TotalRevenue, StringFormat={}{0:C}}" Style="{StaticResource KpiValueStyle}"/>
+                        <TextBlock Text="{Binding TotalRevenue, StringFormat={}{0:C0}}" Style="{StaticResource KpiValueStyle}"/>
                     </StackPanel>
                 </Border>
             </WrapPanel>
-
-            <!--БЛОК 3: ИНФОРМАЦИЯ О СОТРУДНИКАХ-->
-            <TextBlock Grid.Row="5" Text="Результативность сотрудников" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,20,0,10"/>
-            <Border Grid.Row="6" Background="White" CornerRadius="8" Padding="5" Margin="0,0,0,20">
+            <TextBlock Text="Результативность сотрудников" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource DarkBackgroundBrush}" TextAlignment="Center" Margin="0 20 0 20"/>
+            <Border Background="White" Width="{Binding ElementName=FirstWrapPanel, Path=ActualWidth}" CornerRadius="8" Padding="5" Margin="0,0,0,20">
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="1" Color="LightGray" Opacity="0.3" BlurRadius="10"/>
                 </Border.Effect>
-                <DataGrid ItemsSource="{Binding EmployeePerformanceData}"
+                <DataGrid ItemsSource="{Binding EmployeePerformanceData}" HorizontalAlignment="Center" Margin="0 20 0 20"
                           Style="{StaticResource MainDataGridStyle}"
                           ColumnHeaderStyle="{StaticResource MainDataGridColumnHeaderStyle}"
                           RowStyle="{StaticResource MainDataGridRowStyle}"
-                          CellStyle="{StaticResource MainDataGridCellStyle}">
+                          CellStyle="{StaticResource MainDataGridCellStyle}"
+                          PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="СОТРУДНИК" Binding="{Binding FullName}" Width="*"/>
                         <DataGridTextColumn Header="ДОЛЖНОСТЬ" Binding="{Binding Position}" Width="*"/>
@@ -184,7 +170,6 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
-
-        </Grid>
+        </StackPanel>
     </ScrollViewer>
 </Page>

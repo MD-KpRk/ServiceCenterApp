@@ -1,4 +1,5 @@
 ﻿using ServiceCenterApp.Services.Interfaces;
+using System.ComponentModel;
 
 namespace ServiceCenterApp.ViewModels
 {
@@ -45,10 +46,10 @@ namespace ServiceCenterApp.ViewModels
             OnPropertyChanged(nameof(StarPassword));
         }
 
-        private void Login()
+        private async void Login()
         {
             if (string.IsNullOrEmpty(_realPassword)) return;
-            _authenticationService.LoginAsync(_realPassword);
+            await _authenticationService.LoginAsync(_realPassword);
 
             _realPassword = "";
             OnPropertyChanged(nameof(StarPassword));

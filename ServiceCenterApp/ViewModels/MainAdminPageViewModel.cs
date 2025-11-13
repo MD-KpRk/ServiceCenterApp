@@ -16,7 +16,7 @@ namespace ServiceCenterApp.ViewModels
         public int CompletedThisMonthCount { get; set; }
     }
 
-    public class MainPageViewModel : BaseViewModel
+    public class MainAdminPageViewModel : BaseViewModel
     {
         private readonly ApplicationDbContext _context;
 
@@ -86,7 +86,7 @@ namespace ServiceCenterApp.ViewModels
 
         #endregion
 
-        public MainPageViewModel(ApplicationDbContext context)
+        public MainAdminPageViewModel(ApplicationDbContext context)
         {
             _context = context;
             EmployeePerformanceData = new ObservableCollection<EmployeePerformanceViewModel>();

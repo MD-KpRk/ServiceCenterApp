@@ -54,13 +54,13 @@ namespace ServiceCenterApp
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<InstallationPageViewModel>();
             services.AddTransient<AuthPageViewModel>();
-            services.AddTransient<MainPageViewModel>();
+            services.AddTransient<MainAdminPageViewModel>();
 
             // --- VIEWS ---
             services.AddTransient<AuthPage>(); // Page
             services.AddSingleton<InstallationPage>(); // Page
             services.AddSingleton<MainWindow>(); // Window
-            services.AddSingleton<MainPage>(); // Page
+            services.AddSingleton<MainAdminPage>(); // Page
 
 
             _serviceProvider = services.BuildServiceProvider();
@@ -74,7 +74,7 @@ namespace ServiceCenterApp
             // VIEWMODEL - PAGE MAPPING
             navService?.Configure<AuthPageViewModel, AuthPage>();
             navService?.Configure<InstallationPageViewModel, InstallationPage>();
-            navService?.Configure<MainPageViewModel, MainPage>();
+            navService?.Configure<MainAdminPageViewModel, MainAdminPage>();
 
         }
 

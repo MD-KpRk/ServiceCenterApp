@@ -11,23 +11,20 @@ namespace ServiceCenterApp.Data.Configurations
         {
             builder.HasKey(rp => new { rp.RoleId, rp.PermissionId });
             builder.HasData(
-                // Admin (RoleId = 1) -
-                new RolePermission { RoleId = 1, PermissionId = 1 }, // Orders
-                new RolePermission { RoleId = 1, PermissionId = 2 }, // Clients
-                new RolePermission { RoleId = 1, PermissionId = 3 }, // SparePart
-                new RolePermission { RoleId = 1, PermissionId = 4 }, // Diagnostic
-                new RolePermission { RoleId = 1, PermissionId = 5 }, // Payment
-                new RolePermission { RoleId = 1, PermissionId = 6 }, // Admin
+                new RolePermission { RoleId = ((int)RoleEnum.Administrator), PermissionId = ((int)PermissionEnum.Orders) }, // Orders
+                new RolePermission { RoleId = ((int)RoleEnum.Administrator), PermissionId = ((int)PermissionEnum.Clients) }, // Clients
+                new RolePermission { RoleId = ((int)RoleEnum.Administrator), PermissionId = ((int)PermissionEnum.SparePart) }, // SparePart
+                new RolePermission { RoleId = ((int)RoleEnum.Administrator), PermissionId = ((int)PermissionEnum.Diagnostic) }, // Diagnostic
+                new RolePermission { RoleId = ((int)RoleEnum.Administrator), PermissionId = ((int)PermissionEnum.Payment) }, // Payment
+                new RolePermission { RoleId = ((int)RoleEnum.Administrator), PermissionId = ((int)PermissionEnum.Admin) }, // Admin
 
-                // Приемщик (RoleId = 2)
-                new RolePermission { RoleId = 2, PermissionId = 1 }, // Orders
-                new RolePermission { RoleId = 2, PermissionId = 2 }, // Clients
-                new RolePermission { RoleId = 2, PermissionId = 5 }, // Payment
+                new RolePermission { RoleId = ((int)RoleEnum.Receptionist), PermissionId = ((int)PermissionEnum.Orders) }, // Orders
+                new RolePermission { RoleId = ((int)RoleEnum.Receptionist), PermissionId = ((int)PermissionEnum.Clients) }, // Clients
+                new RolePermission { RoleId = ((int)RoleEnum.Receptionist), PermissionId = ((int)PermissionEnum.Payment) }, // Payment
 
-                // Мастер (RoleId = 3)
-                new RolePermission { RoleId = 3, PermissionId = 1 }, // Orders
-                new RolePermission { RoleId = 3, PermissionId = 3 }, // SparePart
-                new RolePermission { RoleId = 3, PermissionId = 4 }  // Diagnostic
+                new RolePermission { RoleId = ((int)RoleEnum.Technician), PermissionId = ((int)PermissionEnum.Orders) }, // Orders
+                new RolePermission { RoleId = ((int)RoleEnum.Technician), PermissionId = ((int)PermissionEnum.SparePart) }, // SparePart
+                new RolePermission { RoleId = ((int)RoleEnum.Technician), PermissionId = ((int)PermissionEnum.Diagnostic) }  // Diagnostic
             );
 
             builder.HasOne(rp => rp.Role)

@@ -1,4 +1,5 @@
-﻿using ServiceCenterApp.Models;
+﻿using ServiceCenterApp.Data.Configurations;
+using ServiceCenterApp.Models;
 using System;
 
 namespace ServiceCenterApp.Services.Interfaces
@@ -12,5 +13,7 @@ namespace ServiceCenterApp.Services.Interfaces
 
         void SetCurrentUser(Employee user);
         void ClearCurrentUser();
+
+        bool HasAllPermissions(params PermissionEnum[] permissions);
     }
 }

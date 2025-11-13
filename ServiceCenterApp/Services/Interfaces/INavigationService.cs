@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ServiceCenterApp.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,8 @@ namespace ServiceCenterApp.Services.Interfaces
     public interface INavigationService
     {
         void Initialize(Frame frame);
-        void NavigateTo<TViewModel>() where TViewModel : class;
+        void NavigateTo<TViewModel>() where TViewModel : BaseViewModel;
+        public void NavigaToRoleMainPage();
         void StartNavigation();
         void GoBack();
     }
