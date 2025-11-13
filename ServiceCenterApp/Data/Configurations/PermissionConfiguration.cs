@@ -9,16 +9,16 @@ namespace ServiceCenterApp.Data.Configurations
 {
     public enum PermissionEnum
     {
-        [Description("Доступ к модулю заказов")]
+        [Description("Доступ к модулю Заявок")]
         Orders = 1,
 
-        [Description("Доступ к модулю клиентов")]
+        [Description("Доступ к модулю Клиентов")]
         Clients = 2,
 
-        [Description("Доступ к модулю склада и запчастей")]
+        [Description("Доступ к модулю Склада")]
         SparePart = 3,
 
-        [Description("Доступ к модулю диагностики и ремонта")]
+        [Description("Доступ к модулю Диагностики и ремонта")]
         Diagnostic = 4,
 
         [Description("Доступ к модулю Финансы и Платежи")]
