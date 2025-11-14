@@ -1,4 +1,5 @@
-﻿using ServiceCenterApp.Services.Interfaces;
+﻿using ServiceCenterApp.Data.Configurations;
+using ServiceCenterApp.Services.Interfaces;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -21,7 +22,7 @@ namespace ServiceCenterApp.ViewModels
 
             _currentUserService.AuthenticationStateChanged += OnAuthenticationStateChanged;
 
-            UpdateMenuVisibility();
+            UpdateMenuAndPermissions();
         }
 
         public void InitializeNavigation(Frame frame)
@@ -43,6 +44,68 @@ namespace ServiceCenterApp.ViewModels
                 OnPropertyChanged(nameof(IsMenuExtended));
             }
         }
+
+        public Visibility DashBoardVisibility
+        {
+            get
+            {
+                if (_currentUserService.HasAllPermissions([PermissionEnum.Admin])) return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+        }
+
+        public Visibility OrdersVisibility
+        {
+            get
+            {
+                if (_currentUserService.HasAllPermissions([PermissionEnum.Admin])) return Visibility.Visible;
+
+                if (_currentUserService.HasAllPermissions([PermissionEnum.Orders])) return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+        }
+
+        public Visibility ClientsVisibility
+        {
+            get
+            {
+                if (_currentUserService.HasAllPermissions([PermissionEnum.Admin])) return Visibility.Visible;
+
+                if (_currentUserService.HasAllPermissions([PermissionEnum.Clients])) return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+        }
+
+        public Visibility EmployeesVisibility
+        {
+            get
+            {
+                if (_currentUserService.HasAllPermissions([PermissionEnum.Admin])) return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+        }
+        public Visibility StorageVisibility
+        {
+            get
+            {
+                if (_currentUserService.HasAllPermissions([PermissionEnum.Admin])) return Visibility.Visible;
+
+                if (_currentUserService.HasAllPermissions([PermissionEnum.SparePart])) return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+        }
+
+        public Visibility FinanceVisibility
+        {
+            get
+            {
+                if (_currentUserService.HasAllPermissions([PermissionEnum.Admin])) return Visibility.Visible;
+
+                if (_currentUserService.HasAllPermissions([PermissionEnum.Payment])) return Visibility.Visible;
+                return Visibility.Collapsed;
+            }
+        }
+
 
         public bool IsMenuVisible
         {
@@ -74,15 +137,23 @@ namespace ServiceCenterApp.ViewModels
             }
         }
 
-
         private void OnAuthenticationStateChanged()
         {
-            UpdateMenuVisibility();
+            UpdateMenuAndPermissions();
         }
 
-        private void UpdateMenuVisibility()
+        private void UpdateMenuAndPermissions()
         {
             IsMenuVisible = _currentUserService.IsLoggedIn;
+
+            OnPropertyChanged(nameof(DashBoardVisibility));
+            OnPropertyChanged(nameof(OrdersVisibility));
+            OnPropertyChanged(nameof(ClientsVisibility));
+            OnPropertyChanged(nameof(EmployeesVisibility));
+            OnPropertyChanged(nameof(StorageVisibility));
+            OnPropertyChanged(nameof(FinanceVisibility));
         }
+
+
     }
 }

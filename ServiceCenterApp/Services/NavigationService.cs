@@ -89,7 +89,11 @@ namespace ServiceCenterApp.Services
 
         public void NavigaToRoleMainPage()
         {
-            NavigateTo<MainAdminPageViewModel>();
+            if(_currentUserService.HasAllPermissions(PermissionEnum.Admin))
+                NavigateTo<MainAdminPageViewModel>();
+            if (_currentUserService.HasAllPermissions(PermissionEnum.Orders))
+                NavigateTo<OrdersPageViewModel>();
+
         }
 
         public void StartNavigation()

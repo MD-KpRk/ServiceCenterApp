@@ -55,12 +55,14 @@ namespace ServiceCenterApp
             services.AddSingleton<InstallationPageViewModel>();
             services.AddTransient<AuthPageViewModel>();
             services.AddTransient<MainAdminPageViewModel>();
+            services.AddTransient<OrdersPageViewModel>();
 
             // --- VIEWS ---
             services.AddTransient<AuthPage>(); // Page
             services.AddSingleton<InstallationPage>(); // Page
             services.AddSingleton<MainWindow>(); // Window
-            services.AddSingleton<MainAdminPage>(); // Page
+            services.AddSingleton<MainAdminPage>(); // Page 
+            services.AddSingleton<OrdersPage>(); // Page 
 
 
             _serviceProvider = services.BuildServiceProvider();
@@ -75,6 +77,7 @@ namespace ServiceCenterApp
             navService?.Configure<AuthPageViewModel, AuthPage>();
             navService?.Configure<InstallationPageViewModel, InstallationPage>();
             navService?.Configure<MainAdminPageViewModel, MainAdminPage>();
+            navService?.Configure<OrdersPageViewModel, OrdersPage>();
 
         }
 

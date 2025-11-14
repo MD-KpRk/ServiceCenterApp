@@ -19,7 +19,7 @@
     <Grid Background="{StaticResource LightBackgroundBrush}">
         <Grid.ColumnDefinitions>
             <!--<ColumnDefinition Width="50" />--> <!--FOR DEBUG-->
-
+            
             <ColumnDefinition>
                 <ColumnDefinition.Width>
                     <MultiBinding Converter="{StaticResource MenuWidthConverter}">
@@ -63,12 +63,12 @@
                     <TextBlock Text="ServiceCRM" Foreground="{StaticResource WhiteTextBrush}" VerticalAlignment="Center" FontSize="20" Margin="10 0 0 0"/>
                 </DockPanel>
                 <Separator Margin="0 0 0 0" Foreground="{StaticResource LightBackgroundBrush}"/>
-                <Button Content="Краткая сводка" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource ChartsIcon}" />
-                <Button Content="Все заявки" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource OrdersIcon}" />
-                <Button Content="Клиенты" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource ClientsIcon}"/>
-                <Button Content="Персонал" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource EmployeesIcon}"/>
-                <Button Content="Склад" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource StorageIcon}"/>
-                <Button Content="Финансы" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource FinanceIcon}"/>
+                <Button Content="Краткая сводка" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource ChartsIcon}" Visibility="{Binding DashBoardVisibility}" />
+                <Button Content="Все заявки" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource OrdersIcon}" Visibility="{Binding OrdersVisibility}"/>
+                <Button Content="Клиенты" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource ClientsIcon}" Visibility="{Binding ClientsVisibility}"/>
+                <Button Content="Персонал" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource EmployeesIcon}" Visibility="{Binding EmployeesVisibility}"/>
+                <Button Content="Склад" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource StorageIcon}" Visibility="{Binding StorageVisibility}"/>
+                <Button Content="Финансы" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource FinanceIcon}" Visibility="{Binding FinanceVisibility}"/>
             </StackPanel>
 
             <StackPanel VerticalAlignment="Bottom" Margin="0 0 0 10">
