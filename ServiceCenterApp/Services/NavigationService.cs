@@ -56,6 +56,11 @@ namespace ServiceCenterApp.Services
 
         public void NavigateTo<TViewModel>() where TViewModel : BaseViewModel
         {
+            NavigateTo<TViewModel>(null);
+        }
+
+        public void NavigateTo<TViewModel>(object? parameter) where TViewModel : BaseViewModel
+        {
             if (_mainFrame == null)
                 throw new InvalidOperationException("NavigationService is not initialized.");
 
@@ -81,6 +86,11 @@ namespace ServiceCenterApp.Services
             if (page == null || viewModel == null)
             {
                 throw new NullReferenceException($"Could not resolve page or ViewModel from DI container for {typeof(TViewModel).Name}");
+            }
+
+            if (parameter != null && viewModel is IViewModelWithParameter vmWithParam)
+            {
+                vmWithParam.SetParameter(parameter);
             }
 
             page.DataContext = viewModel;

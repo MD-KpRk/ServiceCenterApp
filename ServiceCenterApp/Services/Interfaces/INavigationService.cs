@@ -12,6 +12,7 @@ namespace ServiceCenterApp.Services.Interfaces
     {
         void Initialize(Frame frame);
         void NavigateTo<TViewModel>() where TViewModel : BaseViewModel;
+        void NavigateTo<TViewModel>(object? parameter) where TViewModel : BaseViewModel;
         public void NavigaToRoleMainPage();
         void StartNavigation();
         void GoBack();
