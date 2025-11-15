@@ -47,5 +47,10 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+    <Style x:Key="EditableTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="Margin" Value="0,3,0,10"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
 </ResourceDictionary>
