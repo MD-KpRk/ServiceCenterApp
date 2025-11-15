@@ -27,5 +27,12 @@ namespace ServiceCenterApp.Helpers
 
             return attribute != null ? attribute.Text : string.Empty;
         }
+
+        public static TAttribute? GetAttribute<TAttribute>(this Enum value) where TAttribute : Attribute
+        {
+            return value.GetType()
+                        .GetField(value.ToString())
+                        ?.GetCustomAttribute<TAttribute>();
+        }
     }
 }

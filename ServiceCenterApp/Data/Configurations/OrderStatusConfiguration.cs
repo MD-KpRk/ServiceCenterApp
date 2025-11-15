@@ -9,24 +9,31 @@ namespace ServiceCenterApp.Data.Configurations
     public enum OrderStatusEnum
     {
         [Description("Новая")]
+        [StatusColor("DodgerBlue")]
         New = 1,
 
         [Description("В диагностике")]
+        [StatusColor("Orange")]
         InDiagnostics = 2,
 
         [Description("Ожидает запчасть")]
+        [StatusColor("Gold")]
         AwaitingPart = 3,
 
         [Description("В работе")]
+        [StatusColor("Orange")]
         InProgress = 4,
 
         [Description("Готов к выдаче")]
+        [StatusColor("LimeGreen")]
         ReadyForPickup = 5,
 
         [Description("Выдан")]
+        [StatusColor("Gray")]
         Completed = 6,
 
         [Description("Отменен")]
+        [StatusColor("IndianRed")]
         Cancelled = 7
     }
 
