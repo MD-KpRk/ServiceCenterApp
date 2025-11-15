@@ -4,11 +4,69 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:ServiceCenterApp.Pages"
+      xmlns:controls="clr-namespace:ServiceCenterApp.Controls"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="800" d:DesignWidth="1200"
       Title="OrdersPage">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Заголовок -->
+            <RowDefinition Height="Auto"/>
+            <!-- Панель с фильтрами и поиском -->
+            <RowDefinition Height="*"/>
+            <!-- Список заказов -->
+        </Grid.RowDefinitions>
 
-    <Grid>
-        
+        <!-- Заголовок страницы -->
+        <TextBlock Text="Все заявки" Grid.Row="0" FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,0,0,20"/>
+
+        <!-- Панель управления -->
+        <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+            <StackPanel>
+                <!-- Фильтры по статусам -->
+                <TextBlock Text="Фильтр по статусам:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                <ItemsControl ItemsSource="{Binding StatusFilters}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding StatusName}" 
+                                      IsChecked="{Binding IsChecked}" 
+                                      Margin="0,0,15,5" 
+                                      VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Separator Margin="0,10"/>
+
+                <!-- Поиск и кнопка "Новый заказ" -->
+                <DockPanel>
+                    <Button Content="+ Новый заказ" DockPanel.Dock="Right" VerticalAlignment="Center" Style="{StaticResource AccentButtonStyle}"/>
+                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"  Width="300"
+                             Margin="0,0,10,0"/>
+                </DockPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Список заказов -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding FilteredOrders}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <controls:OrderCard/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </Page>

@@ -71,7 +71,7 @@ namespace ServiceCenterApp.ViewModels
             MaxSurNameLength = ModelHelper.GetMaxLength(typeof(Employee), nameof(Employee.SurName));
             MaxPatronymicLength = ModelHelper.GetMaxLength(typeof(Employee), nameof(Employee.Patronymic));
             MaxPositionLength = ModelHelper.GetMaxLength(typeof(Position), nameof(Models.Position.PositionName));
-            CreateAdminCommand = new RelayCommand(CreateAdministrator, CanCreateAdministrator);
+            CreateAdminCommand = new AsyncRelayCommand(CreateAdministrator, CanCreateAdministrator);
         }
 
 
@@ -89,7 +89,7 @@ namespace ServiceCenterApp.ViewModels
             FirstName = SurName = Patronymic = Position = Pin1 = Pin2 = null;
         }
 
-        private async void CreateAdministrator(object? parameter)
+        private async Task CreateAdministrator(object? parameter)
         {
             if (_authenticationService == null) throw new NullReferenceException("Auth Service not found");
 
