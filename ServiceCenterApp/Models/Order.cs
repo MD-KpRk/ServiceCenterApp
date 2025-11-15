@@ -40,7 +40,7 @@ namespace ServiceCenterApp.Models
         [ForeignKey("PriorityId")]
         public virtual Priority? Priority { get; set; }
 
-        [ForeignKey("AcceptorId")]
+        [ForeignKey("EmployeeId")]
         public virtual Employee? Employee { get; set; }
 
         [ForeignKey("ClientId")]

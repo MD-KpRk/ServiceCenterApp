@@ -263,8 +263,7 @@ namespace ServiceCenterApp.Migrations
                     Comment = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
                     EmployeeId = table.Column<int>(type: "int", nullable: false),
                     ClientId = table.Column<int>(type: "int", nullable: false),
-                    DeviceId = table.Column<int>(type: "int", nullable: false),
-                    AcceptorId = table.Column<int>(type: "int", nullable: true)
+                    DeviceId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -12,7 +12,7 @@ using ServiceCenterApp.Data;
 namespace ServiceCenterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251113191854_InitialCreate")]
+    [Migration("20251115113725_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -615,9 +615,6 @@ namespace ServiceCenterApp.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
-
-                    b.Property<int?>("AcceptorId")
-                        .HasColumnType("int");
 
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
