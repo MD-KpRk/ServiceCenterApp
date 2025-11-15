@@ -261,7 +261,8 @@ namespace ServiceCenterApp.Migrations
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Comment = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    CreatorEmployeeId = table.Column<int>(type: "int", nullable: false),
+                    AcceptorEmployeeId = table.Column<int>(type: "int", nullable: true),
                     ClientId = table.Column<int>(type: "int", nullable: false),
                     DeviceId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -281,8 +282,14 @@ namespace ServiceCenterApp.Migrations
                         principalColumn: "DeviceId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Orders_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
+                        name: "FK_Orders_Employees_AcceptorEmployeeId",
+                        column: x => x.AcceptorEmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "EmployeeId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Orders_Employees_CreatorEmployeeId",
+                        column: x => x.CreatorEmployeeId,
                         principalTable: "Employees",
                         principalColumn: "EmployeeId",
                         onDelete: ReferentialAction.Restrict);
@@ -355,7 +362,7 @@ namespace ServiceCenterApp.Migrations
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "EmployeeId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Documents_Orders_OrderId",
                         column: x => x.OrderId,
@@ -589,19 +596,24 @@ namespace ServiceCenterApp.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_AcceptorEmployeeId",
+                table: "Orders",
+                column: "AcceptorEmployeeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_ClientId",
                 table: "Orders",
                 column: "ClientId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_CreatorEmployeeId",
+                table: "Orders",
+                column: "CreatorEmployeeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_DeviceId",
                 table: "Orders",
                 column: "DeviceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Orders_EmployeeId",
-                table: "Orders",
-                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_PriorityId",

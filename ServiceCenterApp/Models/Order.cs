@@ -29,7 +29,8 @@ namespace ServiceCenterApp.Models
         [MaxLength(128)]
         public string? Comment { get; set; }
 
-        public int EmployeeId { get; set; }
+        public int CreatorEmployeeId { get; set; }
+        public int? AcceptorEmployeeId { get; set; }
         public int ClientId { get; set; }
         public int DeviceId { get; set; }
 
@@ -40,8 +41,9 @@ namespace ServiceCenterApp.Models
         [ForeignKey("PriorityId")]
         public virtual Priority? Priority { get; set; }
 
-        [ForeignKey("EmployeeId")]
-        public virtual Employee? Employee { get; set; }
+        public virtual Employee? CreatorEmployee { get; set; }
+
+        public virtual Employee? AcceptorEmployee { get; set; }
 
         [ForeignKey("ClientId")]
         public virtual Client? Client { get; set; }

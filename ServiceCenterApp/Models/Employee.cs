@@ -42,7 +42,12 @@ namespace ServiceCenterApp.Models
         [ForeignKey("RoleId")]
         public virtual Role? Role { get; set; }
 
+        // Заказы, которые этот сотрудник СОЗДАЛ
+        public virtual ICollection<Order> CreatedOrders { get; set; } = new List<Order>();
+
+        // Заказы, которые этот сотрудник ИСПОЛНЯЕТ (как мастер)
         public virtual ICollection<Order> AcceptedOrders { get; set; } = new List<Order>();
+
         public virtual ICollection<DiagnosticReport> AuthoredDiagnosticReports { get; set; } = new List<DiagnosticReport>();
         public virtual ICollection<Document> AuthoredDocuments { get; set; } = new List<Document>();
     }

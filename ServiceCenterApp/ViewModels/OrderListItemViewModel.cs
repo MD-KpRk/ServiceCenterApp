@@ -25,16 +25,15 @@ namespace ServiceCenterApp.ViewModels
             DeviceDescription = $"{order.Device?.Brand} {order.Device?.Model}";
             ProblemDescription = order.ProblemDescription;
 
-            if (order.Employee != null)
+            if (order.AcceptorEmployee != null)
             {
-                MasterFullName = $"{order.Employee.SurName} {order.Employee.FirstName?.FirstOrDefault()}.";
+                MasterFullName = $"{order.AcceptorEmployee.SurName} {order.AcceptorEmployee.FirstName?.FirstOrDefault()}.";
             }
             else
             {
                 MasterFullName = "—"; 
             }
 
-            // Получаем цвет на основе Enum, как и раньше
             StatusColor = GetStatusColor((OrderStatusEnum)(order.StatusId));
         }
 

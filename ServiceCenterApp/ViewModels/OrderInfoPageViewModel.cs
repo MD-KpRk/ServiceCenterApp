@@ -69,7 +69,7 @@ namespace ServiceCenterApp.ViewModels
                 OnPropertyChanged();
                 if (Order != null && value != null)
                 {
-                    Order.EmployeeId = value.EmployeeId;
+                    Order.AcceptorEmployeeId = value.EmployeeId;
                 }
             }
         }
@@ -114,7 +114,7 @@ namespace ServiceCenterApp.ViewModels
         {
             Order = await _context.Orders
                 .Include(o => o.Status)
-                .Include(o => o.Employee)
+                .Include(o => o.CreatorEmployee)
                 .Include(o => o.Priority)
                 .Include(o => o.Client)
                 .Include(o => o.Device)
@@ -125,7 +125,7 @@ namespace ServiceCenterApp.ViewModels
             if (Order != null)
             {
                 SelectedOrderStatus = AllOrderStatuses.FirstOrDefault(s => s.StatusId == Order.StatusId);
-                SelectedEmployee = AllEmployees.FirstOrDefault(e => e.EmployeeId == Order.EmployeeId);
+                SelectedEmployee = AllEmployees.FirstOrDefault(e => e.EmployeeId == Order.AcceptorEmployeeId);
 
                 SelectedPriority = AllPriorities.FirstOrDefault(p => p.PriorityId == Order.PriorityId);
                 if (SelectedPriority == null && AllPriorities.Any())

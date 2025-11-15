@@ -71,7 +71,7 @@ namespace ServiceCenterApp.ViewModels
                 .Include(o => o.Status)
                 .Include(o => o.Client)
                 .Include(o => o.Device)
-                .Include(o => o.Employee)
+                .Include(o => o.CreatorEmployee)
                 .OrderByDescending(o => o.RegistrationDate)
                 .ToListAsync();
 

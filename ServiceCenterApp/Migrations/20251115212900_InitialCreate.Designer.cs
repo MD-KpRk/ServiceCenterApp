@@ -12,7 +12,7 @@ using ServiceCenterApp.Data;
 namespace ServiceCenterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251115113725_InitialCreate")]
+    [Migration("20251115212900_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -616,6 +616,9 @@ namespace ServiceCenterApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
+                    b.Property<int?>("AcceptorEmployeeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
 
@@ -623,10 +626,10 @@ namespace ServiceCenterApp.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<int>("DeviceId")
+                    b.Property<int>("CreatorEmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("EmployeeId")
+                    b.Property<int>("DeviceId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("EndDate")
@@ -653,11 +656,13 @@ namespace ServiceCenterApp.Migrations
 
                     b.HasKey("OrderId");
 
+                    b.HasIndex("AcceptorEmployeeId");
+
                     b.HasIndex("ClientId");
 
-                    b.HasIndex("DeviceId");
+                    b.HasIndex("CreatorEmployeeId");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("DeviceId");
 
                     b.HasIndex("PriorityId");
 
@@ -908,7 +913,7 @@ namespace ServiceCenterApp.Migrations
                     b.HasOne("ServiceCenterApp.Models.Employee", "Employee")
                         .WithMany("AuthoredDocuments")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ServiceCenterApp.Models.Order", "Order")
@@ -945,9 +950,20 @@ namespace ServiceCenterApp.Migrations
 
             modelBuilder.Entity("ServiceCenterApp.Models.Order", b =>
                 {
+                    b.HasOne("ServiceCenterApp.Models.Employee", "AcceptorEmployee")
+                        .WithMany("AcceptedOrders")
+                        .HasForeignKey("AcceptorEmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("ServiceCenterApp.Models.Client", "Client")
                         .WithMany("Orders")
                         .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ServiceCenterApp.Models.Employee", "CreatorEmployee")
+                        .WithMany("CreatedOrders")
+                        .HasForeignKey("CreatorEmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -955,12 +971,6 @@ namespace ServiceCenterApp.Migrations
                         .WithMany("Orders")
                         .HasForeignKey("DeviceId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ServiceCenterApp.Models.Employee", "Employee")
-                        .WithMany("AcceptedOrders")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ServiceCenterApp.Models.Lookup.Priority", "Priority")
@@ -975,11 +985,13 @@ namespace ServiceCenterApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("AcceptorEmployee");
+
                     b.Navigation("Client");
 
-                    b.Navigation("Device");
+                    b.Navigation("CreatorEmployee");
 
-                    b.Navigation("Employee");
+                    b.Navigation("Device");
 
                     b.Navigation("Priority");
 
@@ -1041,6 +1053,8 @@ namespace ServiceCenterApp.Migrations
                     b.Navigation("AuthoredDiagnosticReports");
 
                     b.Navigation("AuthoredDocuments");
+
+                    b.Navigation("CreatedOrders");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Order", b =>

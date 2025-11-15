@@ -114,7 +114,7 @@ namespace ServiceCenterApp.Services
 
             _currentUserService.SetCurrentUser(userToAuthenticate);
 
-            _navigationService.NavigaToRoleMainPage();
+            _navigationService.NavigateToRoleMainPage();
 
             return true;
         }
