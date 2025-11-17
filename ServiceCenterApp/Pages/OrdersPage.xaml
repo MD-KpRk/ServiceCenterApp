@@ -5,44 +5,49 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:ServiceCenterApp.Pages"
       xmlns:controls="clr-namespace:ServiceCenterApp.Controls"
+      xmlns:converters="clr-namespace:ServiceCenterApp.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="900" d:DesignWidth="1600"
       Title="OrdersPage">
+
     <Page.Resources>
-        <Style TargetType="ListBoxItem">
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Margin" Value="0"/>
-            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Bd" SnapsToDevicePixels="true">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Cursor" Value="Hand"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="{StaticResource PrimaryColor}" Opacity="0.8"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <converters:ObjectToGridLengthConverter x:Key="ObjectToGridLengthConverter"/>
+        <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
     </Page.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="480" MinWidth="400"/>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource ObjectToGridLengthConverter}}" MinWidth="410" MaxWidth="840">
+                <ColumnDefinition.Style>
+                    <Style TargetType="ColumnDefinition">
+                        <Setter Property="Tag" Value="820"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedOrderDetails, Converter={StaticResource IsNotNullConverter}}" Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Tag">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="410"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Tag">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="820"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ColumnDefinition.Style>
+            </ColumnDefinition>
+            <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
 
@@ -51,6 +56,7 @@
             <DockPanel>
                 <Border DockPanel.Dock="Top" Background="White" CornerRadius="5" Padding="10" Margin="0,0,0,10">
                     <StackPanel>
+                        <!-- Панель управления (без изменений) -->
                         <TextBlock Text="Фильтр по статусам:" FontWeight="SemiBold" Margin="0,0,0,5"/>
                         <ItemsControl ItemsSource="{Binding StatusFilters}">
                             <ItemsControl.ItemsPanel>
@@ -71,20 +77,40 @@
                         </DockPanel>
                     </StackPanel>
                 </Border>
-                <ListBox ItemsSource="{Binding FilteredOrders}"
-                         SelectedItem="{Binding SelectedOrderInList, Mode=TwoWay}"
-                         HorizontalContentAlignment="Stretch"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <controls:OrderCard/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding FilteredOrders}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <controls:OrderCard/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+
+                        <!-- Новый стиль для подсветки выбранного элемента -->
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="Effect">
+                                            <Setter.Value>
+                                                <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="{StaticResource PrimaryColor}" Opacity="0.8"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                    </ItemsControl>
+                </ScrollViewer>
             </DockPanel>
         </Border>
 
-        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="Transparent"/>
+        <GridSplitter Grid.Column="1" Style="{StaticResource ModernGridSplitterStyle}"/>
 
         <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ ЗАКАЗА -->
         <ContentControl Grid.Column="2" Content="{Binding SelectedOrderDetails}">
@@ -96,7 +122,7 @@
                                 <Setter.Value>
                                     <ControlTemplate>
                                         <Grid Background="#F0F2F5">
-                                            <TextBlock Text="Выберите заказ из списка для просмотра деталей" FontSize="16" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Выберите заказ из списка для просмотра деталей" FontSize="16" Foreground="Gray" HorizontalAlignment="Center" TextWrapping="Wrap" Margin="10 0 10 0" VerticalAlignment="Center"/>
                                         </Grid>
                                     </ControlTemplate>
                                 </Setter.Value>
@@ -108,7 +134,7 @@
 
             <ContentControl.ContentTemplate>
                 <DataTemplate>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <Grid Margin="20">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -117,74 +143,54 @@
 
                             <DockPanel Grid.Row="0" Margin="0,0,0,20">
                                 <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" VerticalAlignment="Center">
-                                    <Run Text="Заявка №"/>
-                                    <Run Text="{Binding OrderId}"/>
+                        <Run Text="Заявка №"/>
+                        <Run Text="{Binding OrderId}"/>
                                 </TextBlock>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                     <Button Content="Сохранить" Style="{StaticResource AccentButtonStyle}"/>
                                 </StackPanel>
                             </DockPanel>
 
-                            <Grid Grid.Row="1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="1.2*"/>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="2*"/>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="1.2*"/>
-                                </Grid.ColumnDefinitions>
+                            <WrapPanel Grid.Row="1" Orientation="Horizontal">
 
-                                <!-- Центральная колонка -->
-                                <StackPanel Grid.Column="2">
+                                <!-- БЛОК 1: КЛЮЧЕВАЯ ИНФОРМАЦИЯ -->
+                                <StackPanel MinWidth="400" Margin="0,0,20,20">
                                     <TextBlock Text="КЛЮЧЕВАЯ ИНФОРМАЦИЯ" Style="{StaticResource SectionHeaderStyle}"/>
                                     <Border Style="{StaticResource InfoBorderStyle}">
                                         <StackPanel>
                                             <DockPanel Margin="0,0,0,5">
                                                 <TextBlock Text="Статус заказа:" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
                                                 <ComboBox ItemsSource="{Binding DataContext.AllOrderStatuses, RelativeSource={RelativeSource AncestorType=Page}}" 
-                                                          SelectedItem="{Binding DataContext.SelectedOrderStatus, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
-                                                          Style="{StaticResource PageComboBoxStyle}" ItemContainerStyle="{StaticResource ColorStatusComboBoxItemContainerStyle}"
-                                                          ItemTemplate="{StaticResource ColorStatusComboBoxItemTemplate}"/>
+                                                SelectedItem="{Binding DataContext.SelectedOrderStatus, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
+                                                Style="{StaticResource PageComboBoxStyle}" ItemContainerStyle="{StaticResource ColorStatusComboBoxItemContainerStyle}"
+                                                ItemTemplate="{StaticResource ColorStatusComboBoxItemTemplate}"/>
                                             </DockPanel>
                                             <DockPanel Margin="0,0,0,5">
                                                 <TextBlock Text="Исполнитель (мастер):" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
                                                 <ComboBox ItemsSource="{Binding DataContext.AllEmployees, RelativeSource={RelativeSource AncestorType=Page}}" 
-                                                          SelectedItem="{Binding DataContext.SelectedAcceptorEmployee, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
-                                                          Style="{StaticResource PageComboBoxStyle}" ItemTemplate="{StaticResource EmployeeComboBoxItemTemplate}"/>
+                                                SelectedItem="{Binding DataContext.SelectedAcceptorEmployee, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
+                                                Style="{StaticResource PageComboBoxStyle}" ItemTemplate="{StaticResource EmployeeComboBoxItemTemplate}"/>
                                             </DockPanel>
                                             <DockPanel Margin="0,0,0,5">
                                                 <TextBlock Text="Приоритет:" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
                                                 <ComboBox ItemsSource="{Binding DataContext.AllPriorities, RelativeSource={RelativeSource AncestorType=Page}}" 
-                                                          SelectedItem="{Binding DataContext.SelectedPriority, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
-                                                          Style="{StaticResource PageComboBoxStyle}" ItemTemplate="{StaticResource PriorityComboBoxItemTemplate}"/>
+                                                SelectedItem="{Binding DataContext.SelectedPriority, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
+                                                Style="{StaticResource PageComboBoxStyle}" ItemTemplate="{StaticResource PriorityComboBoxItemTemplate}"/>
                                             </DockPanel>
                                             <Separator Margin="0,10"/>
                                             <DockPanel>
                                                 <TextBlock Text="Создал заказ:" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
                                                 <TextBlock VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold">
-                                                    <Run Text="{Binding CreatorEmployee.SurName}"/>
-                                                    <Run Text="{Binding CreatorEmployee.FirstName, StringFormat=' {0}.'}"/>
+                                        <Run Text="{Binding CreatorEmployee.SurName}"/>
+                                        <Run Text="{Binding CreatorEmployee.FirstName, StringFormat=' {0}.'}"/>
                                                 </TextBlock>
                                             </DockPanel>
                                         </StackPanel>
                                     </Border>
-                                    <TextBlock Text="ИСПОЛЬЗУЕМЫЕ ЗАПЧАСТИ" Style="{StaticResource SectionHeaderStyle}"/>
-                                    <Border Style="{StaticResource InfoBorderStyle}">
-                                        <StackPanel>
-                                            <DataGrid ItemsSource="{Binding DataContext.UsedSpareParts, RelativeSource={RelativeSource AncestorType=Page}}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True">
-                                                <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Название" Binding="{Binding SparePart.Name}" Width="*"/>
-                                                    <DataGridTextColumn Header="Артикул" Binding="{Binding SparePart.PartNumber}" Width="Auto"/>
-                                                    <DataGridTextColumn Header="Кол-во" Binding="{Binding Quantity}" Width="Auto"/>
-                                                    <DataGridTextColumn Header="Цена" Binding="{Binding SparePart.Price, StringFormat={}{0:C0}}" Width="Auto"/>
-                                                </DataGrid.Columns>
-                                            </DataGrid>
-                                            <Button Content="+ Добавить запчасть" Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Right" Margin="0,10,0,0"/>
-                                        </StackPanel>
-                                    </Border>
                                 </StackPanel>
-                                <!-- Левая и правая колонки -->
-                                <StackPanel Grid.Column="0">
+
+                                <!-- БЛОК 2: ИНФОРМАЦИЯ О КЛИЕНТЕ -->
+                                <StackPanel MinWidth="350" Margin="0,0,20,20">
                                     <TextBlock Text="ИНФОРМАЦИЯ О КЛИЕНТЕ" Style="{StaticResource SectionHeaderStyle}"/>
                                     <Border Style="{StaticResource InfoBorderStyle}">
                                         <StackPanel>
@@ -203,7 +209,9 @@
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
-                                <StackPanel Grid.Column="4">
+
+                                <!-- БЛОК 3: УСТРОЙСТВО И ДЕТАЛИ -->
+                                <StackPanel MinWidth="350" Margin="0,0,20,20">
                                     <TextBlock Text="ИНФОРМАЦИЯ ОБ УСТРОЙСТВЕ" Style="{StaticResource SectionHeaderStyle}"/>
                                     <Border Style="{StaticResource InfoBorderStyle}">
                                         <StackPanel>
@@ -227,11 +235,31 @@
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
-                            </Grid>
+
+                                <!-- БЛОК 4: ИСПОЛЬЗУЕМЫЕ ЗАПЧАСТИ -->
+                                <StackPanel MinWidth="400" Margin="0,0,20,20">
+                                    <TextBlock Text="ИСПОЛЬЗУЕМЫЕ ЗАПЧАСТИ" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <Border Style="{StaticResource InfoBorderStyle}">
+                                        <StackPanel>
+                                            <DataGrid ItemsSource="{Binding DataContext.UsedSpareParts, RelativeSource={RelativeSource AncestorType=Page}}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Название" Binding="{Binding SparePart.Name}" Width="*"/>
+                                                    <DataGridTextColumn Header="Артикул" Binding="{Binding SparePart.PartNumber}" Width="Auto"/>
+                                                    <DataGridTextColumn Header="Кол-во" Binding="{Binding Quantity}" Width="Auto"/>
+                                                    <DataGridTextColumn Header="Цена" Binding="{Binding SparePart.Price, StringFormat={}{0:C0}}" Width="Auto"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                            <Button Content="+ Добавить запчасть" Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Right" Margin="0,10,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                            </WrapPanel>
                         </Grid>
                     </ScrollViewer>
                 </DataTemplate>
             </ContentControl.ContentTemplate>
+
         </ContentControl>
     </Grid>
 </Page>

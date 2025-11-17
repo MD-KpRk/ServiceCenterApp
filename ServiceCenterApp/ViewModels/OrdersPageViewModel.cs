@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ServiceCenterApp.ViewModels
 {
@@ -23,6 +24,7 @@ namespace ServiceCenterApp.ViewModels
         private List<OrderListItemViewModel> _allOrders = new List<OrderListItemViewModel>();
         public ObservableCollection<OrderListItemViewModel> FilteredOrders { get; }
         public ObservableCollection<StatusFilterViewModel> StatusFilters { get; }
+        public ICommand SelectOrderCommand { get; }
 
         private string _searchText;
         public string SearchText
@@ -70,6 +72,8 @@ namespace ServiceCenterApp.ViewModels
             private set { _allPriorities = value; OnPropertyChanged(); }
         }
 
+
+
         // Выбранные элементы в ComboBox'ах
         private OrderStatusViewModel _selectedOrderStatus;
         public OrderStatusViewModel SelectedOrderStatus
@@ -106,7 +110,16 @@ namespace ServiceCenterApp.ViewModels
             {
                 if (_selectedOrderInList != value)
                 {
+                    // Снимаем выделение со старого элемента
+                    if (_selectedOrderInList != null)
+                        _selectedOrderInList.IsSelected = false;
+
                     _selectedOrderInList = value;
+
+                    // Устанавливаем выделение на новый элемент
+                    if (_selectedOrderInList != null)
+                        _selectedOrderInList.IsSelected = true;
+
                     OnPropertyChanged();
                     LoadOrderDetailsAsync(value?.OrderId);
                 }
@@ -121,6 +134,8 @@ namespace ServiceCenterApp.ViewModels
             FilteredOrders = new ObservableCollection<OrderListItemViewModel>();
             StatusFilters = new ObservableCollection<StatusFilterViewModel>();
             UsedSpareParts = new ObservableCollection<OrderSparePart>();
+
+            SelectOrderCommand = new RelayCommand<OrderListItemViewModel>(vm => SelectedOrderInList = vm);
 
             InitializeFilters();
         }

@@ -17,6 +17,7 @@
                 <ResourceDictionary Source="/Styles/TextBlock.xaml"/>
                 <ResourceDictionary Source="/Styles/Border.xaml"/>
                 <ResourceDictionary Source="/Styles/ComboBox.xaml"/>
+                <ResourceDictionary Source="/Styles/GridSplitter.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
             <FontFamily x:Key="Roboto">./Fonts/#Roboto</FontFamily>
