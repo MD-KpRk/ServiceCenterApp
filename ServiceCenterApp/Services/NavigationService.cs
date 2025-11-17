@@ -106,7 +106,7 @@ namespace ServiceCenterApp.Services
             }
             if (_currentUserService.HasAllPermissions(PermissionEnum.Orders))
             {
-                NavigateTo<OrdersPageViewModel>();
+                NavigateTo<OrdersViewModel>();
                 return;
             }
 

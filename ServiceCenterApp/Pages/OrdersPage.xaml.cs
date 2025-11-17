@@ -6,9 +6,9 @@ namespace ServiceCenterApp.Pages
 {
     public partial class OrdersPage : Page
     {
-        private OrdersPageViewModel? ViewModel => DataContext as OrdersPageViewModel;
+        private OrdersViewModel? ViewModel => DataContext as OrdersViewModel;
 
-        public OrdersPage(OrdersPageViewModel viewModel)
+        public OrdersPage(OrdersViewModel viewModel)
         {
             InitializeComponent();
             DataContext = viewModel;
@@ -19,7 +19,7 @@ namespace ServiceCenterApp.Pages
         {
             if (ViewModel != null)
             {
-                await ViewModel.LoadOrdersAsync();
+                await ViewModel.LoadInitialDataAsync();
             }
         }
     }

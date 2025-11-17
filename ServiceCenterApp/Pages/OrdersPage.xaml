@@ -6,67 +6,232 @@
       xmlns:local="clr-namespace:ServiceCenterApp.Pages"
       xmlns:controls="clr-namespace:ServiceCenterApp.Controls"
       mc:Ignorable="d" 
-      d:DesignHeight="800" d:DesignWidth="1200"
+      d:DesignHeight="900" d:DesignWidth="1600"
       Title="OrdersPage">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <!-- Заголовок -->
-            <RowDefinition Height="Auto"/>
-            <!-- Панель с фильтрами и поиском -->
-            <RowDefinition Height="*"/>
-            <!-- Список заказов -->
-        </Grid.RowDefinitions>
+    <Page.Resources>
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd" SnapsToDevicePixels="true">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect ShadowDepth="0" BlurRadius="15" Color="{StaticResource PrimaryColor}" Opacity="0.8"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
 
-        <!-- Заголовок страницы -->
-        <TextBlock Text="Все заявки" Grid.Row="0" FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,0,0,20"/>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="480" MinWidth="400"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Панель управления -->
-        <Border Grid.Row="1" Background="White" CornerRadius="5" Padding="10" Margin="0,0,0,10">
-            <StackPanel>
-                <!-- Фильтры по статусам -->
-                <TextBlock Text="Фильтр по статусам:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                <ItemsControl ItemsSource="{Binding StatusFilters}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
+        <!-- ЛЕВАЯ КОЛОНКА: СПИСОК ЗАКАЗОВ -->
+        <Border Grid.Column="0" Background="{StaticResource LightBackgroundBrush}" Padding="10">
+            <DockPanel>
+                <Border DockPanel.Dock="Top" Background="White" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="Фильтр по статусам:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <ItemsControl ItemsSource="{Binding StatusFilters}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding StatusName}" IsChecked="{Binding IsChecked}" Margin="0,0,15,5" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Separator Margin="0,10"/>
+                        <DockPanel>
+                            <Button Content="+ Новый заказ" DockPanel.Dock="Right" VerticalAlignment="Center" Style="{StaticResource AccentButtonStyle}"/>
+                            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" Style="{StaticResource EditableTextBoxStyle}"/>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+                <ListBox ItemsSource="{Binding FilteredOrders}"
+                         SelectedItem="{Binding SelectedOrderInList, Mode=TwoWay}"
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <CheckBox Content="{Binding StatusName}" 
-                                      IsChecked="{Binding IsChecked}" 
-                                      Margin="0,0,15,5" 
-                                      VerticalAlignment="Center"/>
+                            <controls:OrderCard/>
                         </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <Separator Margin="0,10"/>
-
-                <!-- Поиск и кнопка "Новый заказ" -->
-                <DockPanel>
-                    <Button Content="+ Новый заказ" DockPanel.Dock="Right" VerticalAlignment="Center" Style="{StaticResource AccentButtonStyle}"/>
-                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"  Width="300"
-                             Margin="0,0,10,0"/>
-                </DockPanel>
-            </StackPanel>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
         </Border>
 
-        <!-- Список заказов -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding FilteredOrders}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <controls:OrderCard/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="Transparent"/>
+
+        <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ ЗАКАЗА -->
+        <ContentControl Grid.Column="2" Content="{Binding SelectedOrderDetails}">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedOrderDetails}" Value="{x:Null}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <Grid Background="#F0F2F5">
+                                            <TextBlock Text="Выберите заказ из списка для просмотра деталей" FontSize="16" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+
+            <ContentControl.ContentTemplate>
+                <DataTemplate>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <Grid Margin="20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <DockPanel Grid.Row="0" Margin="0,0,0,20">
+                                <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" VerticalAlignment="Center">
+                                    <Run Text="Заявка №"/>
+                                    <Run Text="{Binding OrderId}"/>
+                                </TextBlock>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="Сохранить" Style="{StaticResource AccentButtonStyle}"/>
+                                </StackPanel>
+                            </DockPanel>
+
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.2*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="1.2*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Центральная колонка -->
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="КЛЮЧЕВАЯ ИНФОРМАЦИЯ" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <Border Style="{StaticResource InfoBorderStyle}">
+                                        <StackPanel>
+                                            <DockPanel Margin="0,0,0,5">
+                                                <TextBlock Text="Статус заказа:" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
+                                                <ComboBox ItemsSource="{Binding DataContext.AllOrderStatuses, RelativeSource={RelativeSource AncestorType=Page}}" 
+                                                          SelectedItem="{Binding DataContext.SelectedOrderStatus, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
+                                                          Style="{StaticResource PageComboBoxStyle}" ItemContainerStyle="{StaticResource ColorStatusComboBoxItemContainerStyle}"
+                                                          ItemTemplate="{StaticResource ColorStatusComboBoxItemTemplate}"/>
+                                            </DockPanel>
+                                            <DockPanel Margin="0,0,0,5">
+                                                <TextBlock Text="Исполнитель (мастер):" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
+                                                <ComboBox ItemsSource="{Binding DataContext.AllEmployees, RelativeSource={RelativeSource AncestorType=Page}}" 
+                                                          SelectedItem="{Binding DataContext.SelectedAcceptorEmployee, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
+                                                          Style="{StaticResource PageComboBoxStyle}" ItemTemplate="{StaticResource EmployeeComboBoxItemTemplate}"/>
+                                            </DockPanel>
+                                            <DockPanel Margin="0,0,0,5">
+                                                <TextBlock Text="Приоритет:" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
+                                                <ComboBox ItemsSource="{Binding DataContext.AllPriorities, RelativeSource={RelativeSource AncestorType=Page}}" 
+                                                          SelectedItem="{Binding DataContext.SelectedPriority, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
+                                                          Style="{StaticResource PageComboBoxStyle}" ItemTemplate="{StaticResource PriorityComboBoxItemTemplate}"/>
+                                            </DockPanel>
+                                            <Separator Margin="0,10"/>
+                                            <DockPanel>
+                                                <TextBlock Text="Создал заказ:" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
+                                                <TextBlock VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold">
+                                                    <Run Text="{Binding CreatorEmployee.SurName}"/>
+                                                    <Run Text="{Binding CreatorEmployee.FirstName, StringFormat=' {0}.'}"/>
+                                                </TextBlock>
+                                            </DockPanel>
+                                        </StackPanel>
+                                    </Border>
+                                    <TextBlock Text="ИСПОЛЬЗУЕМЫЕ ЗАПЧАСТИ" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <Border Style="{StaticResource InfoBorderStyle}">
+                                        <StackPanel>
+                                            <DataGrid ItemsSource="{Binding DataContext.UsedSpareParts, RelativeSource={RelativeSource AncestorType=Page}}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Название" Binding="{Binding SparePart.Name}" Width="*"/>
+                                                    <DataGridTextColumn Header="Артикул" Binding="{Binding SparePart.PartNumber}" Width="Auto"/>
+                                                    <DataGridTextColumn Header="Кол-во" Binding="{Binding Quantity}" Width="Auto"/>
+                                                    <DataGridTextColumn Header="Цена" Binding="{Binding SparePart.Price, StringFormat={}{0:C0}}" Width="Auto"/>
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                            <Button Content="+ Добавить запчасть" Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Right" Margin="0,10,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                                <!-- Левая и правая колонки -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="ИНФОРМАЦИЯ О КЛИЕНТЕ" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <Border Style="{StaticResource InfoBorderStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Фамилия"/>
+                                            <TextBox Text="{Binding Client.SurName}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Имя"/>
+                                            <TextBox Text="{Binding Client.FirstName}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Отчество"/>
+                                            <TextBox Text="{Binding Client.Patronymic}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Телефон"/>
+                                            <TextBox Text="{Binding Client.PhoneNumber}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Email"/>
+                                            <TextBox Text="{Binding Client.Email}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Комментарий клиента"/>
+                                            <TextBox Text="{Binding Client.Comment}" TextWrapping="Wrap" MinHeight="60" Style="{StaticResource EditableTextBoxStyle}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock Text="ИНФОРМАЦИЯ ОБ УСТРОЙСТВЕ" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <Border Style="{StaticResource InfoBorderStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Тип устройства"/>
+                                            <TextBox Text="{Binding Device.DeviceType}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Бренд"/>
+                                            <TextBox Text="{Binding Device.Brand}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Модель"/>
+                                            <TextBox Text="{Binding Device.Model}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Серийный номер"/>
+                                            <TextBox Text="{Binding Device.SerialNumber}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <TextBlock Text="ДЕТАЛИ ЗАКАЗА" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <Border Style="{StaticResource InfoBorderStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Описание неисправности"/>
+                                            <TextBox Text="{Binding ProblemDescription}" TextWrapping="Wrap" MinHeight="80" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Комментарий мастера"/>
+                                            <TextBox Text="{Binding Comment}" TextWrapping="Wrap" MinHeight="60" Style="{StaticResource EditableTextBoxStyle}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </ScrollViewer>
+                </DataTemplate>
+            </ContentControl.ContentTemplate>
+        </ContentControl>
     </Grid>
 </Page>
