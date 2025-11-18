@@ -45,7 +45,6 @@ namespace ServiceCenterApp.ViewModels
             {
                 _selectedOrderDetails = value;
                 OnPropertyChanged();
-                // Также обновляем коллекцию запчастей при смене заказа
                 UpdateUsedSpareParts();
             }
         }
@@ -96,7 +95,14 @@ namespace ServiceCenterApp.ViewModels
             set { _selectedPriority = value; OnPropertyChanged(); if (SelectedOrderDetails != null && value != null) SelectedOrderDetails.PriorityId = value.PriorityId; }
         }
 
-        public ObservableCollection<OrderSparePart> UsedSpareParts { get; }
+        public ObservableCollection<UsedSparePartViewModel> UsedSpareParts { get; }
+
+        private decimal _sparePartsTotalSum;
+        public decimal SparePartsTotalSum
+        {
+            get => _sparePartsTotalSum;
+            set { _sparePartsTotalSum = value; OnPropertyChanged(); }
+        }
 
         #endregion
 
@@ -133,7 +139,7 @@ namespace ServiceCenterApp.ViewModels
             _navigationService = navigationService;
             FilteredOrders = new ObservableCollection<OrderListItemViewModel>();
             StatusFilters = new ObservableCollection<StatusFilterViewModel>();
-            UsedSpareParts = new ObservableCollection<OrderSparePart>();
+            UsedSpareParts = new ObservableCollection<UsedSparePartViewModel>();
 
             SelectOrderCommand = new RelayCommand<OrderListItemViewModel>(vm => SelectedOrderInList = vm);
 
@@ -153,6 +159,26 @@ namespace ServiceCenterApp.ViewModels
         {
             await LoadComboBoxSourcesAsync();
             await LoadAllOrdersListAsync();
+        }
+
+        private void CalculateSparePartsTotalSum()
+        {
+            SparePartsTotalSum = UsedSpareParts.Sum(p => p.TotalSum);
+        }
+
+        private void UpdateUsedSpareParts()
+        {
+            UsedSpareParts.Clear();
+            if (SelectedOrderDetails?.OrderSpareParts != null)
+            {
+                foreach (var part in SelectedOrderDetails.OrderSpareParts)
+                {
+                    // Создаем ViewModel для каждой запчасти и передаем callback
+                    UsedSpareParts.Add(new UsedSparePartViewModel(part, CalculateSparePartsTotalSum));
+                }
+            }
+            // Считаем сумму после заполнения
+            CalculateSparePartsTotalSum();
         }
 
         private async Task LoadAllOrdersListAsync()
@@ -202,18 +228,6 @@ namespace ServiceCenterApp.ViewModels
                 SelectedOrderStatus = AllOrderStatuses.FirstOrDefault(s => s.StatusId == SelectedOrderDetails.StatusId);
                 SelectedAcceptorEmployee = AllEmployees.FirstOrDefault(e => e.EmployeeId == SelectedOrderDetails.AcceptorEmployeeId);
                 SelectedPriority = AllPriorities.FirstOrDefault(p => p.PriorityId == SelectedOrderDetails.PriorityId);
-            }
-        }
-
-        private void UpdateUsedSpareParts()
-        {
-            UsedSpareParts.Clear();
-            if (SelectedOrderDetails?.OrderSpareParts != null)
-            {
-                foreach (var part in SelectedOrderDetails.OrderSpareParts)
-                {
-                    UsedSpareParts.Add(part);
-                }
             }
         }
 
