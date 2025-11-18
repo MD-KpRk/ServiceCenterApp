@@ -48,7 +48,7 @@
                 </ColumnDefinition.Style>
             </ColumnDefinition>
             <ColumnDefinition Width="5"/>
-            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- ЛЕВАЯ КОЛОНКА: СПИСОК ЗАКАЗОВ -->
@@ -79,7 +79,7 @@
                 </Border>
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding FilteredOrders}">
+                    <ItemsControl ItemsSource="{Binding FilteredOrders}" HorizontalAlignment="Center">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel Orientation="Horizontal"/>
@@ -135,25 +135,67 @@
             <ContentControl.ContentTemplate>
                 <DataTemplate>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <Grid Margin="20">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-
-                            <DockPanel Grid.Row="0" Margin="0,0,0,20">
-                                <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" VerticalAlignment="Center">
-                        <Run Text="Заявка №"/>
-                        <Run Text="{Binding OrderId}"/>
+                        <StackPanel Margin="20" >
+                            <DockPanel Margin="0,0,0,20">
+                                <TextBlock FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" VerticalAlignment="Center" DockPanel.Dock="Left">
+                                    <Run Text="Заявка №"/>
+                                    <Run Text="{Binding OrderId}"/>
                                 </TextBlock>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right" MaxHeight="40">
                                     <Button Content="Сохранить" Style="{StaticResource AccentButtonStyle}"/>
                                 </StackPanel>
                             </DockPanel>
 
-                            <WrapPanel Grid.Row="1" Orientation="Horizontal">
+                            <WrapPanel x:Name="RightWrapPanel" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
 
-                                <!-- БЛОК 1: КЛЮЧЕВАЯ ИНФОРМАЦИЯ -->
+                                <!-- БЛОК 1: УСТРОЙСТВО И ДЕТАЛИ -->
+                                <StackPanel MinWidth="350" Margin="0,0,20,20">
+                                    <TextBlock Text="ИНФОРМАЦИЯ ОБ УСТРОЙСТВЕ" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <Border Style="{StaticResource InfoBorderStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Тип устройства"/>
+                                            <TextBox Text="{Binding Device.DeviceType}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Бренд"/>
+                                            <TextBox Text="{Binding Device.Brand}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Модель"/>
+                                            <TextBox Text="{Binding Device.Model}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Серийный номер"/>
+                                            <TextBox Text="{Binding Device.SerialNumber}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <TextBlock Text="ДЕТАЛИ ЗАКАЗА" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <Border Style="{StaticResource InfoBorderStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Описание неисправности"/>
+                                            <TextBox Text="{Binding ProblemDescription}" TextWrapping="Wrap" MinHeight="80" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Комментарий мастера"/>
+                                            <TextBox Text="{Binding Comment}" TextWrapping="Wrap" MinHeight="60" Style="{StaticResource EditableTextBoxStyle}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- БЛОК 2: ИНФОРМАЦИЯ О КЛИЕНТЕ -->
+                                <StackPanel MinWidth="350" Margin="0,0,20,20">
+                                    <TextBlock Text="ИНФОРМАЦИЯ О КЛИЕНТЕ" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <Border Style="{StaticResource InfoBorderStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Фамилия"/>
+                                            <TextBox Text="{Binding Client.SurName}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Имя"/>
+                                            <TextBox Text="{Binding Client.FirstName}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Отчество"/>
+                                            <TextBox Text="{Binding Client.Patronymic}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Телефон"/>
+                                            <TextBox Text="{Binding Client.PhoneNumber}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Email"/>
+                                            <TextBox Text="{Binding Client.Email}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                            <TextBlock Text="Комментарий клиента"/>
+                                            <TextBox Text="{Binding Client.Comment}" TextWrapping="Wrap" MinHeight="60" Style="{StaticResource EditableTextBoxStyle}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- БЛОК 3: КЛЮЧЕВАЯ ИНФОРМАЦИЯ -->
                                 <StackPanel MinWidth="400" Margin="0,0,20,20">
                                     <TextBlock Text="КЛЮЧЕВАЯ ИНФОРМАЦИЯ" Style="{StaticResource SectionHeaderStyle}"/>
                                     <Border Style="{StaticResource InfoBorderStyle}">
@@ -189,73 +231,26 @@
                                     </Border>
                                 </StackPanel>
 
-                                <!-- БЛОК 2: ИНФОРМАЦИЯ О КЛИЕНТЕ -->
-                                <StackPanel MinWidth="350" Margin="0,0,20,20">
-                                    <TextBlock Text="ИНФОРМАЦИЯ О КЛИЕНТЕ" Style="{StaticResource SectionHeaderStyle}"/>
-                                    <Border Style="{StaticResource InfoBorderStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Фамилия"/>
-                                            <TextBox Text="{Binding Client.SurName}" Style="{StaticResource EditableTextBoxStyle}"/>
-                                            <TextBlock Text="Имя"/>
-                                            <TextBox Text="{Binding Client.FirstName}" Style="{StaticResource EditableTextBoxStyle}"/>
-                                            <TextBlock Text="Отчество"/>
-                                            <TextBox Text="{Binding Client.Patronymic}" Style="{StaticResource EditableTextBoxStyle}"/>
-                                            <TextBlock Text="Телефон"/>
-                                            <TextBox Text="{Binding Client.PhoneNumber}" Style="{StaticResource EditableTextBoxStyle}"/>
-                                            <TextBlock Text="Email"/>
-                                            <TextBox Text="{Binding Client.Email}" Style="{StaticResource EditableTextBoxStyle}"/>
-                                            <TextBlock Text="Комментарий клиента"/>
-                                            <TextBox Text="{Binding Client.Comment}" TextWrapping="Wrap" MinHeight="60" Style="{StaticResource EditableTextBoxStyle}"/>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-
-                                <!-- БЛОК 3: УСТРОЙСТВО И ДЕТАЛИ -->
-                                <StackPanel MinWidth="350" Margin="0,0,20,20">
-                                    <TextBlock Text="ИНФОРМАЦИЯ ОБ УСТРОЙСТВЕ" Style="{StaticResource SectionHeaderStyle}"/>
-                                    <Border Style="{StaticResource InfoBorderStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Тип устройства"/>
-                                            <TextBox Text="{Binding Device.DeviceType}" Style="{StaticResource EditableTextBoxStyle}"/>
-                                            <TextBlock Text="Бренд"/>
-                                            <TextBox Text="{Binding Device.Brand}" Style="{StaticResource EditableTextBoxStyle}"/>
-                                            <TextBlock Text="Модель"/>
-                                            <TextBox Text="{Binding Device.Model}" Style="{StaticResource EditableTextBoxStyle}"/>
-                                            <TextBlock Text="Серийный номер"/>
-                                            <TextBox Text="{Binding Device.SerialNumber}" Style="{StaticResource EditableTextBoxStyle}"/>
-                                        </StackPanel>
-                                    </Border>
-                                    <TextBlock Text="ДЕТАЛИ ЗАКАЗА" Style="{StaticResource SectionHeaderStyle}"/>
-                                    <Border Style="{StaticResource InfoBorderStyle}">
-                                        <StackPanel>
-                                            <TextBlock Text="Описание неисправности"/>
-                                            <TextBox Text="{Binding ProblemDescription}" TextWrapping="Wrap" MinHeight="80" Style="{StaticResource EditableTextBoxStyle}"/>
-                                            <TextBlock Text="Комментарий мастера"/>
-                                            <TextBox Text="{Binding Comment}" TextWrapping="Wrap" MinHeight="60" Style="{StaticResource EditableTextBoxStyle}"/>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-
-                                <!-- БЛОК 4: ИСПОЛЬЗУЕМЫЕ ЗАПЧАСТИ -->
-                                <StackPanel MinWidth="400" Margin="0,0,20,20">
-                                    <TextBlock Text="ИСПОЛЬЗУЕМЫЕ ЗАПЧАСТИ" Style="{StaticResource SectionHeaderStyle}"/>
-                                    <Border Style="{StaticResource InfoBorderStyle}">
-                                        <StackPanel>
-                                            <DataGrid ItemsSource="{Binding DataContext.UsedSpareParts, RelativeSource={RelativeSource AncestorType=Page}}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True">
-                                                <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="Название" Binding="{Binding SparePart.Name}" Width="*"/>
-                                                    <DataGridTextColumn Header="Артикул" Binding="{Binding SparePart.PartNumber}" Width="Auto"/>
-                                                    <DataGridTextColumn Header="Кол-во" Binding="{Binding Quantity}" Width="Auto"/>
-                                                    <DataGridTextColumn Header="Цена" Binding="{Binding SparePart.Price, StringFormat={}{0:C0}}" Width="Auto"/>
-                                                </DataGrid.Columns>
-                                            </DataGrid>
-                                            <Button Content="+ Добавить запчасть" Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Right" Margin="0,10,0,0"/>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-
                             </WrapPanel>
-                        </Grid>
+
+                            <!-- БЛОК 4: ИСПОЛЬЗУЕМЫЕ ЗАПЧАСТИ -->
+                            <StackPanel Margin="0,0,20,20" Width="{Binding ElementName=RightWrapPanel, Path=ActualWidth}"> 
+                                <TextBlock Text="ИСПОЛЬЗУЕМЫЕ ЗАПЧАСТИ" Style="{StaticResource SectionHeaderStyle}"/>
+                                <Border Style="{StaticResource InfoBorderStyle}">
+                                    <StackPanel>
+                                        <DataGrid ItemsSource="{Binding DataContext.UsedSpareParts, RelativeSource={RelativeSource AncestorType=Page}}" HorizontalScrollBarVisibility="Disabled" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Название" Binding="{Binding SparePart.Name}" Width="*"/>
+                                                <DataGridTextColumn Header="Артикул" Binding="{Binding SparePart.PartNumber}" Width="Auto"/>
+                                                <DataGridTextColumn Header="Кол-во" Binding="{Binding Quantity}" Width="Auto"/>
+                                                <DataGridTextColumn Header="Цена" Binding="{Binding SparePart.Price, StringFormat={}{0:C0}}" Width="Auto"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <Button Content="+ Добавить запчасть" Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Right" Margin="0,10,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
                     </ScrollViewer>
                 </DataTemplate>
             </ContentControl.ContentTemplate>
