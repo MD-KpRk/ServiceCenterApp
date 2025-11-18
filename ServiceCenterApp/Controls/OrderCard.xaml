@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:ServiceCenterApp.ViewModels"
              mc:Ignorable="d" 
+             Language="be-BY"
              d:DesignHeight="130" d:DesignWidth="450">
 
     <UserControl.Resources>

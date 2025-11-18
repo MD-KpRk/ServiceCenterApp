@@ -1,0 +1,48 @@
+﻿<Window x:Class="ServiceCenterApp.Views.AddSparePartWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ServiceCenterApp.Views"
+        mc:Ignorable="d"
+        Language="be-BY"
+        Title="Добавить запчасть в заказ" Height="600" Width="800"
+        WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow"
+        Loaded="Window_Loaded">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Поиск -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SearchTextBoxStyle}"/>
+        </DockPanel>
+
+        <!-- Список запчастей -->
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding SparePartsView}"
+                  SelectedItem="{Binding SelectedSparePart}"
+                  IsReadOnly="True"
+                  Style="{StaticResource ModernDataGridStyle}"
+                  ColumnHeaderStyle="{StaticResource ModernDataGridColumnHeaderStyle}"
+                  RowStyle="{StaticResource ModernDataGridRowStyle}"
+                  CellStyle="{StaticResource ModernDataGridCellStyle}">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="4*"/>
+                <DataGridTextColumn Header="Артикул" Binding="{Binding PartNumber}" Width="2*"/>
+                <DataGridTextColumn Header="Цена за шт." Binding="{Binding Price, StringFormat={}{0:C0}}" Width="1*"/>
+                <DataGridTextColumn Header="На складе     " Binding="{Binding StockQuantity}" Width="1*" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+            <Button Content="Отмена" IsCancel="True" Style="{StaticResource SecondaryButtonStyle}" MinWidth="100" Margin="0,0,10,0"/>
+            <Button Content="Добавить" IsDefault="True" Style="{StaticResource AccentButtonStyle}" MinWidth="100" Click="AddButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

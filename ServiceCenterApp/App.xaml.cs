@@ -6,6 +6,7 @@ using ServiceCenterApp.Pages;
 using ServiceCenterApp.Services;
 using ServiceCenterApp.Services.Interfaces;
 using ServiceCenterApp.ViewModels;
+using ServiceCenterApp.Views;
 using System;
 using System.Configuration;
 using System.Data;
@@ -56,6 +57,7 @@ namespace ServiceCenterApp
             services.AddTransient<AuthPageViewModel>();
             services.AddTransient<MainAdminPageViewModel>();
             services.AddTransient<OrdersViewModel>();
+            services.AddTransient<AddSparePartViewModel>();
 
             // --- VIEWS ---
             services.AddTransient<AuthPage>();          // Page
@@ -63,6 +65,7 @@ namespace ServiceCenterApp
             services.AddSingleton<MainWindow>();        // Window
             services.AddSingleton<MainAdminPage>();     // Page 
             services.AddSingleton<OrdersPage>();        // Page 
+            services.AddTransient<AddSparePartWindow>();// Window
 
 
             _serviceProvider = services.BuildServiceProvider();
@@ -86,7 +89,7 @@ namespace ServiceCenterApp
             if (_serviceProvider == null) throw new ArgumentNullException();
 
             // --- УСТАНОВКА КУЛЬТУРЫ ДЛЯ ОТОБРАЖЕНИЯ ВАЛЮТЫ ---
-            var culture = new CultureInfo("be-BY");
+            CultureInfo culture = new CultureInfo("be-BY");
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
 

@@ -6,6 +6,7 @@ using ServiceCenterApp.Models;
 using ServiceCenterApp.Models.Associations;
 using ServiceCenterApp.Models.Lookup;
 using ServiceCenterApp.Services.Interfaces;
+using ServiceCenterApp.Views;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace ServiceCenterApp.ViewModels
     {
         private readonly ApplicationDbContext _context;
         private readonly INavigationService _navigationService;
+        private readonly IServiceProvider _serviceProvider;
 
         #region Свойства для левой панели (Список)
 
@@ -25,6 +27,8 @@ namespace ServiceCenterApp.ViewModels
         public ObservableCollection<OrderListItemViewModel> FilteredOrders { get; }
         public ObservableCollection<StatusFilterViewModel> StatusFilters { get; }
         public ICommand SelectOrderCommand { get; }
+
+        public ICommand AddSparePartCommand { get; }
 
         private string _searchText;
         public string SearchText
@@ -133,7 +137,7 @@ namespace ServiceCenterApp.ViewModels
         }
         #endregion
 
-        public OrdersViewModel(ApplicationDbContext context, INavigationService navigationService)
+        public OrdersViewModel(ApplicationDbContext context, INavigationService navigationService, IServiceProvider serviceProvider)
         {
             _context = context;
             _navigationService = navigationService;
@@ -141,9 +145,58 @@ namespace ServiceCenterApp.ViewModels
             StatusFilters = new ObservableCollection<StatusFilterViewModel>();
             UsedSpareParts = new ObservableCollection<UsedSparePartViewModel>();
 
+            _serviceProvider = serviceProvider;
+
             SelectOrderCommand = new RelayCommand<OrderListItemViewModel>(vm => SelectedOrderInList = vm);
+            AddSparePartCommand = new RelayCommand(ExecuteAddSparePart, CanExecuteAddSparePart);
 
             InitializeFilters();
+        }
+
+        private bool CanExecuteAddSparePart()
+        {
+            // Кнопку "Добавить запчасть" можно нажать только если выбран какой-то заказ
+            return SelectedOrderDetails != null;
+        }
+
+        private void ExecuteAddSparePart()
+        {
+            var addSparePartWindow = (AddSparePartWindow)_serviceProvider.GetService(typeof(AddSparePartWindow));
+
+            if (addSparePartWindow.ShowDialog() == true)
+            {
+                // Если пользователь нажал "Добавить"
+                var selectedPart = addSparePartWindow.ViewModel.SelectedSparePart;
+
+                // Проверяем, нет ли такой запчасти уже в заказе
+                var existingPartVM = UsedSpareParts.FirstOrDefault(p => p.PartNumber == selectedPart.PartNumber);
+                if (existingPartVM != null)
+                {
+                    // Если есть - просто увеличиваем количество
+                    existingPartVM.Quantity++;
+                }
+                else
+                {
+                    // Если нет - создаем новую запись
+                    var newOrderSparePart = new OrderSparePart
+                    {
+                        Order = SelectedOrderDetails,
+                        OrderId = SelectedOrderDetails.OrderId,
+                        SparePart = selectedPart,
+                        PartId = selectedPart.PartId,
+                        Quantity = 1
+                    };
+
+                    // Добавляем в коллекцию модели (для сохранения в БД)
+                    SelectedOrderDetails.OrderSpareParts.Add(newOrderSparePart);
+
+                    // Создаем и добавляем ViewModel в отображаемую коллекцию
+                    UsedSpareParts.Add(new UsedSparePartViewModel(newOrderSparePart, CalculateSparePartsTotalSum));
+                }
+
+                // Пересчитываем общую сумму
+                CalculateSparePartsTotalSum();
+            }
         }
 
         private void InitializeFilters()
