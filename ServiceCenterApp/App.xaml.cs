@@ -42,7 +42,7 @@ namespace ServiceCenterApp
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            });
+            }, ServiceLifetime.Transient);
 
             // --- SERVICE REGISTRATION ---
             services.AddSingleton<IAuthenticationService, AuthenticationService>();

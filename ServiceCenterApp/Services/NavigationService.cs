@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using ServiceCenterApp.Attributes;
 using ServiceCenterApp.Data;
 using ServiceCenterApp.Data.Configurations;
@@ -11,29 +10,22 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Navigation;
 
 namespace ServiceCenterApp.Services
 {
     public class NavigationService : INavigationService
     {
-        // ViewModel -> View
         private readonly Dictionary<Type, Type> _viewModelToViewMapping = new();
-
         private readonly IServiceProvider _serviceProvider;
         private readonly ApplicationDbContext? _dbcontext;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IDatabaseHealthService _databaseHealthService;
         private Frame? _mainFrame;
 
         public NavigationService(
-            ApplicationDbContext? dbcontext, 
+            ApplicationDbContext? dbcontext,
             IServiceProvider serviceProvider,
-            IDatabaseHealthService databaseHealthService,
-            ICurrentUserService currentUserService
-            )
+            ICurrentUserService currentUserService)
         {
-            _databaseHealthService = databaseHealthService;
             _serviceProvider = serviceProvider;
             _currentUserService = currentUserService;
             _dbcontext = dbcontext;
@@ -46,12 +38,15 @@ namespace ServiceCenterApp.Services
 
         public void GoBack()
         {
-            if (_mainFrame == null) throw new ArgumentNullException(nameof(_mainFrame));
-
-            if (_mainFrame.CanGoBack)
+            if (_mainFrame != null && _mainFrame.CanGoBack)
             {
                 _mainFrame.GoBack();
             }
+        }
+
+        public void Configure<TViewModel, TPage>() where TViewModel : BaseViewModel where TPage : Page
+        {
+            _viewModelToViewMapping[typeof(TViewModel)] = typeof(TPage);
         }
 
         public void NavigateTo<TViewModel>() where TViewModel : BaseViewModel
@@ -63,6 +58,15 @@ namespace ServiceCenterApp.Services
         {
             if (_mainFrame == null)
                 throw new InvalidOperationException("NavigationService is not initialized.");
+
+            if (_mainFrame.Content is Page currentPage && currentPage.DataContext is TViewModel currentViewModel)
+            {
+                if (currentViewModel is IRefreshable refreshableViewModel)
+                {
+                    refreshableViewModel.RefreshAsync();
+                    return;
+                }
+            }
 
             if (!_viewModelToViewMapping.ContainsKey(typeof(TViewModel)))
                 throw new KeyNotFoundException($"No page configured for ViewModel {typeof(TViewModel).Name}");
@@ -109,7 +113,6 @@ namespace ServiceCenterApp.Services
                 NavigateTo<OrdersViewModel>();
                 return;
             }
-
         }
 
         public void StartNavigation()
@@ -117,7 +120,7 @@ namespace ServiceCenterApp.Services
             if (_dbcontext == null)
                 throw new ArgumentNullException(nameof(_dbcontext));
 
-            if(_dbcontext.Employees.Where(e => e.RoleId == ((int)RoleEnum.Administrator)).Count() == 0)
+            if (_dbcontext.Employees.Where(e => e.RoleId == ((int)RoleEnum.Administrator)).Count() == 0)
             {
                 NavigateTo<InstallationPageViewModel>();
             }
@@ -125,11 +128,6 @@ namespace ServiceCenterApp.Services
             {
                 NavigateTo<AuthPageViewModel>();
             }
-        }
-
-        public void Configure<TViewModel, TView>() where TView : Page
-        {
-            _viewModelToViewMapping.Add(typeof(TViewModel), typeof(TView));
         }
     }
 }

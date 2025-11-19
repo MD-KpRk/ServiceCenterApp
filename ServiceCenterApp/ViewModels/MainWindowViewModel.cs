@@ -2,6 +2,7 @@
 using ServiceCenterApp.Services.Interfaces;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace ServiceCenterApp.ViewModels
 {
@@ -15,12 +16,16 @@ namespace ServiceCenterApp.ViewModels
         private readonly INavigationService _navigationService;
         private readonly ICurrentUserService _currentUserService;
 
+        public ICommand NavigateCommand { get; }
+
         public MainWindowViewModel(INavigationService navigationService, ICurrentUserService currentUserService)
         {
             _navigationService = navigationService;
             _currentUserService = currentUserService;
 
             _currentUserService.AuthenticationStateChanged += OnAuthenticationStateChanged;
+
+            NavigateCommand = new RelayCommand<string>(Navigate);
 
             UpdateMenuAndPermissions();
         }
@@ -42,6 +47,22 @@ namespace ServiceCenterApp.ViewModels
             {
                 _isMenuExtended = value;
                 OnPropertyChanged(nameof(IsMenuExtended));
+            }
+        }
+
+        private void Navigate(string destination)
+        {
+            switch (destination)
+            {
+                case "Dashboard":
+                    _navigationService.NavigateTo<MainAdminPageViewModel>();
+                    break;
+                case "Orders":
+                    _navigationService.NavigateTo<OrdersViewModel>();
+                    break;
+
+                    //TODO:
+                    // Сюда можно добавить другие кейсы: "Clients", "Employees" и т.д.
             }
         }
 

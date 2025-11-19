@@ -17,7 +17,7 @@ using System.Windows.Input;
 
 namespace ServiceCenterApp.ViewModels
 {
-    public class OrdersViewModel : BaseViewModel
+    public class OrdersViewModel : BaseViewModel, IRefreshable
     {
         private readonly ApplicationDbContext _context;
         private readonly INavigationService _navigationService;
@@ -217,6 +217,21 @@ namespace ServiceCenterApp.ViewModels
                 MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
+        }
+
+        public async Task RefreshAsync()
+        {
+            if (_context.ChangeTracker.HasChanges())
+            {
+                _context.ChangeTracker.Clear();
+            }
+
+            SearchText = string.Empty;
+            if (_selectedOrderInList != null) _selectedOrderInList.IsSelected = false;
+            _selectedOrderInList = null;
+            OnPropertyChanged(nameof(SelectedOrderInList));
+            LoadOrderDetailsAsync(null);
+            await LoadInitialDataAsync();
         }
 
         private void InitializeFilters()

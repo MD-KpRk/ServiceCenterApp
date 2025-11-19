@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ServiceCenterApp.Data;
+using ServiceCenterApp.Services.Interfaces;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace ServiceCenterApp.ViewModels
         public int CompletedThisMonthCount { get; set; }
     }
 
-    public class MainAdminPageViewModel : BaseViewModel
+    public class MainAdminPageViewModel : BaseViewModel, IRefreshable
     {
         private readonly ApplicationDbContext _context;
 
@@ -92,6 +93,12 @@ namespace ServiceCenterApp.ViewModels
             EmployeePerformanceData = new ObservableCollection<EmployeePerformanceViewModel>();
         }
 
+        public async Task RefreshAsync()
+        {
+            _context.ChangeTracker.Clear();
+            await LoadDashboardDataAsync();
+        }
+
         public async Task LoadDashboardDataAsync()
         {
             try
@@ -99,14 +106,12 @@ namespace ServiceCenterApp.ViewModels
                 var today = DateTime.Today;
                 var startOfMonth = new DateTime(today.Year, today.Month, 1);
 
-                // --- ИНФОРМАЦИЯ О ЗАКАЗАХ ---
                 TotalOrdersCount = await _context.Orders.CountAsync();
                 NewOrdersCount = await _context.Orders.CountAsync(o => o.Status.StatusName == "Новая");
                 var inProgressStatuses = new[] { "В диагностике", "Ожидает запчасть", "В работе" };
                 InProgressOrdersCount = await _context.Orders.CountAsync(o => o.Status != null && inProgressStatuses.Contains(o.Status.StatusName));
                 ReadyForPickupCount = await _context.Orders.CountAsync(o => o.Status.StatusName == "Готов к выдаче");
 
-                // --- ИНФОРМАЦИЯ О ДЕНЬГАХ ---
                 TotalAmountDue = await _context.Payments
                     .Where(p => p.PaymentStatus.StatusName == "Ожидает оплаты" && p.Order.Status.StatusName == "Готов к выдаче")
                     .SumAsync(p => p.Amount);
@@ -123,10 +128,9 @@ namespace ServiceCenterApp.ViewModels
                     .Where(p => p.PaymentStatus.StatusName == "Оплачен")
                     .SumAsync(p => p.Amount);
 
-                // --- ИНФОРМАЦИЯ О СОТРУДНИКАХ ---
-                EmployeePerformanceData.Clear(); // Очищаем перед загрузкой новых данных
+                EmployeePerformanceData.Clear();
                 var employeeData = await _context.Employees
-                    .Where(e => e.AcceptedOrders.Any()) // Только сотрудники с заказами
+                    .Where(e => e.AcceptedOrders.Any())
                     .Include(e => e.Position)
                     .Include(e => e.AcceptedOrders)
                         .ThenInclude(o => o.Status)
@@ -137,7 +141,7 @@ namespace ServiceCenterApp.ViewModels
                         InProgressOrdersCount = e.AcceptedOrders.Count(o => o.Status != null && inProgressStatuses.Contains(o.Status.StatusName)),
                         CompletedThisMonthCount = e.AcceptedOrders.Count(o => o.Status.StatusName == "Выдан" && o.EndDate.HasValue && o.EndDate.Value >= startOfMonth)
                     })
-                    .OrderByDescending(e => e.InProgressOrdersCount) // Сортируем по занятости
+                    .OrderByDescending(e => e.InProgressOrdersCount)
                     .ToListAsync();
 
                 foreach (var emp in employeeData)

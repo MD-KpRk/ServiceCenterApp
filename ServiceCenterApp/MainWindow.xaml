@@ -61,8 +61,14 @@
                     <TextBlock Text="ServiceCRM" Foreground="{StaticResource WhiteTextBrush}" VerticalAlignment="Center" FontSize="20" Margin="10 0 0 0"/>
                 </DockPanel>
                 <Separator Margin="0 0 0 0" Foreground="{StaticResource LightBackgroundBrush}"/>
-                <Button Content="Краткая сводка" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource ChartsIcon}" Visibility="{Binding DashBoardVisibility}" />
-                <Button Content="Все заявки" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource OrdersIcon}" Visibility="{Binding OrdersVisibility}"/>
+                <Button Content="Краткая сводка" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource ChartsIcon}" 
+                        Visibility="{Binding DashBoardVisibility}" 
+                        Command="{Binding NavigateCommand}" 
+                        CommandParameter="Dashboard"/>
+                <Button Content="Все заявки" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource OrdersIcon}" 
+                        Visibility="{Binding OrdersVisibility}"
+                        Command="{Binding NavigateCommand}" 
+                        CommandParameter="Orders"/>
                 <Button Content="Клиенты" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource ClientsIcon}" Visibility="{Binding ClientsVisibility}"/>
                 <Button Content="Персонал" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource EmployeesIcon}" Visibility="{Binding EmployeesVisibility}"/>
                 <Button Content="Склад" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource StorageIcon}" Visibility="{Binding StorageVisibility}"/>
