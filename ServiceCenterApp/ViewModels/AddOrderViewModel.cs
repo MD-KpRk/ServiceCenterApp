@@ -1,16 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ServiceCenterApp.Data;
 using ServiceCenterApp.Data.Configurations;
-using ServiceCenterApp.Helpers;
 using ServiceCenterApp.Models;
 using ServiceCenterApp.Models.Lookup;
 using ServiceCenterApp.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions; // Для очистки номера
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media; // Для кистей (Colors)
 
 namespace ServiceCenterApp.ViewModels
 {
@@ -28,10 +29,21 @@ namespace ServiceCenterApp.ViewModels
             {
                 _clientPhoneNumber = value;
                 OnPropertyChanged();
-                // При изменении номера пробуем найти клиента
+                // Запускаем поиск при каждом изменении
                 TryFindClient(value);
             }
         }
+
+        // Статус поиска (для красивого отображения)
+        private string _searchStatusText = "Введите номер";
+        public string SearchStatusText { get => _searchStatusText; set { _searchStatusText = value; OnPropertyChanged(); } }
+
+        private Brush _searchStatusColor = new SolidColorBrush(Colors.Gray);
+        public Brush SearchStatusColor { get => _searchStatusColor; set { _searchStatusColor = value; OnPropertyChanged(); } }
+
+        private string _searchStatusIcon = "?"; // Символ для иконки
+        public string SearchStatusIcon { get => _searchStatusIcon; set { _searchStatusIcon = value; OnPropertyChanged(); } }
+
 
         private string _clientSurname;
         public string ClientSurname { get => _clientSurname; set { _clientSurname = value; OnPropertyChanged(); } }
@@ -67,14 +79,12 @@ namespace ServiceCenterApp.ViewModels
 
         public ICommand SaveCommand { get; }
 
-        // Флаг, что мы нашли существующего клиента (чтобы не создавать дубль)
         private Client _existingClient;
 
         public AddOrderViewModel(ApplicationDbContext context, ICurrentUserService currentUserService)
         {
             _context = context;
             _currentUserService = currentUserService;
-
             SaveCommand = new RelayCommand(ExecuteSave);
         }
 
@@ -91,31 +101,55 @@ namespace ServiceCenterApp.ViewModels
 
         private async void TryFindClient(string phoneNumber)
         {
-            if (string.IsNullOrWhiteSpace(phoneNumber) || phoneNumber.Length < 3)
+            if (string.IsNullOrWhiteSpace(phoneNumber) || phoneNumber.Length < 4)
             {
                 _existingClient = null;
+                SearchStatusText = "Введите номер";
+                SearchStatusColor = new SolidColorBrush(Colors.Gray);
+                SearchStatusIcon = "...";
+
+                ClearClientFields();
                 return;
             }
 
-            var client = await _context.Clients.FirstOrDefaultAsync(c => c.PhoneNumber == phoneNumber);
+            // 2. Ищем клиента
+            var client = await _context.Clients
+                .FirstOrDefaultAsync(c => c.PhoneNumber.Contains(phoneNumber));
 
             if (client != null)
             {
                 _existingClient = client;
+
                 ClientSurname = client.SurName;
                 ClientFirstName = client.FirstName;
                 ClientPatronymic = client.Patronymic;
                 ClientEmail = client.Email;
+
+                SearchStatusText = "Клиент найден";
+                SearchStatusColor = new SolidColorBrush(Colors.Green);
+                SearchStatusIcon = "✓";
             }
             else
             {
                 _existingClient = null;
+
+                SearchStatusText = "Новый клиент";
+                SearchStatusColor = new SolidColorBrush(Colors.DodgerBlue);
+                SearchStatusIcon = "+";
+                ClearClientFields();
             }
+        }
+
+        private void ClearClientFields()
+        {
+            ClientSurname = string.Empty;
+            ClientFirstName = string.Empty;
+            ClientPatronymic = string.Empty;
+            ClientEmail = string.Empty;
         }
 
         private async void ExecuteSave()
         {
-            // 1. Валидация
             if (string.IsNullOrWhiteSpace(ClientPhoneNumber) || string.IsNullOrWhiteSpace(ClientSurname) || string.IsNullOrWhiteSpace(ClientFirstName))
             {
                 MessageBox.Show("Заполните обязательные поля клиента (Телефон, Фамилия, Имя).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -123,7 +157,7 @@ namespace ServiceCenterApp.ViewModels
             }
             if (string.IsNullOrWhiteSpace(DeviceType) || string.IsNullOrWhiteSpace(DeviceBrand) || string.IsNullOrWhiteSpace(DeviceModel))
             {
-                MessageBox.Show("Заполните информацию об устройстве (Тип, Бренд, Модель).", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Заполните информацию об устройстве.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             if (string.IsNullOrWhiteSpace(ProblemDescription))
@@ -134,7 +168,6 @@ namespace ServiceCenterApp.ViewModels
 
             try
             {
-                // 2. Работа с КЛИЕНТОМ
                 Client clientToUse = _existingClient;
 
                 if (clientToUse == null)
@@ -158,7 +191,6 @@ namespace ServiceCenterApp.ViewModels
                     _context.Clients.Update(clientToUse);
                 }
 
-                // 3. Работа с УСТРОЙСТВОМ
                 var newDevice = new Device
                 {
                     DeviceType = DeviceType,
@@ -168,20 +200,14 @@ namespace ServiceCenterApp.ViewModels
                 };
                 _context.Devices.Add(newDevice);
 
-                // 4. статус "Новая"
                 int newStatusId = (int)OrderStatusEnum.New;
-                var newStatus = await _context.OrderStatuses.FindAsync(newStatusId);
-                if (newStatus == null)
-                {
-                    throw new Exception($"Критическая ошибка: Статус с ID {newStatusId} ('{OrderStatusEnum.New}') не найден в базе данных.");
-                }
 
                 var newOrder = new Order
                 {
                     RegistrationDate = DateTime.Now,
                     Client = clientToUse,
                     Device = newDevice,
-                    StatusId = newStatus.StatusId,
+                    StatusId = newStatusId,
                     PriorityId = SelectedPriority.PriorityId,
                     ProblemDescription = ProblemDescription,
                     Comment = Comment,
