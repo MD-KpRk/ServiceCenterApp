@@ -99,6 +99,8 @@ namespace ServiceCenterApp.ViewModels
             await LoadDashboardDataAsync();
         }
 
+
+        // TODO. REWORK IT. HARDCODE ATTENTION
         public async Task LoadDashboardDataAsync()
         {
             try
