@@ -58,6 +58,7 @@ namespace ServiceCenterApp
             services.AddTransient<MainAdminPageViewModel>();
             services.AddTransient<OrdersViewModel>();
             services.AddTransient<AddSparePartViewModel>();
+            services.AddTransient<AddOrderViewModel>();
 
             // --- VIEWS ---
             services.AddTransient<AuthPage>();          // Page
@@ -66,6 +67,7 @@ namespace ServiceCenterApp
             services.AddSingleton<MainAdminPage>();     // Page 
             services.AddSingleton<OrdersPage>();        // Page 
             services.AddTransient<AddSparePartWindow>();// Window
+            services.AddTransient<AddOrderWindow>();    // Window
 
 
             _serviceProvider = services.BuildServiceProvider();

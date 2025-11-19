@@ -32,7 +32,13 @@
             <!-- Управление количеством -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Button Command="{Binding DecreaseQuantityCommand}" Content="-" FontSize="16" Style="{StaticResource SecondaryButtonStyle}" Width="20" Padding="8,4" Margin="0,0,5,0"/>
-                <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="40" TextAlignment="Center" VerticalContentAlignment="Center"/>
+                <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" 
+                         Width="50" 
+                         TextAlignment="Center" 
+                         VerticalContentAlignment="Center"
+                         MaxLength="7" 
+                         PreviewTextInput="NumberValidationTextBox"
+                         DataObject.Pasting="TextBox_Pasting"/>
                 <Button Command="{Binding IncreaseQuantityCommand}" Content="+" FontSize="16" Style="{StaticResource SecondaryButtonStyle}" Width="20" Padding="8,4" Margin="5,0,0,0"/>
             </StackPanel>
 

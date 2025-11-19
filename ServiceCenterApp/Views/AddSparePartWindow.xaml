@@ -7,8 +7,7 @@
         mc:Ignorable="d"
         Language="be-BY"
         Title="Добавить запчасть в заказ" Height="600" Width="800"
-        WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow"
-        Loaded="Window_Loaded">
+        WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

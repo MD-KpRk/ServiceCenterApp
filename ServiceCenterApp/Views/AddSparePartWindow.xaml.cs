@@ -16,8 +16,7 @@ namespace ServiceCenterApp.Views
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // Загружаем данные при открытии окна
-            await ViewModel.LoadSparePartsAsync();
+            // await ViewModel.LoadSparePartsAsync();
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)

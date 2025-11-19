@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ServiceCenterApp.Data;
 using ServiceCenterApp.Models;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -13,10 +14,7 @@ namespace ServiceCenterApp.ViewModels
     {
         private readonly ApplicationDbContext _context;
 
-        // Коллекция для хранения всех запчастей
         private readonly ObservableCollection<SparePart> _allSpareParts;
-
-        // "Представление" коллекции, которое мы будем фильтровать
         public ICollectionView SparePartsView { get; }
 
         private string _searchText;
@@ -27,7 +25,6 @@ namespace ServiceCenterApp.ViewModels
             {
                 _searchText = value;
                 OnPropertyChanged();
-                // Применяем фильтр к нашему "представлению"
                 SparePartsView.Refresh();
             }
         }
@@ -44,15 +41,14 @@ namespace ServiceCenterApp.ViewModels
             _context = context;
             _allSpareParts = new ObservableCollection<SparePart>();
 
-            // Создаем "представление" для фильтрации
             SparePartsView = CollectionViewSource.GetDefaultView(_allSpareParts);
             SparePartsView.Filter = FilterSpareParts;
         }
 
-        public async Task LoadSparePartsAsync()
+        public async Task LoadSparePartsAsync(Dictionary<int, int> existingQuantities)
         {
-            // Загружаем только те запчасти, которые есть в наличии
             var parts = await _context.SpareParts
+                .AsNoTracking()
                 .Where(p => p.StockQuantity > 0)
                 .OrderBy(p => p.Name)
                 .ToListAsync();
@@ -60,24 +56,27 @@ namespace ServiceCenterApp.ViewModels
             _allSpareParts.Clear();
             foreach (var part in parts)
             {
-                _allSpareParts.Add(part);
+                if (existingQuantities.ContainsKey(part.PartId))
+                {
+                    part.StockQuantity -= existingQuantities[part.PartId];
+                }
+
+                if (part.StockQuantity > 0)
+                {
+                    _allSpareParts.Add(part);
+                }
             }
         }
 
         private bool FilterSpareParts(object item)
         {
-            if (string.IsNullOrWhiteSpace(SearchText))
-            {
-                return true; // Фильтр пуст - показываем всё
-            }
+            if (string.IsNullOrWhiteSpace(SearchText)) return true;
 
             if (item is SparePart part)
             {
-                // Поиск по названию или артикулу, без учета регистра
                 return part.Name.Contains(SearchText, System.StringComparison.OrdinalIgnoreCase) ||
                        part.PartNumber.Contains(SearchText, System.StringComparison.OrdinalIgnoreCase);
             }
-
             return false;
         }
     }

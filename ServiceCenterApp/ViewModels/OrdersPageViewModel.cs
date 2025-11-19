@@ -7,10 +7,12 @@ using ServiceCenterApp.Models.Associations;
 using ServiceCenterApp.Models.Lookup;
 using ServiceCenterApp.Services.Interfaces;
 using ServiceCenterApp.Views;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace ServiceCenterApp.ViewModels
@@ -22,25 +24,19 @@ namespace ServiceCenterApp.ViewModels
         private readonly IServiceProvider _serviceProvider;
 
         #region Свойства для левой панели (Список)
-
         private List<OrderListItemViewModel> _allOrders = new List<OrderListItemViewModel>();
         public ObservableCollection<OrderListItemViewModel> FilteredOrders { get; }
         public ObservableCollection<StatusFilterViewModel> StatusFilters { get; }
         public ICommand SelectOrderCommand { get; }
-
-        public ICommand AddSparePartCommand { get; }
-
         private string _searchText;
         public string SearchText
         {
             get => _searchText;
             set { _searchText = value; OnPropertyChanged(); ApplyFilters(); }
         }
-
         #endregion
 
         #region Свойства для правой панели (Детали)
-
         private Order _selectedOrderDetails;
         public Order SelectedOrderDetails
         {
@@ -53,86 +49,52 @@ namespace ServiceCenterApp.ViewModels
             }
         }
 
-        // Списки для ComboBox'ов в деталях
+        // Списки
         private List<OrderStatusViewModel> _allOrderStatuses;
-        public List<OrderStatusViewModel> AllOrderStatuses
-        {
-            get => _allOrderStatuses;
-            private set { _allOrderStatuses = value; OnPropertyChanged(); }
-        }
-
+        public List<OrderStatusViewModel> AllOrderStatuses { get => _allOrderStatuses; private set { _allOrderStatuses = value; OnPropertyChanged(); } }
         private List<Employee> _allEmployees;
-        public List<Employee> AllEmployees
-        {
-            get => _allEmployees;
-            private set { _allEmployees = value; OnPropertyChanged(); }
-        }
-
+        public List<Employee> AllEmployees { get => _allEmployees; private set { _allEmployees = value; OnPropertyChanged(); } }
         private List<Priority> _allPriorities;
-        public List<Priority> AllPriorities
-        {
-            get => _allPriorities;
-            private set { _allPriorities = value; OnPropertyChanged(); }
-        }
+        public List<Priority> AllPriorities { get => _allPriorities; private set { _allPriorities = value; OnPropertyChanged(); } }
 
-
-
-        // Выбранные элементы в ComboBox'ах
+        // Выбранные элементы
         private OrderStatusViewModel _selectedOrderStatus;
-        public OrderStatusViewModel SelectedOrderStatus
-        {
-            get => _selectedOrderStatus;
-            set { _selectedOrderStatus = value; OnPropertyChanged(); if (SelectedOrderDetails != null && value != null) SelectedOrderDetails.StatusId = value.StatusId; }
-        }
-
+        public OrderStatusViewModel SelectedOrderStatus { get => _selectedOrderStatus; set { _selectedOrderStatus = value; OnPropertyChanged(); if (SelectedOrderDetails != null && value != null) SelectedOrderDetails.StatusId = value.StatusId; } }
         private Employee _selectedAcceptorEmployee;
-        public Employee SelectedAcceptorEmployee
-        {
-            get => _selectedAcceptorEmployee;
-            set { _selectedAcceptorEmployee = value; OnPropertyChanged(); if (SelectedOrderDetails != null) SelectedOrderDetails.AcceptorEmployeeId = value?.EmployeeId; }
-        }
-
+        public Employee SelectedAcceptorEmployee { get => _selectedAcceptorEmployee; set { _selectedAcceptorEmployee = value; OnPropertyChanged(); if (SelectedOrderDetails != null) SelectedOrderDetails.AcceptorEmployeeId = value?.EmployeeId; } }
         private Priority _selectedPriority;
-        public Priority SelectedPriority
-        {
-            get => _selectedPriority;
-            set { _selectedPriority = value; OnPropertyChanged(); if (SelectedOrderDetails != null && value != null) SelectedOrderDetails.PriorityId = value.PriorityId; }
-        }
+        public Priority SelectedPriority { get => _selectedPriority; set { _selectedPriority = value; OnPropertyChanged(); if (SelectedOrderDetails != null && value != null) SelectedOrderDetails.PriorityId = value.PriorityId; } }
 
         public ObservableCollection<UsedSparePartViewModel> UsedSpareParts { get; }
-
         private decimal _sparePartsTotalSum;
-        public decimal SparePartsTotalSum
-        {
-            get => _sparePartsTotalSum;
-            set { _sparePartsTotalSum = value; OnPropertyChanged(); }
-        }
+        public decimal SparePartsTotalSum { get => _sparePartsTotalSum; set { _sparePartsTotalSum = value; OnPropertyChanged(); } }
 
+        public ICommand SaveChangesCommand { get; }
+        public ICommand AddSparePartCommand { get; }
+        public ICommand CloseDetailsCommand { get; }
+        public ICommand CreateOrderCommand { get; }
         #endregion
 
         #region "Клей" между панелями
-
         private OrderListItemViewModel _selectedOrderInList;
         public OrderListItemViewModel SelectedOrderInList
         {
             get => _selectedOrderInList;
             set
             {
-                if (_selectedOrderInList != value)
+                if (_selectedOrderInList == value) return;
+                if (ShouldCancelSelectionChange(value))
                 {
-                    // Снимаем выделение со старого элемента
-                    if (_selectedOrderInList != null)
-                        _selectedOrderInList.IsSelected = false;
-
-                    _selectedOrderInList = value;
-
-                    // Устанавливаем выделение на новый элемент
-                    if (_selectedOrderInList != null)
-                        _selectedOrderInList.IsSelected = true;
-
-                    OnPropertyChanged();
-                    LoadOrderDetailsAsync(value?.OrderId);
+                    OnPropertyChanged(nameof(SelectedOrderInList));
+                    return;
                 }
+
+                if (_selectedOrderInList != null) _selectedOrderInList.IsSelected = false;
+                _selectedOrderInList = value;
+                if (_selectedOrderInList != null) _selectedOrderInList.IsSelected = true;
+
+                OnPropertyChanged();
+                LoadOrderDetailsAsync(value?.OrderId);
             }
         }
         #endregion
@@ -141,61 +103,119 @@ namespace ServiceCenterApp.ViewModels
         {
             _context = context;
             _navigationService = navigationService;
+            _serviceProvider = serviceProvider;
+
             FilteredOrders = new ObservableCollection<OrderListItemViewModel>();
             StatusFilters = new ObservableCollection<StatusFilterViewModel>();
             UsedSpareParts = new ObservableCollection<UsedSparePartViewModel>();
 
-            _serviceProvider = serviceProvider;
-
             SelectOrderCommand = new RelayCommand<OrderListItemViewModel>(vm => SelectedOrderInList = vm);
             AddSparePartCommand = new RelayCommand(ExecuteAddSparePart, CanExecuteAddSparePart);
+            SaveChangesCommand = new RelayCommand(ExecuteSaveChanges, CanExecuteSaveChanges);
+            CloseDetailsCommand = new RelayCommand(CloseDetails);
+            CreateOrderCommand = new RelayCommand(ExecuteCreateOrder);
 
             InitializeFilters();
         }
 
-        private bool CanExecuteAddSparePart()
+        private async void ExecuteCreateOrder()
         {
-            // Кнопку "Добавить запчасть" можно нажать только если выбран какой-то заказ
-            return SelectedOrderDetails != null;
+            var addOrderWindow = (AddOrderWindow)_serviceProvider.GetService(typeof(AddOrderWindow));
+
+            if (addOrderWindow.ShowDialog() == true)
+            {
+                await LoadAllOrdersListAsync();
+
+            }
         }
 
-        private void ExecuteAddSparePart()
+        private bool ShouldCancelSelectionChange(OrderListItemViewModel targetOrder)
         {
-            var addSparePartWindow = (AddSparePartWindow)_serviceProvider.GetService(typeof(AddSparePartWindow));
-
-            if (addSparePartWindow.ShowDialog() == true)
+            if (!_context.ChangeTracker.HasChanges())
             {
-                // Если пользователь нажал "Добавить"
-                var selectedPart = addSparePartWindow.ViewModel.SelectedSparePart;
+                _context.ChangeTracker.Clear();
+                return false; 
+            }
 
-                // Проверяем, нет ли такой запчасти уже в заказе
-                var existingPartVM = UsedSpareParts.FirstOrDefault(p => p.PartNumber == selectedPart.PartNumber);
-                if (existingPartVM != null)
+            var result = MessageBox.Show(
+                "У вас есть несохраненные изменения. Сохранить их перед переходом?",
+                "Несохраненные изменения",
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Warning);
+
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    SaveAndNavigateAsync(targetOrder);
+                    return true; 
+
+                case MessageBoxResult.No:
+                    _context.ChangeTracker.Clear();
+                    return false; 
+
+                case MessageBoxResult.Cancel:
+                    return true; 
+            }
+
+            return false;
+        }
+
+        private async void SaveAndNavigateAsync(OrderListItemViewModel targetOrder)
+        {
+            if (await SaveInternalAsync())
+            {
+                _context.ChangeTracker.Clear();
+                SelectedOrderInList = targetOrder;
+            }
+        }
+        private void CloseDetails()
+        {
+            SelectedOrderInList = null;
+        }
+
+        private bool CanExecuteSaveChanges() => SelectedOrderDetails != null;
+
+        private async void ExecuteSaveChanges()
+        {
+            if (await SaveInternalAsync())
+            {
+                MessageBox.Show("Изменения успешно сохранены!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                CloseDetails();
+            }
+        }
+
+        private async Task<bool> SaveInternalAsync()
+        {
+            try
+            {
+                if (SelectedOrderDetails == null) return false;
+
+                await _context.SaveChangesAsync();
+
+                if (SelectedOrderDetails.StatusId != 0)
                 {
-                    // Если есть - просто увеличиваем количество
-                    existingPartVM.Quantity++;
+                    SelectedOrderDetails.Status = await _context.OrderStatuses.FindAsync(SelectedOrderDetails.StatusId);
+                }
+
+                if (SelectedOrderDetails.AcceptorEmployeeId.HasValue)
+                {
+                    SelectedOrderDetails.AcceptorEmployee = await _context.Employees.FindAsync(SelectedOrderDetails.AcceptorEmployeeId);
                 }
                 else
                 {
-                    // Если нет - создаем новую запись
-                    var newOrderSparePart = new OrderSparePart
-                    {
-                        Order = SelectedOrderDetails,
-                        OrderId = SelectedOrderDetails.OrderId,
-                        SparePart = selectedPart,
-                        PartId = selectedPart.PartId,
-                        Quantity = 1
-                    };
-
-                    // Добавляем в коллекцию модели (для сохранения в БД)
-                    SelectedOrderDetails.OrderSpareParts.Add(newOrderSparePart);
-
-                    // Создаем и добавляем ViewModel в отображаемую коллекцию
-                    UsedSpareParts.Add(new UsedSparePartViewModel(newOrderSparePart, CalculateSparePartsTotalSum));
+                    SelectedOrderDetails.AcceptorEmployee = null;
                 }
 
-                // Пересчитываем общую сумму
-                CalculateSparePartsTotalSum();
+                if (SelectedOrderInList != null)
+                {
+                    SelectedOrderInList.RefreshData(SelectedOrderDetails);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
         }
 
@@ -212,26 +232,6 @@ namespace ServiceCenterApp.ViewModels
         {
             await LoadComboBoxSourcesAsync();
             await LoadAllOrdersListAsync();
-        }
-
-        private void CalculateSparePartsTotalSum()
-        {
-            SparePartsTotalSum = UsedSpareParts.Sum(p => p.TotalSum);
-        }
-
-        private void UpdateUsedSpareParts()
-        {
-            UsedSpareParts.Clear();
-            if (SelectedOrderDetails?.OrderSpareParts != null)
-            {
-                foreach (var part in SelectedOrderDetails.OrderSpareParts)
-                {
-                    // Создаем ViewModel для каждой запчасти и передаем callback
-                    UsedSpareParts.Add(new UsedSparePartViewModel(part, CalculateSparePartsTotalSum));
-                }
-            }
-            // Считаем сумму после заполнения
-            CalculateSparePartsTotalSum();
         }
 
         private async Task LoadAllOrdersListAsync()
@@ -284,11 +284,75 @@ namespace ServiceCenterApp.ViewModels
             }
         }
 
+        private void UpdateUsedSpareParts()
+        {
+            UsedSpareParts.Clear();
+            if (SelectedOrderDetails?.OrderSpareParts != null)
+            {
+                foreach (var part in SelectedOrderDetails.OrderSpareParts)
+                {
+                    UsedSpareParts.Add(new UsedSparePartViewModel(part, CalculateSparePartsTotalSum));
+                }
+            }
+            CalculateSparePartsTotalSum();
+        }
+
+        private void CalculateSparePartsTotalSum()
+        {
+            SparePartsTotalSum = UsedSpareParts.Sum(p => p.TotalSum);
+        }
+
+        private bool CanExecuteAddSparePart() => SelectedOrderDetails != null;
+
+        private async void ExecuteAddSparePart()
+        {
+            var addSparePartWindow = (AddSparePartWindow)_serviceProvider.GetService(typeof(AddSparePartWindow));
+            var existingQuantities = new Dictionary<int, int>();
+            foreach (var partVm in UsedSpareParts)
+            {
+                if (existingQuantities.ContainsKey(partVm.PartId))
+                    existingQuantities[partVm.PartId] += partVm.Quantity;
+                else
+                    existingQuantities.Add(partVm.PartId, partVm.Quantity);
+            }
+
+            await addSparePartWindow.ViewModel.LoadSparePartsAsync(existingQuantities);
+
+            if (addSparePartWindow.ShowDialog() == true)
+            {
+                var selectedPart = addSparePartWindow.ViewModel.SelectedSparePart;
+                var existingPartVM = UsedSpareParts.FirstOrDefault(p => p.PartNumber == selectedPart.PartNumber);
+
+                if (existingPartVM != null)
+                {
+                    existingPartVM.Quantity++;
+                }
+                else
+                {
+                    var trackedPart = await _context.SpareParts.FindAsync(selectedPart.PartId);
+                    if (trackedPart != null)
+                    {
+                        trackedPart.StockQuantity -= 1;
+                        var newOrderSparePart = new OrderSparePart
+                        {
+                            Order = SelectedOrderDetails,
+                            OrderId = SelectedOrderDetails.OrderId,
+                            SparePart = trackedPart,
+                            PartId = trackedPart.PartId,
+                            Quantity = 1
+                        };
+                        SelectedOrderDetails.OrderSpareParts.Add(newOrderSparePart);
+                        UsedSpareParts.Add(new UsedSparePartViewModel(newOrderSparePart, CalculateSparePartsTotalSum));
+                    }
+                }
+                CalculateSparePartsTotalSum();
+            }
+        }
+
         private void ApplyFilters()
         {
             var selectedStatuses = StatusFilters.Where(f => f.IsChecked).Select(f => f.StatusName).ToHashSet();
             var result = _allOrders.Where(order => selectedStatuses.Contains(order.StatusName));
-
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 string lowerSearchText = SearchText.ToLower();
@@ -298,12 +362,8 @@ namespace ServiceCenterApp.ViewModels
                     order.OrderId.ToString().Contains(lowerSearchText)
                 );
             }
-
             FilteredOrders.Clear();
-            foreach (var item in result)
-            {
-                FilteredOrders.Add(item);
-            }
+            foreach (var item in result) { FilteredOrders.Add(item); }
         }
     }
 }

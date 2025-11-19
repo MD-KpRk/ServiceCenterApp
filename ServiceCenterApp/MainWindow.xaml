@@ -8,7 +8,7 @@
         xmlns:converters="clr-namespace:ServiceCenterApp.Converters"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="MainWindow" Height="675" Width="1200" MinHeight="600" MinWidth="600"
+        Title="MainWindow" Height="675" Width="1300" MinHeight="700" MinWidth="600"
         Loaded="MainWindow_OnLoaded"
         Language="be-BY">
 
@@ -18,8 +18,6 @@
 
     <Grid Background="{StaticResource LightBackgroundBrush}">
         <Grid.ColumnDefinitions>
-            <!--<ColumnDefinition Width="50" />--> <!--FOR DEBUG-->
-            
             <ColumnDefinition>
                 <ColumnDefinition.Width>
                     <MultiBinding Converter="{StaticResource MenuWidthConverter}">

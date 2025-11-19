@@ -9,6 +9,8 @@ namespace ServiceCenterApp.ViewModels
         private readonly OrderSparePart _orderSparePart;
         private readonly Action _updateTotalSumCallback;
 
+        public int PartId => _orderSparePart.PartId;
+
         public string Name => _orderSparePart.SparePart?.Name ?? "Неизвестно";
         public string PartNumber => _orderSparePart.SparePart?.PartNumber ?? "—";
         public decimal Price => _orderSparePart.SparePart?.Price ?? 0;
@@ -21,19 +23,37 @@ namespace ServiceCenterApp.ViewModels
             get => _orderSparePart.Quantity;
             set
             {
-                int newQuantity = value;
+                int currentQty = _orderSparePart.Quantity;
+                int newQty = value;
 
-                if (newQuantity < 1) newQuantity = 1;
+                if (newQty < 1) newQty = 1;
 
-                // Проверка: не больше остатка на складе
-                if (newQuantity > StockQuantity) newQuantity = StockQuantity;
+                int totalAvailable = currentQty + StockQuantity;
 
-                if (_orderSparePart.Quantity != newQuantity)
+                if (newQty > totalAvailable) newQty = totalAvailable;
+
+                if (currentQty != newQty)
                 {
-                    _orderSparePart.Quantity = newQuantity;
+                    // 3. Вычисляем разницу
+                    int diff = newQty - currentQty;
+
+                    // 4. Обновляем количество в заказе
+                    _orderSparePart.Quantity = newQty;
+
+                    if (_orderSparePart.SparePart != null)
+                    {
+                        _orderSparePart.SparePart.StockQuantity -= diff;
+                    }
+
                     OnPropertyChanged(nameof(Quantity));
-                    OnPropertyChanged(nameof(TotalSum)); // Уведомляем об изменении суммы для этой строки
-                    _updateTotalSumCallback?.Invoke(); // Вызываем callback для пересчета ОБЩЕЙ суммы
+                    OnPropertyChanged(nameof(TotalSum));
+                    OnPropertyChanged(nameof(StockQuantity));
+
+                    _updateTotalSumCallback?.Invoke();
+                }
+                else if (value != newQty)
+                {
+                    OnPropertyChanged(nameof(Quantity));
                 }
             }
         }

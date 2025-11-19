@@ -86,8 +86,7 @@ namespace ServiceCenterApp.ViewModels
             AllPriorities = await _context.Priorities.ToListAsync();
             OnPropertyChanged(nameof(AllPriorities));
 
-            // По умолчанию ставим приоритет "Обычный"
-            SelectedPriority = AllPriorities.FirstOrDefault(p => p.PriorityName == "Обычный");
+            SelectedPriority = AllPriorities.FirstOrDefault(p => p.PriorityId == (int)PriorityEnum.Normal);
         }
 
         private async void TryFindClient(string phoneNumber)
@@ -98,13 +97,11 @@ namespace ServiceCenterApp.ViewModels
                 return;
             }
 
-            // Ищем клиента по точному совпадению телефона
             var client = await _context.Clients.FirstOrDefaultAsync(c => c.PhoneNumber == phoneNumber);
 
             if (client != null)
             {
                 _existingClient = client;
-                // Автозаполняем поля
                 ClientSurname = client.SurName;
                 ClientFirstName = client.FirstName;
                 ClientPatronymic = client.Patronymic;
@@ -112,7 +109,6 @@ namespace ServiceCenterApp.ViewModels
             }
             else
             {
-                // Если клиента не нашли, сбрасываем флаг, но поля не очищаем (вдруг пользователь вводит нового)
                 _existingClient = null;
             }
         }
@@ -172,11 +168,14 @@ namespace ServiceCenterApp.ViewModels
                 };
                 _context.Devices.Add(newDevice);
 
-                // 4. Получаем статус "Новая"
-                var newStatus = await _context.OrderStatuses.FirstOrDefaultAsync(s => s.StatusName == "Новая");
-                if (newStatus == null) throw new Exception("Статус 'Новая' не найден в БД.");
+                // 4. статус "Новая"
+                int newStatusId = (int)OrderStatusEnum.New;
+                var newStatus = await _context.OrderStatuses.FindAsync(newStatusId);
+                if (newStatus == null)
+                {
+                    throw new Exception($"Критическая ошибка: Статус с ID {newStatusId} ('{OrderStatusEnum.New}') не найден в базе данных.");
+                }
 
-                // 5. Создаем ЗАКАЗ
                 var newOrder = new Order
                 {
                     RegistrationDate = DateTime.Now,
@@ -186,16 +185,13 @@ namespace ServiceCenterApp.ViewModels
                     PriorityId = SelectedPriority.PriorityId,
                     ProblemDescription = ProblemDescription,
                     Comment = Comment,
-                    // Важно: Кто создал заказ
                     CreatorEmployeeId = _currentUserService.CurrentUser.EmployeeId,
-                    // Мастера можно назначить сразу или оставить пустым
                     AcceptorEmployeeId = SelectedMaster?.EmployeeId
                 };
 
                 _context.Orders.Add(newOrder);
                 await _context.SaveChangesAsync();
 
-                // Закрываем окно (через View) с результатом true
                 foreach (Window window in Application.Current.Windows)
                 {
                     if (window.DataContext == this)
