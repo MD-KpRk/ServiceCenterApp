@@ -1,0 +1,111 @@
+﻿<Window x:Class="ServiceCenterApp.Views.AddOrderWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:helpers="clr-namespace:ServiceCenterApp.Helpers"
+        mc:Ignorable="d"
+        Title="Новый заказ" Height="700" Width="900"
+        WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow"
+        Loaded="Window_Loaded">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Заголовок -->
+            <RowDefinition Height="*"/>
+            <!-- Форма -->
+            <RowDefinition Height="Auto"/>
+            <!-- Кнопки -->
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Регистрация нового заказа" FontSize="24" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,0,0,20"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- ЛЕВАЯ КОЛОНКА: КЛИЕНТ И УСТРОЙСТВО -->
+                <StackPanel Grid.Column="0">
+                    <!-- КЛИЕНТ -->
+                    <TextBlock Text="ДАННЫЕ КЛИЕНТА" Style="{StaticResource SectionHeaderStyle}"/>
+                    <Border Style="{StaticResource InfoBorderStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Номер телефона (Поиск) *"/>
+                            <TextBox Text="{Binding ClientPhoneNumber, UpdateSourceTrigger=PropertyChanged}" MaxLength="24" Style="{StaticResource EditableTextBoxStyle}"/>
+
+                            <TextBlock Text="Фамилия *"/>
+                            <TextBox Text="{Binding ClientSurname}" MaxLength="64" Style="{StaticResource EditableTextBoxStyle}"/>
+
+                            <TextBlock Text="Имя *"/>
+                            <TextBox Text="{Binding ClientFirstName}" MaxLength="64" Style="{StaticResource EditableTextBoxStyle}"/>
+
+                            <TextBlock Text="Отчество"/>
+                            <TextBox Text="{Binding ClientPatronymic}" MaxLength="64" Style="{StaticResource EditableTextBoxStyle}"/>
+
+                            <TextBlock Text="Email"/>
+                            <TextBox Text="{Binding ClientEmail}" MaxLength="48" Style="{StaticResource EditableTextBoxStyle}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- УСТРОЙСТВО -->
+                    <TextBlock Text="ДАННЫЕ УСТРОЙСТВА" Style="{StaticResource SectionHeaderStyle}"/>
+                    <Border Style="{StaticResource InfoBorderStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Тип устройства (напр. Ноутбук, Телефон) *"/>
+                            <TextBox Text="{Binding DeviceType}" MaxLength="128" Style="{StaticResource EditableTextBoxStyle}"/>
+
+                            <TextBlock Text="Бренд (напр. Samsung, Apple) *"/>
+                            <TextBox Text="{Binding DeviceBrand}" MaxLength="128" Style="{StaticResource EditableTextBoxStyle}"/>
+
+                            <TextBlock Text="Модель *"/>
+                            <TextBox Text="{Binding DeviceModel}" MaxLength="128" Style="{StaticResource EditableTextBoxStyle}"/>
+
+                            <TextBlock Text="Серийный номер / IMEI"/>
+                            <TextBox Text="{Binding DeviceSerialNumber}" MaxLength="64" Style="{StaticResource EditableTextBoxStyle}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ПРАВАЯ КОЛОНКА: ДЕТАЛИ ЗАКАЗА -->
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="ДЕТАЛИ ЗАКАЗА" Style="{StaticResource SectionHeaderStyle}"/>
+                    <Border Style="{StaticResource InfoBorderStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Описание неисправности *"/>
+                            <TextBox Text="{Binding ProblemDescription}" MaxLength="256" TextWrapping="Wrap" MinHeight="80" Style="{StaticResource EditableTextBoxStyle}"/>
+
+                            <TextBlock Text="Дополнительный комментарий"/>
+                            <TextBox Text="{Binding Comment}" MaxLength="128" TextWrapping="Wrap" MinHeight="60" Style="{StaticResource EditableTextBoxStyle}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="ПАРАМЕТРЫ" Style="{StaticResource SectionHeaderStyle}"/>
+                    <Border Style="{StaticResource InfoBorderStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Назначить мастера:" Margin="0,0,0,5"/>
+                            <ComboBox ItemsSource="{Binding AllEmployees}" SelectedItem="{Binding SelectedMaster}"
+                                      Style="{StaticResource PageComboBoxStyle}" 
+                                      ItemTemplate="{StaticResource EmployeeComboBoxItemTemplate}"
+                                      Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Приоритет:" Margin="0,0,0,5"/>
+                            <ComboBox ItemsSource="{Binding AllPriorities}" SelectedItem="{Binding SelectedPriority}"
+                                      Style="{StaticResource PageComboBoxStyle}" 
+                                      ItemTemplate="{StaticResource PriorityComboBoxItemTemplate}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- КНОПКИ -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Отмена" IsCancel="True" Style="{StaticResource SecondaryButtonStyle}" Width="120" Margin="0,0,15,0"/>
+            <Button Content="Создать заказ" Command="{Binding SaveCommand}" Style="{StaticResource AccentButtonStyle}" Width="150"/>
+        </StackPanel>
+    </Grid>
+</Window>
