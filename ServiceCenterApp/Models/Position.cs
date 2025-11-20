@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ServiceCenterApp.Models
 {
@@ -11,7 +7,10 @@ namespace ServiceCenterApp.Models
     {
         [Key]
         public int PositionId { get; set; }
+
         [Required, MaxLength(100)]
         public string? PositionName { get; set; }
+
+        public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
     }
 }
