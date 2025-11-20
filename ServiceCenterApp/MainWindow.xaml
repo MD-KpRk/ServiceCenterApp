@@ -73,7 +73,12 @@
                         Visibility="{Binding ClientsVisibility}"
                         Command="{Binding NavigateCommand}"
                         CommandParameter="Clients"/>
-                <Button Content="Персонал" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource EmployeesIcon}" Visibility="{Binding EmployeesVisibility}"/>
+                <Button Content="Персонал" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource EmployeesIcon}" 
+                        Visibility="{Binding EmployeesVisibility}"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Employees"
+                        />
+                
                 <Button Content="Склад" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource StorageIcon}" Visibility="{Binding StorageVisibility}"/>
                 <Button Content="Финансы" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource FinanceIcon}" Visibility="{Binding FinanceVisibility}"/>
             </StackPanel>

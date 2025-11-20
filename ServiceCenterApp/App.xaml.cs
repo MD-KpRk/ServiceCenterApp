@@ -61,6 +61,8 @@ namespace ServiceCenterApp
             services.AddTransient<AddOrderViewModel>();
             services.AddTransient<ClientsViewModel>();
             services.AddTransient<AddClientViewModel>();
+            services.AddTransient<EmployeesViewModel>();    
+            services.AddTransient<AddEmployeeViewModel>();
 
             // --- VIEWS ---
             services.AddTransient<AuthPage>();          // Page
@@ -72,6 +74,8 @@ namespace ServiceCenterApp
             services.AddTransient<AddOrderWindow>();    // Window
             services.AddTransient<ClientsPage>();       // Page 
             services.AddTransient<AddClientWindow>();   // Window
+            services.AddTransient<EmployeesPage>();     // Page
+            services.AddTransient<AddEmployeeWindow>(); // Window
 
 
             _serviceProvider = services.BuildServiceProvider();
@@ -88,6 +92,7 @@ namespace ServiceCenterApp
             navService?.Configure<MainAdminPageViewModel, MainAdminPage>();
             navService?.Configure<OrdersViewModel, OrdersPage>();
             navService?.Configure<ClientsViewModel, ClientsPage>();
+            navService?.Configure<EmployeesViewModel, EmployeesPage>();
 
         }
 
