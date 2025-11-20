@@ -63,6 +63,9 @@ namespace ServiceCenterApp.ViewModels
                 case "Clients":
                     _navigationService.NavigateTo<ClientsViewModel>();
                     break;
+                case "Employees":
+                    _navigationService.NavigateTo<EmployeesViewModel>();
+                    break;
 
                     //TODO:
                     // Сюда можно добавить другие кейсы: "Clients", "Employees" и т.д.
