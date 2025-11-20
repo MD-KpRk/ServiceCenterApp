@@ -1,17 +1,35 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-
+    <!-- Шаблон для Статуса (с цветным кружком) -->
     <DataTemplate x:Key="ColorStatusComboBoxItemTemplate">
         <StackPanel Orientation="Horizontal">
-            <!-- Цветной кружок -->
-            <Ellipse Width="10" Height="10" 
-                     Fill="{Binding StatusColor}" 
-                     Margin="10,0,8,0"
-                     VerticalAlignment="Center"/>
-            <!-- Текст статуса -->
+            <Ellipse Width="10" Height="10" Fill="{Binding StatusColor}" Margin="0,0,8,0" VerticalAlignment="Center"/>
             <TextBlock Text="{Binding StatusName}"/>
         </StackPanel>
+    </DataTemplate>
+
+    <!-- Шаблон для Сотрудника -->
+    <DataTemplate x:Key="EmployeeComboBoxItemTemplate">
+        <TextBlock>
+            <Run Text="{Binding SurName}"/>
+            <Run Text="{Binding FirstName, StringFormat=' {0}.'}"/>
+        </TextBlock>
+    </DataTemplate>
+
+    <!-- Шаблон для Приоритета -->
+    <DataTemplate x:Key="PriorityComboBoxItemTemplate">
+        <TextBlock Text="{Binding PriorityName}"/>
+    </DataTemplate>
+
+    <!-- НОВЫЙ: Шаблон для Роли -->
+    <DataTemplate x:Key="RoleComboBoxItemTemplate">
+        <TextBlock Text="{Binding RoleName}"/>
+    </DataTemplate>
+
+    <!-- НОВЫЙ: Шаблон для Должности -->
+    <DataTemplate x:Key="PositionComboBoxItemTemplate">
+        <TextBlock Text="{Binding PositionName}"/>
     </DataTemplate>
 
     <Style x:Key="ColorStatusComboBoxItemContainerStyle" TargetType="ComboBoxItem">
@@ -26,24 +44,13 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter TargetName="border" Property="Background" Value="#F0F0F0"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-
-    <DataTemplate x:Key="EmployeeComboBoxItemTemplate">
-        <TextBlock Margin="10 0 0 0">
-            <Run Text="{Binding SurName}"/>
-            <Run Text="{Binding FirstName, StringFormat='\t'}"/>
-        </TextBlock>
-    </DataTemplate>
-
-    <DataTemplate x:Key="PriorityComboBoxItemTemplate">
-        <TextBlock Margin="10 0 0 0" Text="{Binding PriorityName}"/>
-    </DataTemplate>
 
     <Style x:Key="PageComboBoxStyle" TargetType="ComboBox">
         <Setter Property="FontSize" Value="14"/>
@@ -53,103 +60,123 @@
         <Setter Property="Background" Value="White"/>
         <Setter Property="Foreground" Value="{StaticResource DarkBackgroundBrush}"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
                         <!-- Popup (выпадающий список) -->
                         <Popup x:Name="PART_Popup"
-                           AllowsTransparency="True"
-                           IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
-                           Placement="Bottom"
-                           PopupAnimation="Slide">
+                               AllowsTransparency="True"
+                               IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                               Placement="Bottom"
+                               PopupAnimation="Slide">
                             <Border x:Name="DropDownBorder"
-                                Margin="0,5,0,0"
-                                Background="{StaticResource LightBackgroundBrush}"
-                                BorderBrush="#E0E0E0"
-                                BorderThickness="1"
-                                CornerRadius="4">
+                                    Margin="0,5,0,0"
+                                    Background="White"
+                                    BorderBrush="#E0E0E0"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    MinWidth="{Binding ActualWidth, ElementName=toggleButton}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                 <Border.Effect>
                                     <DropShadowEffect ShadowDepth="2" BlurRadius="10" Color="Black" Opacity="0.1"/>
                                 </Border.Effect>
-                                <ScrollViewer CanContentScroll="True">
-                                    <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                <ScrollViewer x:Name="DropDownScrollViewer">
+                                    <Grid RenderOptions.ClearTypeHint="Enabled">
+                                        <Canvas Height="0" Width="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                            <Rectangle x:Name="OpaqueRect" Height="{Binding ActualHeight, ElementName=DropDownBorder}" Width="{Binding ActualWidth, ElementName=DropDownBorder}" Fill="{Binding Background, ElementName=DropDownBorder}" />
+                                        </Canvas>
+                                        <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                    </Grid>
                                 </ScrollViewer>
                             </Border>
                         </Popup>
 
-                        <!-- Основная видимая часть ComboBox -->
+                        <!-- ToggleButton (Фон и стрелка) -->
                         <ToggleButton x:Name="toggleButton"
-                                  Background="{TemplateBinding Background}"
-                                  BorderBrush="{TemplateBinding BorderBrush}"
-                                  BorderThickness="{TemplateBinding BorderThickness}"
-                                  Content="{TemplateBinding SelectionBoxItem}"
-                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                  IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                      Background="{TemplateBinding Background}"
+                                      BorderBrush="{TemplateBinding BorderBrush}"
+                                      BorderThickness="{TemplateBinding BorderThickness}"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                      ClickMode="Press">
                             <ToggleButton.Style>
                                 <Style TargetType="ToggleButton">
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ToggleButton">
                                                 <Border x:Name="templateRoot" 
-                                                    Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="4" 
-                                                    SnapsToDevicePixels="True">
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="4" 
+                                                        SnapsToDevicePixels="True">
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="30"/>
                                                         </Grid.ColumnDefinitions>
-
-                                                        <ContentPresenter x:Name="ContentSite"
-                                                                      Content="{TemplateBinding Content}"
-                                                                      ContentTemplate="{TemplateBinding ContentTemplate}"
-                                                                      Margin="{TemplateBinding Padding}"
-                                                                      VerticalAlignment="Center"
-                                                                      HorizontalAlignment="Left"/>
-
+                                                        <!-- Стрелка -->
                                                         <Path x:Name="Arrow" Grid.Column="1"
-                                                          Data="M 0 0 L 4 4 L 8 0 Z"
-                                                          Fill="{TemplateBinding Foreground}"
-                                                          HorizontalAlignment="Center"
-                                                          VerticalAlignment="Center"
-                                                          Margin="0,0,10,0"/>
+                                                              Data="M 0 0 L 4 4 L 8 0 Z"
+                                                              Fill="#888"
+                                                              HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="templateRoot" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                                                        <Setter TargetName="Arrow" Property="Fill" Value="{StaticResource PrimaryBrush}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
                                 </Style>
                             </ToggleButton.Style>
                         </ToggleButton>
+
+                        <!-- Content Presenter (Для режима выбора) -->
+                        <ContentPresenter x:Name="ContentSite"
+                                          IsHitTestVisible="False"
+                                          Content="{TemplateBinding SelectionBoxItem}"
+                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Left"/>
+
+                        <TextBox x:Name="PART_EditableTextBox"
+                                 Style="{x:Null}"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Center"
+                                 Margin="10,0,30,0"
+                                 Focusable="True"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Padding="0"
+                                 Visibility="Hidden"
+                                 IsReadOnly="{Binding IsReadOnly, RelativeSource={RelativeSource TemplatedParent}}"/>
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <!-- Реакция на наведение мыши: рамка становится акцентного цвета -->
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                        <!-- Триггер для переключения в режим редактирования -->
+                        <Trigger Property="IsEditable" Value="True">
+                            <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
+                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
                         </Trigger>
-                        <!-- Когда список открыт, рамка также остается акцентной -->
-                        <Trigger Property="IsDropDownOpen" Value="True">
-                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
-                        </Trigger>
-                        <!-- Реакция на фокус (выбор с клавиатуры) -->
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
-                        </Trigger>
-                        <!-- Вид неактивного ComboBox -->
+
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Background" Value="#F5F5F5"/>
-                            <Setter Property="Foreground" Value="#888"/>
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            <Setter Property="Background" Value="#F4F4F4"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-
-
-
 
 </ResourceDictionary>
