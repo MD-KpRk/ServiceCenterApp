@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:helpers="clr-namespace:ServiceCenterApp.Helpers"
         mc:Ignorable="d"
-        Title="Новый клиент" Height="500" Width="600"
+        Title="Новый клиент" Height="500" Width="600" MinWidth="300" MinHeight="500"
         WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
     <Grid Margin="20">
         <Grid.RowDefinitions>

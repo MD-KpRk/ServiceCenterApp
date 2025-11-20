@@ -19,19 +19,15 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <!-- Используем ObjectToGridLengthConverter, чтобы GridLength не ругался на null -->
-            <ColumnDefinition Width="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource ObjectToGridLengthConverter}}" MinWidth="460" MaxWidth="840">
+            <ColumnDefinition Width="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource ObjectToGridLengthConverter}}" MinWidth="460" MaxWidth="880">
                 <ColumnDefinition.Style>
                     <Style TargetType="ColumnDefinition">
-                        <!-- Значение по умолчанию (большая ширина) -->
-                        <Setter Property="Tag" Value="820"/>
+                        <Setter Property="Tag" Value="880"/>
                         <Style.Triggers>
-                            <!-- Триггер: Если клиент ВЫБРАН -->
                             <DataTrigger Binding="{Binding SelectedClientDetails, Converter={StaticResource IsNotNullConverter}}" Value="True">
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <!-- ИСПОЛЬЗУЕМ ObjectAnimation ВМЕСТО DoubleAnimation -->
                                             <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Tag">
                                                 <DiscreteObjectKeyFrame KeyTime="0" Value="460"/>
                                             </ObjectAnimationUsingKeyFrames>
@@ -41,9 +37,8 @@
                                 <DataTrigger.ExitActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <!-- Возвращаем большую ширину -->
                                             <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Tag">
-                                                <DiscreteObjectKeyFrame KeyTime="0" Value="820"/>
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="880"/>
                                             </ObjectAnimationUsingKeyFrames>
                                         </Storyboard>
                                     </BeginStoryboard>
@@ -58,7 +53,6 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- СПИСОК КЛИЕНТОВ -->
         <Border Grid.Column="0" Background="{StaticResource LightBackgroundBrush}" Padding="10">
             <DockPanel>
                 <Border DockPanel.Dock="Top" Background="White" CornerRadius="5" Padding="10" Margin="0,0,0,10">
@@ -69,18 +63,20 @@
                 </Border>
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding FilteredClients}" HorizontalAlignment="Center">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <controls:ClientCard/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <WrapPanel HorizontalAlignment="Center">
+                        <ItemsControl ItemsSource="{Binding FilteredClients}" HorizontalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <controls:ClientCard/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </WrapPanel>
                 </ScrollViewer>
             </DockPanel>
         </Border>

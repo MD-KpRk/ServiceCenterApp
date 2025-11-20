@@ -13,6 +13,7 @@ using System.Windows.Input;
 
 namespace ServiceCenterApp.ViewModels
 {
+    // 1. Добавляем наследование от IRefreshable
     public class ClientsViewModel : BaseViewModel, IRefreshable
     {
         private readonly ApplicationDbContext _context;
@@ -41,7 +42,6 @@ namespace ServiceCenterApp.ViewModels
             private set { _selectedClientDetails = value; OnPropertyChanged(); }
         }
 
-        // История заказов для DataGrid
         public ObservableCollection<Order> ClientOrdersHistory { get; }
 
         public ICommand SaveChangesCommand { get; }
@@ -89,9 +89,20 @@ namespace ServiceCenterApp.ViewModels
 
         public async Task RefreshAsync()
         {
-            if (_context.ChangeTracker.HasChanges()) _context.ChangeTracker.Clear();
+            if (_context.ChangeTracker.HasChanges())
+            {
+                _context.ChangeTracker.Clear();
+            }
+
             SearchText = string.Empty;
-            SelectedClientInList = null;
+
+            if (_selectedClientInList != null) _selectedClientInList.IsSelected = false;
+            _selectedClientInList = null;
+            OnPropertyChanged(nameof(SelectedClientInList));
+
+            SelectedClientDetails = null;
+            ClientOrdersHistory.Clear();
+
             await LoadAllClientsAsync();
         }
 
@@ -102,10 +113,9 @@ namespace ServiceCenterApp.ViewModels
 
         private async Task LoadAllClientsAsync()
         {
-            // Загружаем клиентов и сразу считаем количество заказов
             var clients = await _context.Clients
                 .AsNoTracking()
-                .Include(c => c.Orders) // Нужно для подсчета
+                .Include(c => c.Orders) 
                 .OrderBy(c => c.SurName)
                 .ToListAsync();
 
@@ -122,21 +132,23 @@ namespace ServiceCenterApp.ViewModels
                 return;
             }
 
-            // Загружаем клиента для редактирования
             SelectedClientDetails = await _context.Clients
                 .Include(c => c.Orders)
-                    .ThenInclude(o => o.Status) // Для истории
+                    .ThenInclude(o => o.Status) 
                 .Include(c => c.Orders)
-                    .ThenInclude(o => o.Device) // Для истории
+                    .ThenInclude(o => o.Device) 
                 .FirstOrDefaultAsync(c => c.ClientId == clientId);
 
             if (SelectedClientDetails != null)
             {
                 ClientOrdersHistory.Clear();
                 // Заполняем историю заказов (сортируем от новых к старым)
-                foreach (var order in SelectedClientDetails.Orders.OrderByDescending(o => o.RegistrationDate))
+                if (SelectedClientDetails.Orders != null)
                 {
-                    ClientOrdersHistory.Add(order);
+                    foreach (var order in SelectedClientDetails.Orders.OrderByDescending(o => o.RegistrationDate))
+                    {
+                        ClientOrdersHistory.Add(order);
+                    }
                 }
             }
         }
@@ -162,8 +174,7 @@ namespace ServiceCenterApp.ViewModels
 
             if (result == MessageBoxResult.Yes)
             {
-                SaveInternalAsync(); // Синхронный запуск, но с ожиданием внутри нельзя.
-                // Упрощение: сохраняем и переходим.
+                SaveInternalAsync(); 
                 return false;
             }
             else if (result == MessageBoxResult.No)
@@ -171,7 +182,7 @@ namespace ServiceCenterApp.ViewModels
                 _context.ChangeTracker.Clear();
                 return false;
             }
-            return true; // Cancel
+            return true; 
         }
 
         private async void ExecuteSaveChanges()
@@ -192,7 +203,7 @@ namespace ServiceCenterApp.ViewModels
                 }
 
                 MessageBox.Show("Сохранено!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                SelectedClientInList = null; // Закрываем панель
+                SelectedClientInList = null; 
                 return true;
             }
             catch (Exception ex)
@@ -210,9 +221,9 @@ namespace ServiceCenterApp.ViewModels
             {
                 string lower = SearchText.ToLower();
                 result = result.Where(c =>
-                    c.FullName.ToLower().Contains(lower) ||
-                    c.PhoneNumber.Contains(lower) ||
-                    c.Email.Contains(lower));
+                    (c.FullName != null && c.FullName.ToLower().Contains(lower)) ||
+                    (c.PhoneNumber != null && c.PhoneNumber.Contains(lower)) ||
+                    (c.Email != null && c.Email.Contains(lower)));
             }
 
             FilteredClients.Clear();

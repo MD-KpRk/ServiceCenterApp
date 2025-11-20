@@ -28,15 +28,13 @@
             CommandParameter="{Binding}"
             Style="{StaticResource TransparentButtonStyle}">
 
-        <!-- ФИКСИРОВАННЫЙ РАЗМЕР: Width="450" Height="100" -->
         <Border Background="White" CornerRadius="5" Margin="5"
                 BorderThickness="1" BorderBrush="#E0E0E0" 
-                Width="450" Height="100">
+                Width="400" Height="76">
 
             <Border.Style>
                 <Style TargetType="Border">
                     <Style.Triggers>
-                        <!-- Подсветка при наведении -->
                         <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
                             <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
                             <Setter Property="Effect">
@@ -45,7 +43,6 @@
                                 </Setter.Value>
                             </Setter>
                         </DataTrigger>
-                        <!-- Подсветка выбранного -->
                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
                             <Setter Property="Effect">
                                 <Setter.Value>
@@ -72,10 +69,11 @@
                     <!-- Кол-во заказов -->
                 </Grid.ColumnDefinitions>
 
-                <!-- Кружок с первой буквой имени -->
+                <!-- Кружок с инициалами -->
                 <Border Grid.Column="0" Width="50" Height="50" CornerRadius="25" Background="#F5F5F5" Margin="0,0,15,0" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding FullName, StringFormat={}{0:1}}" 
-                               FontSize="20" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"
+                    <!-- ИЗМЕНЕНИЕ ЗДЕСЬ: Binding Initials -->
+                    <TextBlock Text="{Binding Initials}" 
+                               FontSize="22" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
 
