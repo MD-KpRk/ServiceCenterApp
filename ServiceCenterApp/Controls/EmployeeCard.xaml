@@ -1,0 +1,84 @@
+﻿<UserControl x:Class="ServiceCenterApp.Controls.EmployeeCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:ServiceCenterApp.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:EmployeeListItemViewModel}"
+             d:DesignHeight="100" d:DesignWidth="450">
+
+    <UserControl.Resources>
+        <Style x:Key="TransparentButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Button Command="{Binding DataContext.SelectEmployeeCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+            CommandParameter="{Binding}"
+            Style="{StaticResource TransparentButtonStyle}">
+
+        <Border Background="White" CornerRadius="5" Margin="5"
+                BorderThickness="1" BorderBrush="#E0E0E0" 
+                Width="380" Height="80">
+
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
+                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect ShadowDepth="2" BlurRadius="10" Color="Black" Opacity="0.1"/>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <Setter Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect ShadowDepth="0" BlurRadius="10" Color="{StaticResource PrimaryColor}" Opacity="0.6"/>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <Grid Margin="15,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Аватарка -->
+                <Border Grid.Column="0" Width="50" Height="50" CornerRadius="25" Background="#F5F5F5" Margin="0,0,15,0">
+                    <TextBlock Text="{Binding Initials}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- Инфо -->
+                <StackPanel Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding FullName}" FontWeight="Bold" FontSize="16" Foreground="{StaticResource DarkBackgroundBrush}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding PositionName}" Foreground="Gray" FontSize="13" Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <!-- Бейдж Роли -->
+                <Border Grid.Column="2" Background="{Binding RoleColor}" Margin="0 -4 -4 0" CornerRadius="10" Padding="6,2" VerticalAlignment="Top" Opacity="0.9">
+                    <TextBlock Text="{Binding RoleName}" FontSize="10" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                </Border>
+            </Grid>
+        </Border>
+    </Button>
+</UserControl>
