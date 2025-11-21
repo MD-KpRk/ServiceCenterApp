@@ -53,7 +53,7 @@ namespace ServiceCenterApp
 
             // --- VIEWMODELS ---
             services.AddSingleton<MainWindowViewModel>();
-            services.AddSingleton<InstallationPageViewModel>();
+            services.AddTransient<InstallationPageViewModel>();
             services.AddTransient<AuthPageViewModel>();
             services.AddTransient<MainAdminPageViewModel>();
             services.AddTransient<OrdersViewModel>();
@@ -67,10 +67,10 @@ namespace ServiceCenterApp
 
             // --- VIEWS ---
             services.AddTransient<AuthPage>();          // Page
-            services.AddSingleton<InstallationPage>();  // Page
+            services.AddTransient<InstallationPage>();  // Page
             services.AddSingleton<MainWindow>();        // Window
-            services.AddSingleton<MainAdminPage>();     // Page 
-            services.AddSingleton<OrdersPage>();        // Page 
+            services.AddTransient<MainAdminPage>();     // Page 
+            services.AddTransient<OrdersPage>();        // Page 
             services.AddTransient<AddSparePartWindow>();// Window
             services.AddTransient<AddOrderWindow>();    // Window
             services.AddTransient<ClientsPage>();       // Page 
