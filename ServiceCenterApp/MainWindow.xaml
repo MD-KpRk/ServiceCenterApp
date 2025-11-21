@@ -78,8 +78,10 @@
                         Command="{Binding NavigateCommand}"
                         CommandParameter="Employees"
                         />
-                
-                <Button Content="Склад" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource StorageIcon}" Visibility="{Binding StorageVisibility}"/>
+                <Button Content="Склад" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource StorageIcon}" 
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Storage"
+                        Visibility="{Binding StorageVisibility}"/>
                 <Button Content="Финансы" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource FinanceIcon}" Visibility="{Binding FinanceVisibility}"/>
             </StackPanel>
 
