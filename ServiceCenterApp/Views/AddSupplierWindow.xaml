@@ -1,0 +1,26 @@
+﻿<Window x:Class="ServiceCenterApp.Views.AddSupplierWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:ServiceCenterApp.Helpers"
+        Title="Новый поставщик" Height="400" Width="500"
+        WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow" ResizeMode="NoResize">
+    <Grid Margin="20">
+        <StackPanel>
+            <TextBlock Text="Добавление поставщика" FontSize="20" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" Margin="0,0,0,20"/>
+
+            <TextBlock Text="Название организации *" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,5"/>
+            <TextBox x:Name="NameTb" MaxLength="128" Style="{StaticResource EditableTextBoxStyle}"/>
+
+            <TextBlock Text="Контакты (Телефон/Email) *" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,5"/>
+            <TextBox x:Name="ContactTb" MaxLength="128" Style="{StaticResource EditableTextBoxStyle}"/>
+
+            <TextBlock Text="Реквизиты / Детали" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,5"/>
+            <TextBox x:Name="DetailsTb" MaxLength="128" TextWrapping="Wrap" MinHeight="60" Style="{StaticResource EditableTextBoxStyle}"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="Отмена" IsCancel="True" Style="{StaticResource SecondaryButtonStyle}" Width="100" Margin="0,0,15,0"/>
+                <Button Content="Сохранить" Click="Save_Click" Style="{StaticResource AccentButtonStyle}" Width="120"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
