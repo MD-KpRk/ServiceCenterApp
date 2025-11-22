@@ -668,6 +668,42 @@ namespace ServiceCenterApp.Migrations
                     b.ToTable("Orders");
                 });
 
+            modelBuilder.Entity("ServiceCenterApp.Models.OrderStatusHistory", b =>
+                {
+                    b.Property<int>("HistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HistoryId"));
+
+                    b.Property<DateTime>("ChangeDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NewStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OldStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("HistoryId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("NewStatusId");
+
+                    b.HasIndex("OldStatusId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderStatusHistories");
+                });
+
             modelBuilder.Entity("ServiceCenterApp.Models.Payment", b =>
                 {
                     b.Property<int>("PaymentId")
@@ -929,7 +965,7 @@ namespace ServiceCenterApp.Migrations
             modelBuilder.Entity("ServiceCenterApp.Models.Employee", b =>
                 {
                     b.HasOne("ServiceCenterApp.Models.Position", "Position")
-                        .WithMany()
+                        .WithMany("Employees")
                         .HasForeignKey("PositionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -993,6 +1029,41 @@ namespace ServiceCenterApp.Migrations
                     b.Navigation("Priority");
 
                     b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("ServiceCenterApp.Models.OrderStatusHistory", b =>
+                {
+                    b.HasOne("ServiceCenterApp.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ServiceCenterApp.Models.Lookup.OrderStatus", "NewStatus")
+                        .WithMany()
+                        .HasForeignKey("NewStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ServiceCenterApp.Models.Lookup.OrderStatus", "OldStatus")
+                        .WithMany()
+                        .HasForeignKey("OldStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ServiceCenterApp.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("NewStatus");
+
+                    b.Navigation("OldStatus");
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Payment", b =>
@@ -1063,6 +1134,11 @@ namespace ServiceCenterApp.Migrations
                     b.Navigation("OrderSpareParts");
 
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("ServiceCenterApp.Models.Position", b =>
+                {
+                    b.Navigation("Employees");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Role", b =>

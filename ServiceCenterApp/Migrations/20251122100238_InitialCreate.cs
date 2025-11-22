@@ -397,6 +397,47 @@ namespace ServiceCenterApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OrderStatusHistories",
+                columns: table => new
+                {
+                    HistoryId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    OldStatusId = table.Column<int>(type: "int", nullable: false),
+                    NewStatusId = table.Column<int>(type: "int", nullable: false),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    ChangeDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderStatusHistories", x => x.HistoryId);
+                    table.ForeignKey(
+                        name: "FK_OrderStatusHistories_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "EmployeeId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_OrderStatusHistories_OrderStatuses_NewStatusId",
+                        column: x => x.NewStatusId,
+                        principalTable: "OrderStatuses",
+                        principalColumn: "StatusId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_OrderStatusHistories_OrderStatuses_OldStatusId",
+                        column: x => x.OldStatusId,
+                        principalTable: "OrderStatuses",
+                        principalColumn: "StatusId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_OrderStatusHistories_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Payments",
                 columns: table => new
                 {
@@ -637,6 +678,26 @@ namespace ServiceCenterApp.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_OrderStatusHistories_EmployeeId",
+                table: "OrderStatusHistories",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderStatusHistories_NewStatusId",
+                table: "OrderStatusHistories",
+                column: "NewStatusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderStatusHistories_OldStatusId",
+                table: "OrderStatusHistories",
+                column: "OldStatusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderStatusHistories_OrderId",
+                table: "OrderStatusHistories",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Payments_OrderId",
                 table: "Payments",
                 column: "OrderId");
@@ -721,6 +782,9 @@ namespace ServiceCenterApp.Migrations
 
             migrationBuilder.DropTable(
                 name: "OrderSpareParts");
+
+            migrationBuilder.DropTable(
+                name: "OrderStatusHistories");
 
             migrationBuilder.DropTable(
                 name: "Payments");
