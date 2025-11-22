@@ -30,7 +30,7 @@ namespace ServiceCenterApp.Services
             }
         }
 
-        private FlowDocument CreateReceptionDocument(Order order)
+        public FlowDocument CreateReceptionDocument(Order order)
         {
             FlowDocument doc = new FlowDocument();
             doc.FontFamily = new FontFamily("Arial");
