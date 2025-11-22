@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection; 
 using ServiceCenterApp.Data;
 using ServiceCenterApp.Models;
 using ServiceCenterApp.Services.Interfaces;
-using ServiceCenterApp.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,19 +14,18 @@ namespace ServiceCenterApp.ViewModels
 {
     public class AddEmployeeViewModel : BaseViewModel
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IPasswordHasher _passwordHasher;
 
         public string FirstName { get; set; }
         public string SurName { get; set; }
         public string Patronymic { get; set; }
         public string ContactInfo { get; set; }
-        public string PinCode { get; set; } 
+        public string PinCode { get; set; }
 
         public List<Role> AllRoles { get; private set; }
         public List<Position> AllPositions { get; private set; }
 
-        // Выбранные значения
         private Role _selectedRole;
         public Role SelectedRole { get => _selectedRole; set { _selectedRole = value; OnPropertyChanged(); } }
 
@@ -35,23 +34,27 @@ namespace ServiceCenterApp.ViewModels
 
         public ICommand SaveCommand { get; }
 
-        public AddEmployeeViewModel(ApplicationDbContext context, IPasswordHasher passwordHasher)
+        public AddEmployeeViewModel(IServiceProvider serviceProvider, IPasswordHasher passwordHasher)
         {
-            _context = context;
+            _serviceProvider = serviceProvider;
             _passwordHasher = passwordHasher;
             SaveCommand = new RelayCommand(ExecuteSave);
         }
 
         public async Task LoadDataAsync()
         {
-            AllRoles = await _context.Roles.ToListAsync();
-            OnPropertyChanged(nameof(AllRoles));
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                AllRoles = await context.Roles.AsNoTracking().ToListAsync();
+                OnPropertyChanged(nameof(AllRoles));
 
-            AllPositions = await _context.Positions.ToListAsync();
-            OnPropertyChanged(nameof(AllPositions));
+                AllPositions = await context.Positions.AsNoTracking().ToListAsync();
+                OnPropertyChanged(nameof(AllPositions));
+            }
 
-            if (AllRoles.Any()) SelectedRole = AllRoles.FirstOrDefault();
-            if (AllPositions.Any()) SelectedPosition = AllPositions.FirstOrDefault();
+            if (AllRoles != null && AllRoles.Any()) SelectedRole = AllRoles.FirstOrDefault();
+            if (AllPositions != null && AllPositions.Any()) SelectedPosition = AllPositions.FirstOrDefault();
         }
 
         private async void ExecuteSave()
@@ -74,25 +77,33 @@ namespace ServiceCenterApp.ViewModels
 
             try
             {
-                var newEmployee = new Employee
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    FirstName = FirstName,
-                    SurName = SurName,
-                    Patronymic = Patronymic,
-                    ContactInfo = ContactInfo,
-                    RoleId = SelectedRole.RoleId,
-                    PositionId = SelectedPosition.PositionId,
-                    // ХЭШИРУЕМ ПАРОЛЬ!
-                    PINHash = _passwordHasher.Hash(PinCode)
-                };
+                    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                _context.Employees.Add(newEmployee);
-                await _context.SaveChangesAsync();
+                    var newEmployee = new Employee
+                    {
+                        FirstName = FirstName,
+                        SurName = SurName,
+                        Patronymic = Patronymic,
+                        ContactInfo = ContactInfo,
+                        RoleId = SelectedRole.RoleId,
+                        PositionId = SelectedPosition.PositionId,
+                        PINHash = _passwordHasher.Hash(PinCode)
+                    };
 
-                // Закрытие окна
+                    context.Employees.Add(newEmployee);
+                    await context.SaveChangesAsync();
+                }
+
                 foreach (Window window in Application.Current.Windows)
                 {
-                    if (window.DataContext == this) { window.DialogResult = true; window.Close(); break; }
+                    if (window.DataContext == this)
+                    {
+                        window.DialogResult = true;
+                        window.Close();
+                        break;
+                    }
                 }
             }
             catch (Exception ex)

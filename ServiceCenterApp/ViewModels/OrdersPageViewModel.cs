@@ -88,6 +88,13 @@ namespace ServiceCenterApp.ViewModels
         public ICommand CloseDetailsCommand { get; }
         public ICommand CreateOrderCommand { get; }
         public ICommand PrintReceiptCommand { get; } // Команда печати
+
+        private readonly IDocumentService _documentService; 
+
+        public ObservableCollection<Document> OrderDocuments { get; } = new();
+
+        public ICommand GenerateReceptionActCommand { get; }
+        public ICommand OpenDocumentCommand { get; }
         #endregion
 
         private OrderListItemViewModel _selectedOrderInList;
@@ -117,7 +124,8 @@ namespace ServiceCenterApp.ViewModels
                                INavigationService navigationService,
                                IServiceProvider serviceProvider,
                                ICurrentUserService currentUserService,
-                               IPrintService printService)
+                               IPrintService printService,
+                               IDocumentService documentService)
         {
             _context = context;
             _navigationService = navigationService;
@@ -136,7 +144,60 @@ namespace ServiceCenterApp.ViewModels
             CreateOrderCommand = new RelayCommand(ExecuteCreateOrder);
             PrintReceiptCommand = new RelayCommand(ExecutePrintReceipt, CanExecuteSaveChanges); // Можно печатать если есть заказ
 
+            _documentService = documentService;
+
+            GenerateReceptionActCommand = new RelayCommand(ExecuteGenerateReceptionAct, CanExecuteSaveChanges);
+            OpenDocumentCommand = new RelayCommand<string>(ExecuteOpenDocument);
+
             InitializeFilters();
+        }
+
+        private async void LoadDocumentsAsync(int? orderId)
+        {
+            OrderDocuments.Clear();
+            if (orderId == null) return;
+
+            var docs = await _documentService.GetDocumentsByOrderIdAsync(orderId.Value);
+            foreach (var doc in docs)
+            {
+                OrderDocuments.Add(doc);
+            }
+        }
+
+        private async void ExecuteGenerateReceptionAct()
+        {
+            if (SelectedOrderDetails == null) return;
+
+            try
+            {
+                var docFlow = _printService.CreateReceptionDocument(SelectedOrderDetails);
+
+                // 2. Сохраняем на диск и в базу (ID типа документа = 1, см. DocumentTypeConfiguration)
+                await _documentService.CreateAndSaveDocumentAsync(SelectedOrderDetails, 1, docFlow);
+
+                LoadDocumentsAsync(SelectedOrderDetails.OrderId);
+
+                // Сразу предлагаем печать
+                // _printService.PrintReceptionReceipt(SelectedOrderDetails);
+
+                MessageBox.Show("Акт приема сформирован и сохранен.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка создания документа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ExecuteOpenDocument(string filePath)
+        {
+            try
+            {
+                _documentService.OpenDocument(filePath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void ExecutePrintReceipt()

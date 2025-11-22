@@ -1,27 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ServiceCenterApp.ViewModels;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace ServiceCenterApp.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для AddEmployeeWindow.xaml
-    /// </summary>
     public partial class AddEmployeeWindow : Window
     {
-        public AddEmployeeWindow()
+        public AddEmployeeViewModel ViewModel => (AddEmployeeViewModel)DataContext;
+        public AddEmployeeWindow(AddEmployeeViewModel viewModel)
         {
             InitializeComponent();
+            DataContext = viewModel;
+            Loaded += Window_Loaded;
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel != null)
+            {
+                await ViewModel.LoadDataAsync();
+            }
         }
     }
 }

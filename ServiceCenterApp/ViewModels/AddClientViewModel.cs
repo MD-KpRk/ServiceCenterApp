@@ -1,8 +1,8 @@
-﻿using ServiceCenterApp.Data;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ServiceCenterApp.Data;
 using ServiceCenterApp.Models;
-using ServiceCenterApp.Services.Interfaces; // Убедись, что этот namespace есть, если там BaseViewModel
+using ServiceCenterApp.Services.Interfaces;
 using System;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -10,7 +10,7 @@ namespace ServiceCenterApp.ViewModels
 {
     public class AddClientViewModel : BaseViewModel
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IServiceProvider _serviceProvider;
 
         public string Surname { get; set; }
         public string FirstName { get; set; }
@@ -21,9 +21,9 @@ namespace ServiceCenterApp.ViewModels
 
         public ICommand SaveCommand { get; }
 
-        public AddClientViewModel(ApplicationDbContext context)
+        public AddClientViewModel(IServiceProvider serviceProvider)
         {
-            _context = context;
+            _serviceProvider = serviceProvider;
             SaveCommand = new RelayCommand(ExecuteSave);
         }
 
@@ -37,20 +37,23 @@ namespace ServiceCenterApp.ViewModels
 
             try
             {
-                var newClient = new Client
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    SurName = Surname,
-                    FirstName = FirstName,
-                    Patronymic = Patronymic,
-                    PhoneNumber = PhoneNumber,
-                    Email = Email,
-                    Comment = Comment
-                };
+                    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                _context.Clients.Add(newClient);
-                await _context.SaveChangesAsync();
+                    var newClient = new Client
+                    {
+                        SurName = Surname,
+                        FirstName = FirstName,
+                        Patronymic = Patronymic,
+                        PhoneNumber = PhoneNumber,
+                        Email = Email,
+                        Comment = Comment
+                    };
 
-                // Закрываем окно
+                    context.Clients.Add(newClient);
+                    await context.SaveChangesAsync();
+                }
                 foreach (Window window in Application.Current.Windows)
                 {
                     if (window.DataContext == this)
