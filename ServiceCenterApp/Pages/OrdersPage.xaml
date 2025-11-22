@@ -343,7 +343,7 @@
                                         </WrapPanel>
 
                                         <!-- БЛОК 4: ЗАПЧАСТИ -->
-                                        <StackPanel Margin="0,0,40,0" Width="{Binding ElementName=RightWrapPanel, Path=ActualWidth}">
+                                        <StackPanel Margin="0,0,20,20" Width="{Binding ElementName=RightWrapPanel, Path=ActualWidth}">
                                             <TextBlock Text="ИСПОЛЬЗУЕМЫЕ ЗАПЧАСТИ" Style="{StaticResource SectionHeaderStyle}"/>
                                             <Border Style="{StaticResource InfoBorderStyle}">
                                                 <StackPanel>
@@ -355,12 +355,13 @@
                                                                 <ColumnDefinition Width="2*"/>
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="30"/>
                                                             </Grid.ColumnDefinitions>
                                                             <TextBlock Grid.Column="0" Text="Название" Style="{StaticResource KpiTitleStyle}"/>
                                                             <TextBlock Grid.Column="1" Text="Остаток" Style="{StaticResource KpiTitleStyle}" Margin="10,0"/>
                                                             <TextBlock Grid.Column="2" Text="Количество" Style="{StaticResource KpiTitleStyle}" HorizontalAlignment="Center"/>
                                                             <TextBlock Grid.Column="3" Text="Цена" Style="{StaticResource KpiTitleStyle}" HorizontalAlignment="Right" Margin="10,0"/>
-                                                            <TextBlock Grid.Column="4" Text="Сумма" Style="{StaticResource KpiTitleStyle}" HorizontalAlignment="Right"/>
+                                                            <TextBlock Grid.Column="4" Text="Сумма" Style="{StaticResource KpiTitleStyle}" Margin="0 0 20 0" HorizontalAlignment="Right"/>
                                                         </Grid>
                                                     </Border>
                                                     <ItemsControl ItemsSource="{Binding DataContext.UsedSpareParts, RelativeSource={RelativeSource AncestorType=Page}}">
@@ -386,7 +387,77 @@
                                                 Command="{Binding DataContext.AddSparePartCommand, RelativeSource={RelativeSource AncestorType=Page}}"/>
                                                 </StackPanel>
                                             </Border>
+                                            
+                                            
                                         </StackPanel>
+
+                                        <!-- БЛОК 5: ВЫПОЛНЕННЫЕ РАБОТЫ -->
+                                        <StackPanel Margin="0,0,20,20" Width="{Binding ElementName=RightWrapPanel, Path=ActualWidth}">
+                                            <TextBlock Text="ВЫПОЛНЕННЫЕ РАБОТЫ И УСЛУГИ" Style="{StaticResource SectionHeaderStyle}"/>
+                                            <Border Style="{StaticResource InfoBorderStyle}">
+                                                <StackPanel>
+                                                    <!-- Шапка таблицы (Как у запчастей) -->
+                                                    <Border BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="10,5">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="2*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="2*"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="30"/>
+                                                                <!-- Место под крестик -->
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <TextBlock Grid.Column="0" Text="Наименование услуги" Style="{StaticResource KpiTitleStyle}"/>
+                                                            <!-- Колонка 1 пропущена (Остаток) -->
+                                                            <TextBlock Grid.Column="3" Text="Цена" Style="{StaticResource KpiTitleStyle}" HorizontalAlignment="Right" Margin="10,0"/>
+                                                            <TextBlock Grid.Column="4" Text="Сумма" Style="{StaticResource KpiTitleStyle}" HorizontalAlignment="Right"/>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <ItemsControl ItemsSource="{Binding DataContext.UsedServices, RelativeSource={RelativeSource AncestorType=Page}}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <controls:UsedServiceControl/>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+
+                                                    <Separator Margin="0,10"/>
+
+                                                    <DockPanel>
+                                                        <TextBlock Text="Общая сумма по работам:" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding DataContext.ServicesTotalSum, RelativeSource={RelativeSource AncestorType=Page}, StringFormat={}{0:C2}}"
+                                                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Right"
+                                                                   Foreground="{StaticResource PrimaryBrush}"/>
+                                                    </DockPanel>
+
+                                                    <Button Content="+ Добавить работу" 
+                                                            MinHeight="30"
+                                                            Style="{StaticResource SecondaryButtonStyle}" 
+                                                            HorizontalAlignment="Right" 
+                                                            Margin="0,10,0,0" 
+                                                            MinWidth="160"
+                                                            Command="{Binding DataContext.AddServiceCommand, RelativeSource={RelativeSource AncestorType=Page}}"/>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- ИТОГОВАЯ СУММА ВСЕГО ЗАКАЗА -->
+                                            <Border Background="{StaticResource PrimaryBrush}" CornerRadius="5" Padding="15" Margin="0,20,0,0">
+                                                <Border.Effect>
+                                                    <DropShadowEffect ShadowDepth="2" BlurRadius="10" Opacity="0.3"/>
+                                                </Border.Effect>
+                                                <DockPanel>
+                                                    <TextBlock Text="ИТОГО К ОПЛАТЕ:" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                        <TextBlock Text="{Binding DataContext.GrandTotalSum, RelativeSource={RelativeSource AncestorType=Page}, StringFormat={}{0:C2}}" 
+                                                                   Foreground="White" FontSize="24" FontWeight="Bold"/>
+                                                    </StackPanel>
+                                                </DockPanel>
+                                            </Border>
+                                        </StackPanel>
+
                                     </StackPanel>
                                 </ScrollViewer>
                             </TabItem>

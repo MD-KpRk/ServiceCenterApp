@@ -65,21 +65,23 @@ namespace ServiceCenterApp
             services.AddTransient<AddEmployeeViewModel>();
             services.AddTransient<StorageViewModel>();
             services.AddTransient<AddEditSparePartViewModel>();
+            services.AddTransient<AddServiceViewModel>();
 
             // --- VIEWS ---
-            services.AddSingleton<MainWindow>();        // Window
-            services.AddTransient<AuthPage>();          // Page
-            services.AddTransient<InstallationPage>();  // Page
-            services.AddTransient<MainAdminPage>();     // Page 
-            services.AddTransient<OrdersPage>();        // Page 
-            services.AddTransient<AddSparePartWindow>();// Window
-            services.AddTransient<AddOrderWindow>();    // Window
-            services.AddTransient<ClientsPage>();       // Page 
-            services.AddTransient<AddClientWindow>();   // Window
-            services.AddTransient<EmployeesPage>();     // Page
-            services.AddTransient<AddEmployeeWindow>(); // Window
-            services.AddTransient<StoragePage>();       // Page
-            services.AddTransient<AddEditSparePartWindow>(); // Window
+            services.AddSingleton<MainWindow>();            // Window
+            services.AddTransient<AuthPage>();              // Page
+            services.AddTransient<InstallationPage>();      // Page
+            services.AddTransient<MainAdminPage>();         // Page 
+            services.AddTransient<OrdersPage>();            // Page 
+            services.AddTransient<AddSparePartWindow>();    // Window
+            services.AddTransient<AddOrderWindow>();        // Window
+            services.AddTransient<ClientsPage>();           // Page 
+            services.AddTransient<AddClientWindow>();       // Window
+            services.AddTransient<EmployeesPage>();         // Page
+            services.AddTransient<AddEmployeeWindow>();     // Window
+            services.AddTransient<StoragePage>();           // Page
+            services.AddTransient<AddEditSparePartWindow>();// Window
+            services.AddTransient<AddServiceWindow>();      //Window
 
 
             _serviceProvider = services.BuildServiceProvider();

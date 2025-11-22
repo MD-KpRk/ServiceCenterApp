@@ -32,21 +32,24 @@ namespace ServiceCenterApp.ViewModels
 
         // --- HISTORY ---
         public ObservableCollection<OrderStatusHistory> StatusHistory { get; } = new();
+        public ObservableCollection<UsedServiceViewModel> UsedServices { get; } = new();
 
-        #region Свойства для левой панели (Список)
-        private List<OrderListItemViewModel> _allOrders = new List<OrderListItemViewModel>();
+        private decimal _grandTotalSum;
+        public decimal GrandTotalSum { get => _grandTotalSum; set { _grandTotalSum = value; OnPropertyChanged(); } }
+
+        private List<OrderListItemViewModel> _allOrders = new();
         public ObservableCollection<OrderListItemViewModel> FilteredOrders { get; }
         public ObservableCollection<StatusFilterViewModel> StatusFilters { get; }
         public ICommand SelectOrderCommand { get; }
+        public ICommand AddServiceCommand { get; }
         private string _searchText;
         public string SearchText
         {
             get => _searchText;
             set { _searchText = value; OnPropertyChanged(); ApplyFilters(); }
         }
-        #endregion
 
-        #region Свойства для правой панели (Детали)
+
         private Order _selectedOrderDetails;
         public Order SelectedOrderDetails
         {
@@ -98,7 +101,6 @@ namespace ServiceCenterApp.ViewModels
 
         public ICommand GenerateReceptionActCommand { get; }
         public ICommand OpenDocumentCommand { get; }
-        #endregion
 
         private OrderListItemViewModel _selectedOrderInList;
         public OrderListItemViewModel SelectedOrderInList
@@ -145,7 +147,8 @@ namespace ServiceCenterApp.ViewModels
             SaveChangesCommand = new RelayCommand(ExecuteSaveChanges, CanExecuteSaveChanges);
             CloseDetailsCommand = new RelayCommand(CloseDetails);
             CreateOrderCommand = new RelayCommand(ExecuteCreateOrder);
-            PrintReceiptCommand = new RelayCommand(ExecutePrintReceipt, CanExecuteSaveChanges); // Можно печатать если есть заказ
+            PrintReceiptCommand = new RelayCommand(ExecutePrintReceipt, CanExecuteSaveChanges); 
+            AddServiceCommand = new RelayCommand(ExecuteAddService, CanExecuteSaveChanges);
 
             _documentService = documentService;
 
@@ -153,6 +156,84 @@ namespace ServiceCenterApp.ViewModels
             OpenDocumentCommand = new RelayCommand<string>(ExecuteOpenDocument);
 
             InitializeFilters();
+        }
+
+        private async void ExecuteAddService()
+        {
+            var window = (AddServiceWindow)_serviceProvider.GetService(typeof(AddServiceWindow));
+            if (window.ShowDialog() == true)
+            {
+                var selectedExternal = window.ViewModel.SelectedService; // Это объект из чужого контекста
+
+                if (selectedExternal == null) return;
+
+                if (UsedServices.Any(s => s.ServiceId == selectedExternal.ServiceId))
+                {
+                    MessageBox.Show("Эта услуга уже добавлена.");
+                    return;
+                }
+
+                Service? localService = await _context.Services.FindAsync(selectedExternal.ServiceId);
+
+                if (localService == null) return; 
+
+                var newOrderService = new OrderService
+                {
+                    Order = SelectedOrderDetails,
+                    OrderId = SelectedOrderDetails.OrderId,
+                    ServiceId = localService.ServiceId,
+                    Service = localService, 
+                    Price = localService.BasePrice
+                };
+
+                SelectedOrderDetails.OrderServices.Add(newOrderService);
+                UsedServices.Add(new UsedServiceViewModel(newOrderService, CalculateTotalSum, RemoveService));
+
+                CalculateTotalSum();
+            }
+        }
+
+
+
+        private void CalculateTotalSum()
+        {
+            SparePartsTotalSum = UsedSpareParts.Sum(p => p.TotalSum);
+
+            ServicesTotalSum = UsedServices.Sum(s => s.TotalSum);
+            GrandTotalSum = SparePartsTotalSum + ServicesTotalSum;
+        }
+
+        private void UpdateUsedServices()
+        {
+            UsedServices.Clear();
+            if (SelectedOrderDetails?.OrderServices != null)
+            {
+                foreach (var svc in SelectedOrderDetails.OrderServices)
+                {
+                    UsedServices.Add(new UsedServiceViewModel(svc, CalculateTotalSum, RemoveService));
+                }
+            }
+            CalculateTotalSum();
+        }
+
+
+        private void RemoveService(UsedServiceViewModel vm)
+        {
+            // Удаляем из UI
+            UsedServices.Remove(vm);
+
+            // Удаляем из модели заказа (чтобы EF удалил из базы при сохранении)
+            var itemToRemove = SelectedOrderDetails.OrderServices
+                .FirstOrDefault(s => s.ServiceId == vm.ServiceId && s.OrderServiceId == vm.ServiceId); // Упрощено
+
+            // Лучший способ поиска для удаления:
+            var entity = SelectedOrderDetails.OrderServices.FirstOrDefault(s => s.ServiceId == vm.ServiceId);
+            if (entity != null)
+            {
+                SelectedOrderDetails.OrderServices.Remove(entity);
+            }
+
+            CalculateTotalSum();
         }
 
         private async Task LoadDocumentsAsync(int orderId)
@@ -466,6 +547,7 @@ namespace ServiceCenterApp.ViewModels
                     .Include(o => o.Device)
                     .Include(o => o.OrderSpareParts)
                         .ThenInclude(osp => osp.SparePart)
+                    .Include(o => o.OrderServices).ThenInclude(os => os.Service)
                     .FirstOrDefaultAsync(o => o.OrderId == orderId, token);
 
                 if (token.IsCancellationRequested) return;
@@ -480,6 +562,7 @@ namespace ServiceCenterApp.ViewModels
                     SelectedPriority = AllPriorities.FirstOrDefault(p => p.PriorityId == SelectedOrderDetails.PriorityId);
 
                     UpdateUsedSpareParts();
+                    UpdateUsedServices();
 
 
                     await LoadDocumentsAsync(orderId.Value);
@@ -503,16 +586,40 @@ namespace ServiceCenterApp.ViewModels
             {
                 foreach (var part in SelectedOrderDetails.OrderSpareParts)
                 {
-                    UsedSpareParts.Add(new UsedSparePartViewModel(part, CalculateSparePartsTotalSum));
+                    UsedSpareParts.Add(new UsedSparePartViewModel(part, CalculateTotalSum, RemoveSparePart));
                 }
             }
-            CalculateSparePartsTotalSum();
+            CalculateTotalSum();
         }
 
-        private void CalculateSparePartsTotalSum()
+        private void RemoveSparePart(UsedSparePartViewModel vm)
         {
-            SparePartsTotalSum = UsedSpareParts.Sum(p => p.TotalSum);
+            var linkEntity = SelectedOrderDetails.OrderSpareParts
+                .FirstOrDefault(osp => osp.PartId == vm.PartId);
+
+            if (linkEntity != null)
+            {
+                if (linkEntity.SparePart != null)
+                {
+                    linkEntity.SparePart.StockQuantity += linkEntity.Quantity;
+                }
+
+                SelectedOrderDetails.OrderSpareParts.Remove(linkEntity);
+            }
+
+            UsedSpareParts.Remove(vm);
+
+            CalculateTotalSum();
         }
+
+        private decimal _servicesTotalSum;
+        public decimal ServicesTotalSum
+        {
+            get => _servicesTotalSum;
+            set { _servicesTotalSum = value; OnPropertyChanged(); }
+        }
+
+
 
         private bool CanExecuteAddSparePart() => SelectedOrderDetails != null;
 
@@ -545,6 +652,7 @@ namespace ServiceCenterApp.ViewModels
                     if (trackedPart != null)
                     {
                         trackedPart.StockQuantity -= 1;
+
                         var newOrderSparePart = new OrderSparePart
                         {
                             Order = SelectedOrderDetails,
@@ -554,10 +662,12 @@ namespace ServiceCenterApp.ViewModels
                             Quantity = 1
                         };
                         SelectedOrderDetails.OrderSpareParts.Add(newOrderSparePart);
-                        UsedSpareParts.Add(new UsedSparePartViewModel(newOrderSparePart, CalculateSparePartsTotalSum));
+
+                        // ОБНОВЛЕНО: передаем RemoveSparePart
+                        UsedSpareParts.Add(new UsedSparePartViewModel(newOrderSparePart, CalculateTotalSum, RemoveSparePart));
                     }
                 }
-                CalculateSparePartsTotalSum();
+                CalculateTotalSum();
             }
         }
 
