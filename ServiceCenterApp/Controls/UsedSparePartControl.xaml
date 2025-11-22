@@ -15,40 +15,35 @@
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="30"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Название и Артикул -->
             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
                 <TextBlock Text="{Binding PartNumber}" Foreground="Gray" FontSize="11"/>
             </StackPanel>
 
-            <!-- Остаток на складе -->
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0">
                 <TextBlock Text="Остаток:" FontSize="11" Foreground="Gray" HorizontalAlignment="Center"/>
                 <TextBlock Text="{Binding StockQuantity}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
             </StackPanel>
 
-            <!-- Управление количеством -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Button Command="{Binding DecreaseQuantityCommand}" Content="-" FontSize="16" Style="{StaticResource SecondaryButtonStyle}" Width="20" Padding="8,4" Margin="0,0,5,0"/>
-                <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" 
-                         Width="50" 
-                         TextAlignment="Center" 
-                         VerticalContentAlignment="Center"
-                         MaxLength="7" 
-                         PreviewTextInput="NumberValidationTextBox"
-                         DataObject.Pasting="TextBox_Pasting"/>
+                <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="50" TextAlignment="Center" VerticalContentAlignment="Center" MaxLength="7"/>
                 <Button Command="{Binding IncreaseQuantityCommand}" Content="+" FontSize="16" Style="{StaticResource SecondaryButtonStyle}" Width="20" Padding="8,4" Margin="5,0,0,0"/>
             </StackPanel>
 
-            <!-- Цена за шт. -->
-            <TextBlock Grid.Column="3" Text="{Binding Price, StringFormat={}{0:C0}}" 
-                       VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0"/>
+            <TextBlock Grid.Column="3" Text="{Binding Price, StringFormat={}{0:C0}}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0"/>
 
-            <!-- Итоговая сумма -->
-            <TextBlock Grid.Column="4" Text="{Binding TotalSum, StringFormat={}{0:C0}}" 
-                       FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            <TextBlock Grid.Column="4" Margin="0 0 20 0" Text="{Binding TotalSum, StringFormat={}{0:C0}}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+
+            <Button Grid.Column="5" Content="X" 
+                    Command="{Binding RemoveCommand}" 
+                    Style="{StaticResource SecondaryButtonStyle}" 
+                    Padding="0" Height="30" Width="30" 
+                    Foreground="Red" Margin="0,0,0,0"
+                    ToolTip="Удалить запчасть из заказа"/>
         </Grid>
     </Border>
 </UserControl>

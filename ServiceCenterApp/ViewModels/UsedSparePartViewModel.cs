@@ -8,12 +8,14 @@ namespace ServiceCenterApp.ViewModels
     {
         private readonly OrderSparePart _orderSparePart;
         private readonly Action _updateTotalSumCallback;
+        private readonly Action<UsedSparePartViewModel> _removeCallback; 
 
         public int PartId => _orderSparePart.PartId;
 
         public string Name => _orderSparePart.SparePart?.Name ?? "Неизвестно";
         public string PartNumber => _orderSparePart.SparePart?.PartNumber ?? "—";
         public decimal Price => _orderSparePart.SparePart?.Price ?? 0;
+
         public int StockQuantity => _orderSparePart.SparePart?.StockQuantity ?? 0;
 
         public decimal TotalSum => Quantity * Price;
@@ -28,16 +30,10 @@ namespace ServiceCenterApp.ViewModels
 
                 if (newQty < 1) newQty = 1;
 
-                int totalAvailable = currentQty + StockQuantity;
-
-                if (newQty > totalAvailable) newQty = totalAvailable;
-
                 if (currentQty != newQty)
                 {
-                    // 3. Вычисляем разницу
                     int diff = newQty - currentQty;
 
-                    // 4. Обновляем количество в заказе
                     _orderSparePart.Quantity = newQty;
 
                     if (_orderSparePart.SparePart != null)
@@ -51,23 +47,22 @@ namespace ServiceCenterApp.ViewModels
 
                     _updateTotalSumCallback?.Invoke();
                 }
-                else if (value != newQty)
-                {
-                    OnPropertyChanged(nameof(Quantity));
-                }
             }
         }
 
         public ICommand IncreaseQuantityCommand { get; }
         public ICommand DecreaseQuantityCommand { get; }
+        public ICommand RemoveCommand { get; } 
 
-        public UsedSparePartViewModel(OrderSparePart orderSparePart, Action updateTotalSumCallback)
+        public UsedSparePartViewModel(OrderSparePart orderSparePart, Action updateTotalSumCallback, Action<UsedSparePartViewModel> removeCallback)
         {
             _orderSparePart = orderSparePart ?? throw new ArgumentNullException(nameof(orderSparePart));
             _updateTotalSumCallback = updateTotalSumCallback;
+            _removeCallback = removeCallback;
 
             IncreaseQuantityCommand = new RelayCommand(() => Quantity++);
             DecreaseQuantityCommand = new RelayCommand(() => Quantity--);
+            RemoveCommand = new RelayCommand(() => _removeCallback(this));
         }
     }
 }
