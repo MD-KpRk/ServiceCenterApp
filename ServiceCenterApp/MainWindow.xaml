@@ -78,7 +78,7 @@
                         Command="{Binding NavigateCommand}"
                         CommandParameter="Employees"
                         />
-                <Button Content="Склад" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource StorageIcon}" 
+                <Button Content="Склад и услуги" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource StorageIcon}" 
                         Command="{Binding NavigateCommand}"
                         CommandParameter="Storage"
                         Visibility="{Binding StorageVisibility}"/>

@@ -3,11 +3,39 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:ServiceCenterApp.Pages"
       mc:Ignorable="d" 
-      d:DesignHeight="800" d:DesignWidth="1200"
       Language="be-BY"
-      Title="Склад">
+      d:DesignHeight="800" d:DesignWidth="1200"
+      Title="Склад и Услуги">
+
+    <Page.Resources>
+        <!-- Стиль для TabItem (для красоты) -->
+        <Style TargetType="TabItem">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Border" BorderBrush="Transparent" BorderThickness="0,0,0,3" Padding="{TemplateBinding Padding}" Background="Transparent">
+                            <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center" ContentSource="Header"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Foreground" Value="Gray"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -15,59 +43,92 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Верхняя панель -->
-        <DockPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Склад запчастей" FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" VerticalAlignment="Center"/>
-            
+        <!-- Верхняя панель (Общий поиск) -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock Text="Склад и услуги" FontSize="28" FontWeight="Bold" Foreground="{StaticResource DarkBackgroundBrush}" VerticalAlignment="Center"/>
+
+            <!-- Поиск работает сразу для обеих вкладок -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <!-- Поиск -->
+                <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="Gray"/>
                 <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
-                         Style="{StaticResource SearchTextBoxStyle}" Width="300" Margin="0,0,20,0" VerticalAlignment="Center"/>
-                
-                <!-- Кнопки управления -->
-                <Button Content="Редактировать" Command="{Binding EditPartCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
-                <Button Content="Удалить" Command="{Binding DeletePartCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0" Foreground="IndianRed"/>
-                <Button Content="+ Добавить деталь" Command="{Binding AddPartCommand}" Style="{StaticResource AccentButtonStyle}"/>
+                         Style="{StaticResource SearchTextBoxStyle}" Width="300" VerticalAlignment="Center"/>
             </StackPanel>
         </DockPanel>
 
-        <!-- Таблица (DataGrid) -->
-        <!-- Мы используем RowStyle для подсветки малого остатка -->
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding FilteredParts}"
-                  SelectedItem="{Binding SelectedPart}"
-                  IsReadOnly="True"
-                  Style="{StaticResource ModernDataGridStyle}"
-                  ColumnHeaderStyle="{StaticResource ModernDataGridColumnHeaderStyle}"
-                  CellStyle="{StaticResource ModernDataGridCellStyle}">
-            
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow" BasedOn="{StaticResource ModernDataGridRowStyle}">
-                    <Style.Triggers>
-                        <!-- ТРИГГЕР: Если остаток < 5, красим текст в красный (Внимание!) -->
-                        <DataTrigger Binding="{Binding StockQuantity}" Value="0">
-                            <Setter Property="Foreground" Value="Red"/>
-                            <Setter Property="FontWeight" Value="Bold"/>
-                        </DataTrigger>
-                        <!-- Можно добавить конвертер для диапазона, но для 0 так проще -->
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.RowStyle>
+        <!-- ВКЛАДКИ -->
+        <TabControl Grid.Row="1" BorderThickness="0" Background="Transparent">
 
-            <!-- Двойной клик для редактирования -->
-            <DataGrid.InputBindings>
-                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditPartCommand}"/>
-            </DataGrid.InputBindings>
+            <!-- 1. ЗАПЧАСТИ -->
+            <TabItem Header="Запчасти на складе">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding PartId}" Width="50"/>
-                <DataGridTextColumn Header="Артикул" Binding="{Binding PartNumber}" Width="120"/>
-                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="2*"/>
-                <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="2*"/>
-                <DataGridTextColumn Header="Поставщик" Binding="{Binding Supplier.Name}" Width="1.5*"/>
-                <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat={}{0:C2}}" Width="100"/>
-                <DataGridTextColumn Header="Остаток" Binding="{Binding StockQuantity}" Width="100" FontWeight="SemiBold"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                    <!-- Кнопки управления Запчастями -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+                        <Button Content="Редактировать" Width="120" Command="{Binding EditPartCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
+                        <Button Content="Удалить" Width="120" Command="{Binding DeletePartCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0" Foreground="IndianRed"/>
+                        <Button Content="+ Запчасть" Width="120" Command="{Binding AddPartCommand}" Style="{StaticResource AccentButtonStyle}"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding FilteredParts}"
+                              SelectedItem="{Binding SelectedPart}"
+                              IsReadOnly="True"
+                              Style="{StaticResource ModernDataGridStyle}"
+                              ColumnHeaderStyle="{StaticResource ModernDataGridColumnHeaderStyle}"
+                              CellStyle="{StaticResource ModernDataGridCellStyle}">
+                        <DataGrid.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditPartCommand}"/>
+                        </DataGrid.InputBindings>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Артикул" Binding="{Binding PartNumber}" Width="120"/>
+                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="2*"/>
+                            <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="2*"/>
+                            <DataGridTextColumn Header="Поставщик" Binding="{Binding Supplier.Name}" Width="1.5*"/>
+                            <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat={}{0:C2}}" Width="100"/>
+                            <DataGridTextColumn Header="Остаток" Binding="{Binding StockQuantity}" Width="100" FontWeight="SemiBold"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- 2. УСЛУГИ (НОВОЕ) -->
+            <TabItem Header="Каталог услуг">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Кнопки управления Услугами -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+                        <Button Content="Редактировать" Width="120" Command="{Binding EditServiceCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0"/>
+                        <Button Content="Удалить" Width="120" Command="{Binding DeleteServiceCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0" Foreground="IndianRed"/>
+                        <Button Content="+ Услуга" Width="120" Command="{Binding AddServiceCommand}" Style="{StaticResource AccentButtonStyle}"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding FilteredServices}"
+                              SelectedItem="{Binding SelectedService}"
+                              IsReadOnly="True"
+                              Style="{StaticResource ModernDataGridStyle}"
+                              ColumnHeaderStyle="{StaticResource ModernDataGridColumnHeaderStyle}"
+                              CellStyle="{StaticResource ModernDataGridCellStyle}">
+                        <DataGrid.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditServiceCommand}"/>
+                        </DataGrid.InputBindings>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding ServiceId}" Width="50"/>
+                            <DataGridTextColumn Header="Название услуги" Binding="{Binding Name}" Width="3*"/>
+                            <DataGridTextColumn Header="Базовая цена" Binding="{Binding BasePrice, StringFormat={}{0:C2}}" Width="150" FontWeight="Bold"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
     </Grid>
 </Page>

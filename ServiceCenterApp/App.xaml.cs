@@ -66,6 +66,7 @@ namespace ServiceCenterApp
             services.AddTransient<StorageViewModel>();
             services.AddTransient<AddEditSparePartViewModel>();
             services.AddTransient<AddServiceViewModel>();
+            services.AddTransient<AddEditServiceViewModel>();
 
             // --- VIEWS ---
             services.AddSingleton<MainWindow>();            // Window
@@ -81,8 +82,8 @@ namespace ServiceCenterApp
             services.AddTransient<AddEmployeeWindow>();     // Window
             services.AddTransient<StoragePage>();           // Page
             services.AddTransient<AddEditSparePartWindow>();// Window
-            services.AddTransient<AddServiceWindow>();      //Window
-
+            services.AddTransient<AddServiceWindow>();      // Window
+            services.AddTransient<AddEditServiceWindow>();  // Window
 
             _serviceProvider = services.BuildServiceProvider();
             ConfigureNavigation();

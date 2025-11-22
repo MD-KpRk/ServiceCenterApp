@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:helpers="clr-namespace:ServiceCenterApp.Helpers"
         mc:Ignorable="d"
+        Language="be-BY"
         Title="{Binding WindowTitle}" Height="600" Width="500"
         WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow" ResizeMode="NoResize">
     <Grid Margin="20">
