@@ -155,6 +155,20 @@ namespace ServiceCenterApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Services",
+                columns: table => new
+                {
+                    ServiceId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    BasePrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Services", x => x.ServiceId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Suppliers",
                 columns: table => new
                 {
@@ -372,6 +386,33 @@ namespace ServiceCenterApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OrderServices",
+                columns: table => new
+                {
+                    OrderServiceId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    ServiceId = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(10,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderServices", x => x.OrderServiceId);
+                    table.ForeignKey(
+                        name: "FK_OrderServices_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderServices_Services_ServiceId",
+                        column: x => x.ServiceId,
+                        principalTable: "Services",
+                        principalColumn: "ServiceId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OrderSpareParts",
                 columns: table => new
                 {
@@ -550,6 +591,18 @@ namespace ServiceCenterApp.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Services",
+                columns: new[] { "ServiceId", "BasePrice", "Name" },
+                values: new object[,]
+                {
+                    { 1, 0m, "Диагностика (Первичная)" },
+                    { 2, 30m, "Диагностика (С разборкой)" },
+                    { 3, 50m, "Чистка от пыли + Термопаста" },
+                    { 4, 45m, "Установка Windows + Драйверы" },
+                    { 5, 100m, "Пайка (Сложный ремонт)" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "RolePermissions",
                 columns: new[] { "PermissionId", "RoleId" },
                 values: new object[,]
@@ -667,6 +720,16 @@ namespace ServiceCenterApp.Migrations
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_OrderServices_OrderId",
+                table: "OrderServices",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderServices_ServiceId",
+                table: "OrderServices",
+                column: "ServiceId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OrderSpareParts_PartId",
                 table: "OrderSpareParts",
                 column: "PartId");
@@ -754,6 +817,12 @@ namespace ServiceCenterApp.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Services_Name",
+                table: "Services",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SpareParts_PartNumber",
                 table: "SpareParts",
                 column: "PartNumber",
@@ -781,6 +850,9 @@ namespace ServiceCenterApp.Migrations
                 name: "Documents");
 
             migrationBuilder.DropTable(
+                name: "OrderServices");
+
+            migrationBuilder.DropTable(
                 name: "OrderSpareParts");
 
             migrationBuilder.DropTable(
@@ -794,6 +866,9 @@ namespace ServiceCenterApp.Migrations
 
             migrationBuilder.DropTable(
                 name: "DocumentTypes");
+
+            migrationBuilder.DropTable(
+                name: "Services");
 
             migrationBuilder.DropTable(
                 name: "SpareParts");

@@ -22,6 +22,32 @@ namespace ServiceCenterApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ServiceCenterApp.Models.Associations.OrderService", b =>
+                {
+                    b.Property<int>("OrderServiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderServiceId"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(10, 2)");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderServiceId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("OrderServices");
+                });
+
             modelBuilder.Entity("ServiceCenterApp.Models.Associations.OrderSparePart", b =>
                 {
                     b.Property<int>("OrderId")
@@ -806,6 +832,62 @@ namespace ServiceCenterApp.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ServiceCenterApp.Models.Service", b =>
+                {
+                    b.Property<int>("ServiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServiceId"));
+
+                    b.Property<decimal>("BasePrice")
+                        .HasColumnType("decimal(10, 2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("ServiceId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Services");
+
+                    b.HasData(
+                        new
+                        {
+                            ServiceId = 1,
+                            BasePrice = 0m,
+                            Name = "Диагностика (Первичная)"
+                        },
+                        new
+                        {
+                            ServiceId = 2,
+                            BasePrice = 30m,
+                            Name = "Диагностика (С разборкой)"
+                        },
+                        new
+                        {
+                            ServiceId = 3,
+                            BasePrice = 50m,
+                            Name = "Чистка от пыли + Термопаста"
+                        },
+                        new
+                        {
+                            ServiceId = 4,
+                            BasePrice = 45m,
+                            Name = "Установка Windows + Драйверы"
+                        },
+                        new
+                        {
+                            ServiceId = 5,
+                            BasePrice = 100m,
+                            Name = "Пайка (Сложный ремонт)"
+                        });
+                });
+
             modelBuilder.Entity("ServiceCenterApp.Models.SparePart", b =>
                 {
                     b.Property<int>("PartId")
@@ -876,6 +958,25 @@ namespace ServiceCenterApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Suppliers");
+                });
+
+            modelBuilder.Entity("ServiceCenterApp.Models.Associations.OrderService", b =>
+                {
+                    b.HasOne("ServiceCenterApp.Models.Order", "Order")
+                        .WithMany("OrderServices")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ServiceCenterApp.Models.Service", "Service")
+                        .WithMany("OrderServices")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Associations.OrderSparePart", b =>
@@ -1131,6 +1232,8 @@ namespace ServiceCenterApp.Migrations
 
                     b.Navigation("Documents");
 
+                    b.Navigation("OrderServices");
+
                     b.Navigation("OrderSpareParts");
 
                     b.Navigation("Payments");
@@ -1146,6 +1249,11 @@ namespace ServiceCenterApp.Migrations
                     b.Navigation("Employees");
 
                     b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("ServiceCenterApp.Models.Service", b =>
+                {
+                    b.Navigation("OrderServices");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.SparePart", b =>

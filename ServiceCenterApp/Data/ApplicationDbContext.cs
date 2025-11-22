@@ -23,11 +23,13 @@ namespace ServiceCenterApp.Data
         public DbSet<Document> Documents { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<Position> Positions { get; set; }
+        public DbSet<Service> Services { get; set; }
         public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
 
         // --- Association Helper Tables ---
         public DbSet<OrderSparePart> OrderSpareParts { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<OrderService> OrderServices { get; set; }
 
         // --- Lookup Tables ---
         public DbSet<Role> Roles { get; set; }

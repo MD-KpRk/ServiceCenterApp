@@ -54,6 +54,7 @@ namespace ServiceCenterApp.Models
         public virtual DiagnosticReport? DiagnosticReport { get; set; }
 
         public virtual ICollection<OrderSparePart> OrderSpareParts { get; set; } = new List<OrderSparePart>();
+        public virtual ICollection<OrderService> OrderServices { get; set; } = new List<OrderService>();
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
         public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
     }
