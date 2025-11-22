@@ -18,7 +18,7 @@ namespace ServiceCenterApp.Models
         public int DocumentTypeId { get; set; }
 
         [Required]
-        [MaxLength(128)]
+        [MaxLength(512)] 
         public string? FilePath { get; set; }
 
         public DateTime CreationDate { get; set; } = DateTime.Now;
