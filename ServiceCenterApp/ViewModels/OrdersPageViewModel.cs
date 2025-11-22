@@ -5,6 +5,7 @@ using ServiceCenterApp.Helpers;
 using ServiceCenterApp.Models;
 using ServiceCenterApp.Models.Associations;
 using ServiceCenterApp.Models.Lookup;
+using ServiceCenterApp.Services; // Для PrintService
 using ServiceCenterApp.Services.Interfaces;
 using ServiceCenterApp.Views;
 using System;
@@ -22,6 +23,11 @@ namespace ServiceCenterApp.ViewModels
         private readonly ApplicationDbContext _context;
         private readonly INavigationService _navigationService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICurrentUserService _currentUserService; // кто менял
+        private readonly IPrintService _printService;
+
+        // --- HISTORY ---
+        public ObservableCollection<OrderStatusHistory> StatusHistory { get; } = new();
 
         #region Свойства для левой панели (Список)
         private List<OrderListItemViewModel> _allOrders = new List<OrderListItemViewModel>();
@@ -46,10 +52,10 @@ namespace ServiceCenterApp.ViewModels
                 _selectedOrderDetails = value;
                 OnPropertyChanged();
                 UpdateUsedSpareParts();
+                LoadHistoryAsync(value?.OrderId); // Загружаем историю
             }
         }
 
-        // Списки
         private List<OrderStatusViewModel> _allOrderStatuses;
         public List<OrderStatusViewModel> AllOrderStatuses { get => _allOrderStatuses; private set { _allOrderStatuses = value; OnPropertyChanged(); } }
         private List<Employee> _allEmployees;
@@ -57,9 +63,17 @@ namespace ServiceCenterApp.ViewModels
         private List<Priority> _allPriorities;
         public List<Priority> AllPriorities { get => _allPriorities; private set { _allPriorities = value; OnPropertyChanged(); } }
 
-        // Выбранные элементы
         private OrderStatusViewModel _selectedOrderStatus;
-        public OrderStatusViewModel SelectedOrderStatus { get => _selectedOrderStatus; set { _selectedOrderStatus = value; OnPropertyChanged(); if (SelectedOrderDetails != null && value != null) SelectedOrderDetails.StatusId = value.StatusId; } }
+        public OrderStatusViewModel SelectedOrderStatus
+        {
+            get => _selectedOrderStatus;
+            set
+            {
+                _selectedOrderStatus = value;
+                OnPropertyChanged();
+                if (SelectedOrderDetails != null && value != null) SelectedOrderDetails.StatusId = value.StatusId;
+            }
+        }
         private Employee _selectedAcceptorEmployee;
         public Employee SelectedAcceptorEmployee { get => _selectedAcceptorEmployee; set { _selectedAcceptorEmployee = value; OnPropertyChanged(); if (SelectedOrderDetails != null) SelectedOrderDetails.AcceptorEmployeeId = value?.EmployeeId; } }
         private Priority _selectedPriority;
@@ -73,9 +87,9 @@ namespace ServiceCenterApp.ViewModels
         public ICommand AddSparePartCommand { get; }
         public ICommand CloseDetailsCommand { get; }
         public ICommand CreateOrderCommand { get; }
+        public ICommand PrintReceiptCommand { get; } // Команда печати
         #endregion
 
-        #region "Клей" между панелями
         private OrderListItemViewModel _selectedOrderInList;
         public OrderListItemViewModel SelectedOrderInList
         {
@@ -97,13 +111,19 @@ namespace ServiceCenterApp.ViewModels
                 LoadOrderDetailsAsync(value?.OrderId);
             }
         }
-        #endregion
 
-        public OrdersViewModel(ApplicationDbContext context, INavigationService navigationService, IServiceProvider serviceProvider)
+        // Конструктор обновлен (добавлены сервисы)
+        public OrdersViewModel(ApplicationDbContext context,
+                               INavigationService navigationService,
+                               IServiceProvider serviceProvider,
+                               ICurrentUserService currentUserService,
+                               IPrintService printService)
         {
             _context = context;
             _navigationService = navigationService;
             _serviceProvider = serviceProvider;
+            _currentUserService = currentUserService;
+            _printService = printService;
 
             FilteredOrders = new ObservableCollection<OrderListItemViewModel>();
             StatusFilters = new ObservableCollection<StatusFilterViewModel>();
@@ -114,14 +134,41 @@ namespace ServiceCenterApp.ViewModels
             SaveChangesCommand = new RelayCommand(ExecuteSaveChanges, CanExecuteSaveChanges);
             CloseDetailsCommand = new RelayCommand(CloseDetails);
             CreateOrderCommand = new RelayCommand(ExecuteCreateOrder);
+            PrintReceiptCommand = new RelayCommand(ExecutePrintReceipt, CanExecuteSaveChanges); // Можно печатать если есть заказ
 
             InitializeFilters();
+        }
+
+        private void ExecutePrintReceipt()
+        {
+            if (SelectedOrderDetails == null) return;
+            _printService.PrintReceptionReceipt(SelectedOrderDetails);
+        }
+
+        // Загрузка истории
+        private async void LoadHistoryAsync(int? orderId)
+        {
+            StatusHistory.Clear();
+            if (orderId == null) return;
+
+            var history = await _context.OrderStatusHistories
+                .AsNoTracking()
+                .Where(h => h.OrderId == orderId)
+                .Include(h => h.OldStatus)
+                .Include(h => h.NewStatus)
+                .Include(h => h.Employee)
+                .OrderByDescending(h => h.ChangeDate)
+                .ToListAsync();
+
+            foreach (var item in history)
+            {
+                StatusHistory.Add(item);
+            }
         }
 
         private async void ExecuteCreateOrder()
         {
             var addOrderWindow = (AddOrderWindow)_serviceProvider.GetService(typeof(AddOrderWindow));
-
             if (addOrderWindow.ShowDialog() == true)
             {
                 await LoadAllOrdersListAsync();
@@ -147,15 +194,12 @@ namespace ServiceCenterApp.ViewModels
                 case MessageBoxResult.Yes:
                     SaveAndNavigateAsync(targetOrder);
                     return true;
-
                 case MessageBoxResult.No:
                     _context.ChangeTracker.Clear();
                     return false;
-
                 case MessageBoxResult.Cancel:
                     return true;
             }
-
             return false;
         }
 
@@ -167,6 +211,7 @@ namespace ServiceCenterApp.ViewModels
                 SelectedOrderInList = targetOrder;
             }
         }
+
         private void CloseDetails()
         {
             SelectedOrderInList = null;
@@ -179,10 +224,6 @@ namespace ServiceCenterApp.ViewModels
             if (await SaveInternalAsync())
             {
                 MessageBox.Show("Изменения успешно сохранены!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                // Не закрываем детали сразу, пользователь может захотеть продолжить работу
-                // CloseDetails(); 
-
-                // Обновляем сумму в списке, если статус изменился или еще что-то
                 if (SelectedOrderInList != null)
                 {
                     SelectedOrderInList.RefreshData(SelectedOrderDetails);
@@ -190,17 +231,32 @@ namespace ServiceCenterApp.ViewModels
             }
         }
 
-        // Улучшенный метод сохранения с Транзакцией
         private async Task<bool> SaveInternalAsync()
         {
             if (SelectedOrderDetails == null) return false;
 
-            // Используем транзакцию, так как меняем Order и потенциально SparePart (StockQuantity)
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // Обновляем навигационные свойства по ID, чтобы EF корректно отследил изменения
+                // Логика истории изменений статуса
+                var originalStatusId = (int?)_context.Entry(SelectedOrderDetails).Property(o => o.StatusId).OriginalValue;
+                var newStatusId = SelectedOrderDetails.StatusId;
+
+                if (originalStatusId.HasValue && originalStatusId.Value != newStatusId)
+                {
+                    var historyRecord = new OrderStatusHistory
+                    {
+                        OrderId = SelectedOrderDetails.OrderId,
+                        OldStatusId = originalStatusId.Value,
+                        NewStatusId = newStatusId,
+                        EmployeeId = _currentUserService.CurrentUser.EmployeeId,
+                        ChangeDate = DateTime.Now
+                    };
+                    _context.OrderStatusHistories.Add(historyRecord);
+                }
+
+                // Стандартное сохранение связей
                 if (SelectedOrderDetails.StatusId != 0)
                 {
                     SelectedOrderDetails.Status = await _context.OrderStatuses.FindAsync(SelectedOrderDetails.StatusId);
@@ -215,15 +271,19 @@ namespace ServiceCenterApp.ViewModels
                     SelectedOrderDetails.AcceptorEmployee = null;
                 }
 
-                // Сохранение изменений
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                // Обновляем UI истории после сохранения
+                if (originalStatusId.HasValue && originalStatusId.Value != newStatusId)
+                {
+                    LoadHistoryAsync(SelectedOrderDetails.OrderId);
+                }
 
                 if (SelectedOrderInList != null)
                 {
                     SelectedOrderInList.RefreshData(SelectedOrderDetails);
                 }
-
                 return true;
             }
             catch (Exception ex)
@@ -236,11 +296,7 @@ namespace ServiceCenterApp.ViewModels
 
         public async Task RefreshAsync()
         {
-            if (_context.ChangeTracker.HasChanges())
-            {
-                _context.ChangeTracker.Clear();
-            }
-
+            if (_context.ChangeTracker.HasChanges()) _context.ChangeTracker.Clear();
             SearchText = string.Empty;
             if (_selectedOrderInList != null) _selectedOrderInList.IsSelected = false;
             _selectedOrderInList = null;
@@ -295,8 +351,6 @@ namespace ServiceCenterApp.ViewModels
                 return;
             }
 
-            // Загружаем полные данные для редактирования
-            // Внимание: тут НЕ используем AsNoTracking, так как мы будем редактировать этот объект
             SelectedOrderDetails = await _context.Orders
                 .Include(o => o.CreatorEmployee)
                 .Include(o => o.AcceptorEmployee)
@@ -305,7 +359,7 @@ namespace ServiceCenterApp.ViewModels
                 .Include(o => o.Client)
                 .Include(o => o.Device)
                 .Include(o => o.OrderSpareParts)
-                    .ThenInclude(osp => osp.SparePart) // Важно подгрузить запчасть, чтобы знать цену и остаток
+                    .ThenInclude(osp => osp.SparePart)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
             if (SelectedOrderDetails != null)
@@ -339,8 +393,6 @@ namespace ServiceCenterApp.ViewModels
         private async void ExecuteAddSparePart()
         {
             var addSparePartWindow = (AddSparePartWindow)_serviceProvider.GetService(typeof(AddSparePartWindow));
-
-            // Считаем, сколько уже добавлено в этом сеансе, чтобы не продать больше, чем есть на складе
             var existingQuantities = new Dictionary<int, int>();
             foreach (var partVm in UsedSpareParts)
             {
@@ -355,24 +407,18 @@ namespace ServiceCenterApp.ViewModels
             if (addSparePartWindow.ShowDialog() == true)
             {
                 var selectedPart = addSparePartWindow.ViewModel.SelectedSparePart;
-
-                // Проверяем, есть ли уже эта запчасть в заказе
                 var existingPartVM = UsedSpareParts.FirstOrDefault(p => p.PartNumber == selectedPart.PartNumber);
 
                 if (existingPartVM != null)
                 {
-                    // Просто увеличиваем количество
                     existingPartVM.Quantity++;
                 }
                 else
                 {
                     var trackedPart = await _context.SpareParts.FindAsync(selectedPart.PartId);
-
                     if (trackedPart != null)
                     {
-                        // Списываем 1 шт сразу
                         trackedPart.StockQuantity -= 1;
-
                         var newOrderSparePart = new OrderSparePart
                         {
                             Order = SelectedOrderDetails,
@@ -381,7 +427,6 @@ namespace ServiceCenterApp.ViewModels
                             PartId = trackedPart.PartId,
                             Quantity = 1
                         };
-
                         SelectedOrderDetails.OrderSpareParts.Add(newOrderSparePart);
                         UsedSpareParts.Add(new UsedSparePartViewModel(newOrderSparePart, CalculateSparePartsTotalSum));
                     }
@@ -394,7 +439,6 @@ namespace ServiceCenterApp.ViewModels
         {
             var selectedStatuses = StatusFilters.Where(f => f.IsChecked).Select(f => f.StatusName).ToHashSet();
             var result = _allOrders.Where(order => selectedStatuses.Contains(order.StatusName));
-
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 string lowerSearchText = SearchText.ToLower();
@@ -404,7 +448,6 @@ namespace ServiceCenterApp.ViewModels
                     order.OrderId.ToString().Contains(lowerSearchText)
                 );
             }
-
             FilteredOrders.Clear();
             foreach (var item in result) { FilteredOrders.Add(item); }
         }
