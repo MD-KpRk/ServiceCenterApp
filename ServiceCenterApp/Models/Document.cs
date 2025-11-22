@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Xml.Linq;
 using ServiceCenterApp.Models.Lookup;
 
 namespace ServiceCenterApp.Models
@@ -18,8 +17,11 @@ namespace ServiceCenterApp.Models
         public int DocumentTypeId { get; set; }
 
         [Required]
-        [MaxLength(512)] 
-        public string? FilePath { get; set; }
+        [MaxLength(255)]
+        public string? FileName { get; set; }
+
+        [Required]
+        public byte[]? FileContent { get; set; }
 
         public DateTime CreationDate { get; set; } = DateTime.Now;
 

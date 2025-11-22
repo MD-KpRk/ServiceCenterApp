@@ -12,7 +12,7 @@ using ServiceCenterApp.Data;
 namespace ServiceCenterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251122180000_InitialCreate")]
+    [Migration("20251122203842_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -293,10 +293,14 @@ namespace ServiceCenterApp.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<string>("FilePath")
+                    b.Property<byte[]>("FileContent")
                         .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");

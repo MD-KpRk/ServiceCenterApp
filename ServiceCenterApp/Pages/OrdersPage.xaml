@@ -199,59 +199,6 @@
                         <!-- TABS -->
                         <TabControl Grid.Row="2" Margin="20,0,20,20" BorderThickness="0" Background="Transparent">
 
-                            <TabItem Header="Документы">
-                                <Grid Margin="0,10,0,0">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-
-                                    <!-- Панель действий -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                        <Button Content="Сформировать Акт приема" 
-                                                Command="{Binding DataContext.GenerateReceptionActCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                                Style="{StaticResource SecondaryButtonStyle}"
-                                                Margin="0,0,10,0"/>
-
-                                        <!-- В будущем можно добавить кнопку "Акт выполненных работ" -->
-                                        <Button Content="Акт выполненных работ" 
-                                                IsEnabled="False" 
-                                                ToolTip="Функционал в разработке"
-                                                Style="{StaticResource SecondaryButtonStyle}"/>
-                                    </StackPanel>
-
-                                    <!-- Список документов -->
-                                    <DataGrid Grid.Row="1"
-                                              ItemsSource="{Binding DataContext.OrderDocuments, RelativeSource={RelativeSource AncestorType=Page}}"
-                                              Style="{StaticResource ModernDataGridStyle}"
-                                              ColumnHeaderStyle="{StaticResource ModernDataGridColumnHeaderStyle}"
-                                              RowStyle="{StaticResource ModernDataGridRowStyle}"
-                                              CellStyle="{StaticResource ModernDataGridCellStyle}"
-                                              IsReadOnly="True"
-                                              AutoGenerateColumns="False">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Header="Дата" Binding="{Binding CreationDate, StringFormat='dd.MM.yyyy HH:mm'}" Width="140"/>
-                                            <DataGridTextColumn Header="Тип документа" Binding="{Binding DocumentType.TypeName}" Width="*"/>
-                                            <DataGridTextColumn Header="Сотрудник" Binding="{Binding Employee.SurName}" Width="150"/>
-
-                                            <!-- Кнопка Открыть -->
-                                            <DataGridTemplateColumn Width="100">
-                                                <DataGridTemplateColumn.CellTemplate>
-                                                    <DataTemplate>
-                                                        <Button Content="Открыть" 
-                                                                FontSize="11"
-                                                                Padding="5,2"
-                                                                Style="{StaticResource SecondaryButtonStyle}"
-                                                                Command="{Binding DataContext.OpenDocumentCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                                                CommandParameter="{Binding FilePath}"/>
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.CellTemplate>
-                                            </DataGridTemplateColumn>
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-                                </Grid>
-                            </TabItem>
-
                             <!-- ВКЛАДКА: ИНФОРМАЦИЯ -->
                             <TabItem Header="Информация о заказе">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,10,0,0">
@@ -313,28 +260,28 @@
                                                         <DockPanel Margin="0,0,0,5">
                                                             <TextBlock Text="Статус заказа:" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
                                                             <ComboBox ItemsSource="{Binding DataContext.AllOrderStatuses, RelativeSource={RelativeSource AncestorType=Page}}" 
-                                                SelectedItem="{Binding DataContext.SelectedOrderStatus, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
-                                                Style="{StaticResource PageComboBoxStyle}" ItemContainerStyle="{StaticResource ColorStatusComboBoxItemContainerStyle}"
-                                                ItemTemplate="{StaticResource ColorStatusComboBoxItemTemplate}"/>
+                                                                      SelectedItem="{Binding DataContext.SelectedOrderStatus, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
+                                                                      Style="{StaticResource PageComboBoxStyle}" ItemContainerStyle="{StaticResource ColorStatusComboBoxItemContainerStyle}"
+                                                                      ItemTemplate="{StaticResource ColorStatusComboBoxItemTemplate}"/>
                                                         </DockPanel>
                                                         <DockPanel Margin="0,0,0,5">
                                                             <TextBlock Text="Исполнитель:" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
                                                             <ComboBox ItemsSource="{Binding DataContext.AllEmployees, RelativeSource={RelativeSource AncestorType=Page}}" 
-                                                SelectedItem="{Binding DataContext.SelectedAcceptorEmployee, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
-                                                Style="{StaticResource PageComboBoxStyle}" ItemTemplate="{StaticResource EmployeeComboBoxItemTemplate}"/>
+                                                                      SelectedItem="{Binding DataContext.SelectedAcceptorEmployee, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
+                                                                      Style="{StaticResource PageComboBoxStyle}" ItemTemplate="{StaticResource EmployeeComboBoxItemTemplate}"/>
                                                         </DockPanel>
                                                         <DockPanel Margin="0,0,0,5">
                                                             <TextBlock Text="Приоритет:" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
                                                             <ComboBox ItemsSource="{Binding DataContext.AllPriorities, RelativeSource={RelativeSource AncestorType=Page}}" 
-                                                SelectedItem="{Binding DataContext.SelectedPriority, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
-                                                Style="{StaticResource PageComboBoxStyle}" ItemTemplate="{StaticResource PriorityComboBoxItemTemplate}"/>
+                                                                      SelectedItem="{Binding DataContext.SelectedPriority, RelativeSource={RelativeSource AncestorType=Page}, Mode=TwoWay}"
+                                                                      Style="{StaticResource PageComboBoxStyle}" ItemTemplate="{StaticResource PriorityComboBoxItemTemplate}"/>
                                                         </DockPanel>
                                                         <Separator Margin="0,10"/>
                                                         <DockPanel>
                                                             <TextBlock Text="Создал заказ:" FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0" Width="160"/>
                                                             <TextBlock VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold">
-                                        <Run Text="{Binding CreatorEmployee.SurName}"/>
-                                        <Run Text="{Binding CreatorEmployee.FirstName, StringFormat=' {0}'}"/>
+                                                                <Run Text="{Binding CreatorEmployee.SurName}"/>
+                                                                <Run Text="{Binding CreatorEmployee.FirstName, StringFormat=' {0}'}"/>
                                                             </TextBlock>
                                                         </DockPanel>
                                                     </StackPanel>
@@ -460,6 +407,60 @@
 
                                     </StackPanel>
                                 </ScrollViewer>
+                            </TabItem>
+
+                            <TabItem Header="Документы">
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Панель действий -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10" Height="30">
+                                        <Button Content="Сформировать Акт приема" 
+                                                Command="{Binding DataContext.GenerateReceptionActCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Margin="0,0,10,0"/>
+
+                                        <!-- В будущем можно добавить кнопку "Акт выполненных работ" -->
+                                        <Button Content="Акт выполненных работ" 
+                                                IsEnabled="False" 
+                                                ToolTip="Функционал в разработке"
+                                                Style="{StaticResource SecondaryButtonStyle}"/>
+                                    </StackPanel>
+
+                                    <!-- Список документов -->
+                                    <DataGrid Grid.Row="1"
+                                              ItemsSource="{Binding DataContext.OrderDocuments, RelativeSource={RelativeSource AncestorType=Page}}"
+                                              Style="{StaticResource ModernDataGridStyle}"
+                                              ColumnHeaderStyle="{StaticResource ModernDataGridColumnHeaderStyle}"
+                                              RowStyle="{StaticResource ModernDataGridRowStyle}"
+                                              CellStyle="{StaticResource ModernDataGridCellStyle}"
+                                              IsReadOnly="True"
+                                              AutoGenerateColumns="False">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Дата" Binding="{Binding CreationDate, StringFormat='dd.MM.yyyy HH:mm:ss'}" Width="160"/>
+                                            <DataGridTextColumn Header="Тип" Binding="{Binding DocumentType.TypeName}" Width="180"/>
+                                            <DataGridTextColumn Header="Файл" Binding="{Binding FileName}" Width="Auto"/>
+                                            <DataGridTextColumn Header="Создал" Binding="{Binding Employee.SurName}" Width="120"/>
+                                            <DataGridTemplateColumn Width="100">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <Button Content="Открыть" 
+                                                                FontSize="11"
+                                                                Padding="5,2"
+                                                                Width="70"
+                                                                Height="30"
+                                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                                Command="{Binding DataContext.OpenDocumentCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                                CommandParameter="{Binding}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
                             </TabItem>
 
                             <TabItem Header="История статусов">

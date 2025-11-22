@@ -153,9 +153,24 @@ namespace ServiceCenterApp.ViewModels
             _documentService = documentService;
 
             GenerateReceptionActCommand = new RelayCommand(ExecuteGenerateReceptionAct, () => CanExecuteSaveChanges() && !_isGeneratingDocument);
-            OpenDocumentCommand = new RelayCommand<string>(ExecuteOpenDocument);
+            OpenDocumentCommand = new RelayCommand<Document>(ExecuteOpenDocument);
 
             InitializeFilters();
+        }
+
+        private void ExecuteOpenDocument(Document doc)
+        {
+            if (doc == null) return;
+
+            try
+            {
+                // Передаем объект документа в сервис
+                _documentService.OpenDocument(doc);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private async void ExecuteAddService()
@@ -282,18 +297,6 @@ namespace ServiceCenterApp.ViewModels
             {
                 _isGeneratingDocument = false;
                 CommandManager.InvalidateRequerySuggested(); 
-            }
-        }
-
-        private void ExecuteOpenDocument(string filePath)
-        {
-            try
-            {
-                _documentService.OpenDocument(filePath);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
