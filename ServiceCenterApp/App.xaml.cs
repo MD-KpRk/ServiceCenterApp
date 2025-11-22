@@ -8,13 +8,11 @@ using ServiceCenterApp.Services.Interfaces;
 using ServiceCenterApp.ViewModels;
 using ServiceCenterApp.Views;
 using System;
-using System.Configuration;
-using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Windows;
-using static System.Formats.Asn1.AsnWriter;
+using System.Windows.Threading;
 
 namespace ServiceCenterApp
 {
@@ -25,9 +23,10 @@ namespace ServiceCenterApp
 
         public App()
         {
+            // Глобальная обработка ошибок
+            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
 
             // CONFIG
-
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -35,14 +34,13 @@ namespace ServiceCenterApp
             Configuration = builder.Build();
 
             // --- DI CONTAINER INIT ---
-
             IServiceCollection services = new ServiceCollection();
 
-            // --- DATABASE REGISTATION ---
+            // --- DATABASE REGISTRATION ---
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            }, ServiceLifetime.Transient);
+            }, ServiceLifetime.Transient); // Transient важно для WPF, чтобы избегать проблем с потоками
 
             // --- SERVICE REGISTRATION ---
             services.AddSingleton<IAuthenticationService, AuthenticationService>();
@@ -61,14 +59,15 @@ namespace ServiceCenterApp
             services.AddTransient<AddOrderViewModel>();
             services.AddTransient<ClientsViewModel>();
             services.AddTransient<AddClientViewModel>();
-            services.AddTransient<EmployeesViewModel>();    
+            services.AddTransient<EmployeesViewModel>();
             services.AddTransient<AddEmployeeViewModel>();
             services.AddTransient<StorageViewModel>();
+            services.AddTransient<AddEditSparePartViewModel>();
 
             // --- VIEWS ---
+            services.AddSingleton<MainWindow>();        // Window
             services.AddTransient<AuthPage>();          // Page
             services.AddTransient<InstallationPage>();  // Page
-            services.AddSingleton<MainWindow>();        // Window
             services.AddTransient<MainAdminPage>();     // Page 
             services.AddTransient<OrdersPage>();        // Page 
             services.AddTransient<AddSparePartWindow>();// Window
@@ -78,6 +77,7 @@ namespace ServiceCenterApp
             services.AddTransient<EmployeesPage>();     // Page
             services.AddTransient<AddEmployeeWindow>(); // Window
             services.AddTransient<StoragePage>();       // Page
+            services.AddTransient<AddEditSparePartWindow>(); // Window
 
 
             _serviceProvider = services.BuildServiceProvider();
@@ -89,57 +89,81 @@ namespace ServiceCenterApp
             if (_serviceProvider?.GetRequiredService<INavigationService>() is not NavigationService navService) return;
 
             // VIEWMODEL - PAGE MAPPING
-            navService?.Configure<AuthPageViewModel, AuthPage>();
-            navService?.Configure<InstallationPageViewModel, InstallationPage>();
-            navService?.Configure<MainAdminPageViewModel, MainAdminPage>();
-            navService?.Configure<OrdersViewModel, OrdersPage>();
-            navService?.Configure<ClientsViewModel, ClientsPage>();
-            navService?.Configure<EmployeesViewModel, EmployeesPage>();
-            navService?.Configure<StorageViewModel, StoragePage>();
-
+            navService.Configure<AuthPageViewModel, AuthPage>();
+            navService.Configure<InstallationPageViewModel, InstallationPage>();
+            navService.Configure<MainAdminPageViewModel, MainAdminPage>();
+            navService.Configure<OrdersViewModel, OrdersPage>();
+            navService.Configure<ClientsViewModel, ClientsPage>();
+            navService.Configure<EmployeesViewModel, EmployeesPage>();
+            navService.Configure<StorageViewModel, StoragePage>();
         }
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            if (_serviceProvider == null) throw new ArgumentNullException();
+            if (_serviceProvider == null) throw new ArgumentNullException(nameof(_serviceProvider));
 
-            // --- УСТАНОВКА КУЛЬТУРЫ ДЛЯ ОТОБРАЖЕНИЯ ВАЛЮТЫ ---
+            // --- УСТАНОВКА КУЛЬТУРЫ ДЛЯ ОТОБРАЖЕНИЯ ВАЛЮТЫ (BYN) ---
             CultureInfo culture = new CultureInfo("be-BY");
             Thread.CurrentThread.CurrentCulture = culture;
             Thread.CurrentThread.CurrentUICulture = culture;
 
+            // Миграция и проверка БД
             using (var scope = _serviceProvider.CreateScope())
             {
-                IDatabaseHealthService healthService = scope.ServiceProvider.GetRequiredService<IDatabaseHealthService>();
-                ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var healthService = scope.ServiceProvider.GetRequiredService<IDatabaseHealthService>();
 
                 try
                 {
-                    dbContext.Database.Migrate();
+                    // Пытаемся применить миграции автоматически
+                    await dbContext.Database.MigrateAsync();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-
+                    MessageBox.Show($"Ошибка при обновлении базы данных (Migration): {ex.Message}\n\n" +
+                                    "Проверьте настройки подключения.",
+                                    "Ошибка запуска", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
+                // Проверка соединения
                 bool isConnected = await healthService.CanConnectAsync();
                 if (!isConnected)
                 {
-                    MessageBox.Show("Не удалось установить соединение с SQL Server. " +
+                    MessageBox.Show("Не удалось установить соединение с SQL Server.\n" +
                                     "Пожалуйста, проверьте строку подключения в appsettings.json и доступность сервера.",
                                     "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     Shutdown();
                     return;
                 }
-
             }
 
-            //Show MainWindow
-            MainWindow mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-            mainWindow.Show();
+            // Show MainWindow
+            try
+            {
+                MainWindow mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+                mainWindow.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка инициализации главного окна: {ex.Message}");
+                Shutdown();
+            }
 
             base.OnStartup(e);
         }
-    }
 
+        // Глобальный перехватчик ошибок
+        private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            string errorMsg = $"Произошла непредвиденная ошибка: {e.Exception.Message}\n\n";
+            if (e.Exception.InnerException != null)
+            {
+                errorMsg += $"Подробности: {e.Exception.InnerException.Message}";
+            }
+
+            MessageBox.Show(errorMsg, "Ошибка приложения", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            e.Handled = true;
+        }
+    }
 }

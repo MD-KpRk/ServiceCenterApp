@@ -7,11 +7,11 @@ using ServiceCenterApp.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions; // Для очистки номера
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media; // Для кистей (Colors)
+using System.Windows.Media;
 
 namespace ServiceCenterApp.ViewModels
 {
@@ -20,6 +20,9 @@ namespace ServiceCenterApp.ViewModels
         private readonly ApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
 
+        // Для Debounce (задержки поиска)
+        private CancellationTokenSource? _searchCancellationTokenSource;
+
         // --- ДАННЫЕ КЛИЕНТА ---
         private string _clientPhoneNumber;
         public string ClientPhoneNumber
@@ -27,23 +30,25 @@ namespace ServiceCenterApp.ViewModels
             get => _clientPhoneNumber;
             set
             {
-                _clientPhoneNumber = value;
-                OnPropertyChanged();
-                // Запускаем поиск при каждом изменении
-                TryFindClient(value);
+                if (_clientPhoneNumber != value)
+                {
+                    _clientPhoneNumber = value;
+                    OnPropertyChanged();
+                    // Запускаем поиск с задержкой
+                    InitiateClientSearch(value);
+                }
             }
         }
 
-        // Статус поиска (для красивого отображения)
+        // Статус поиска
         private string _searchStatusText = "Введите номер";
         public string SearchStatusText { get => _searchStatusText; set { _searchStatusText = value; OnPropertyChanged(); } }
 
         private Brush _searchStatusColor = new SolidColorBrush(Colors.Gray);
         public Brush SearchStatusColor { get => _searchStatusColor; set { _searchStatusColor = value; OnPropertyChanged(); } }
 
-        private string _searchStatusIcon = "?"; // Символ для иконки
+        private string _searchStatusIcon = "?";
         public string SearchStatusIcon { get => _searchStatusIcon; set { _searchStatusIcon = value; OnPropertyChanged(); } }
-
 
         private string _clientSurname;
         public string ClientSurname { get => _clientSurname; set { _clientSurname = value; OnPropertyChanged(); } }
@@ -67,7 +72,7 @@ namespace ServiceCenterApp.ViewModels
         public string ProblemDescription { get; set; }
         public string Comment { get; set; }
 
-        // Списки для выбора
+        // Списки
         public List<Employee> AllEmployees { get; private set; }
         public List<Priority> AllPriorities { get; private set; }
 
@@ -96,47 +101,100 @@ namespace ServiceCenterApp.ViewModels
             AllPriorities = await _context.Priorities.ToListAsync();
             OnPropertyChanged(nameof(AllPriorities));
 
-            SelectedPriority = AllPriorities.FirstOrDefault(p => p.PriorityId == (int)PriorityEnum.Normal);
+            if (AllPriorities.Any())
+                SelectedPriority = AllPriorities.FirstOrDefault(p => p.PriorityId == (int)PriorityEnum.Normal);
         }
 
-        private async void TryFindClient(string phoneNumber)
+        // Метод запуска поиска с "Тихим" Debounce (без исключений в консоли)
+        private void InitiateClientSearch(string phoneNumber)
         {
+            // Отменяем предыдущий поиск
+            if (_searchCancellationTokenSource != null)
+            {
+                _searchCancellationTokenSource.Cancel();
+                _searchCancellationTokenSource.Dispose();
+            }
+
+            _searchCancellationTokenSource = new CancellationTokenSource();
+            var token = _searchCancellationTokenSource.Token;
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    // Ждем 500мс БЕЗ передачи токена в Delay.
+                    // Это предотвращает выброс TaskCanceledException в консоль Visual Studio.
+                    await Task.Delay(500);
+
+                    // Проверяем отмену вручную ПОСЛЕ задержки
+                    if (token.IsCancellationRequested) return;
+
+                    // Выполняем поиск в UI потоке
+                    Application.Current.Dispatcher.Invoke(() => TryFindClient(phoneNumber, token));
+                }
+                catch (Exception)
+                {
+                    // Игнорируем любые ошибки потока, чтобы не крашить приложение
+                }
+            });
+        }
+
+        private async void TryFindClient(string phoneNumber, CancellationToken token)
+        {
+            // Дополнительная проверка перед началом тяжелой работы
+            if (token.IsCancellationRequested) return;
+
             if (string.IsNullOrWhiteSpace(phoneNumber) || phoneNumber.Length < 4)
             {
                 _existingClient = null;
                 SearchStatusText = "Введите номер";
                 SearchStatusColor = new SolidColorBrush(Colors.Gray);
                 SearchStatusIcon = "...";
-
-                ClearClientFields();
                 return;
             }
 
-            // 2. Ищем клиента
-            var client = await _context.Clients
-                .FirstOrDefaultAsync(c => c.PhoneNumber.Contains(phoneNumber));
+            SearchStatusText = "Поиск...";
+            SearchStatusColor = new SolidColorBrush(Colors.Gray);
 
-            if (client != null)
+            try
             {
-                _existingClient = client;
+                // Передаем токен в запрос БД, чтобы отменить сам SQL запрос, если пользователь быстро печатает
+                var client = await _context.Clients
+                    .FirstOrDefaultAsync(c => c.PhoneNumber.Contains(phoneNumber), token);
 
-                ClientSurname = client.SurName;
-                ClientFirstName = client.FirstName;
-                ClientPatronymic = client.Patronymic;
-                ClientEmail = client.Email;
+                if (token.IsCancellationRequested) return;
 
-                SearchStatusText = "Клиент найден";
-                SearchStatusColor = new SolidColorBrush(Colors.Green);
-                SearchStatusIcon = "✓";
+                if (client != null)
+                {
+                    _existingClient = client;
+
+                    ClientSurname = client.SurName;
+                    ClientFirstName = client.FirstName;
+                    ClientPatronymic = client.Patronymic;
+                    ClientEmail = client.Email;
+
+                    SearchStatusText = "Клиент найден";
+                    SearchStatusColor = new SolidColorBrush(Colors.Green);
+                    SearchStatusIcon = "✓";
+                }
+                else
+                {
+                    _existingClient = null;
+                    SearchStatusText = "Новый клиент";
+                    SearchStatusColor = new SolidColorBrush(Colors.DodgerBlue);
+                    SearchStatusIcon = "+";
+                    ClearClientFields();
+                }
             }
-            else
+            catch (OperationCanceledException)
             {
-                _existingClient = null;
-
-                SearchStatusText = "Новый клиент";
-                SearchStatusColor = new SolidColorBrush(Colors.DodgerBlue);
-                SearchStatusIcon = "+";
-                ClearClientFields();
+                // Нормальная ситуация при отмене запроса к БД, игнорируем
+            }
+            catch (Exception)
+            {
+                SearchStatusText = "Ошибка поиска";
+                SearchStatusColor = new SolidColorBrush(Colors.Red);
+                SearchStatusIcon = "!";
             }
         }
 
@@ -166,10 +224,14 @@ namespace ServiceCenterApp.ViewModels
                 return;
             }
 
+            // Используем транзакцию для атомарности
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             try
             {
                 Client clientToUse = _existingClient;
 
+                // 1. Обработка Клиента
                 if (clientToUse == null)
                 {
                     clientToUse = new Client
@@ -184,6 +246,7 @@ namespace ServiceCenterApp.ViewModels
                 }
                 else
                 {
+                    // Обновляем данные существующего клиента, если они изменились
                     clientToUse.FirstName = ClientFirstName;
                     clientToUse.SurName = ClientSurname;
                     clientToUse.Patronymic = ClientPatronymic;
@@ -191,6 +254,9 @@ namespace ServiceCenterApp.ViewModels
                     _context.Clients.Update(clientToUse);
                 }
 
+                await _context.SaveChangesAsync();
+
+                // 2. Обработка Устройства
                 var newDevice = new Device
                 {
                     DeviceType = DeviceType,
@@ -199,14 +265,16 @@ namespace ServiceCenterApp.ViewModels
                     SerialNumber = DeviceSerialNumber
                 };
                 _context.Devices.Add(newDevice);
+                await _context.SaveChangesAsync();
 
+                // 3. Создание Заказа
                 int newStatusId = (int)OrderStatusEnum.New;
 
                 var newOrder = new Order
                 {
                     RegistrationDate = DateTime.Now,
-                    Client = clientToUse,
-                    Device = newDevice,
+                    ClientId = clientToUse.ClientId,
+                    DeviceId = newDevice.DeviceId,
                     StatusId = newStatusId,
                     PriorityId = SelectedPriority.PriorityId,
                     ProblemDescription = ProblemDescription,
@@ -218,6 +286,10 @@ namespace ServiceCenterApp.ViewModels
                 _context.Orders.Add(newOrder);
                 await _context.SaveChangesAsync();
 
+                // Если все ок - фиксируем транзакцию
+                await transaction.CommitAsync();
+
+                // Закрытие окна
                 foreach (Window window in Application.Current.Windows)
                 {
                     if (window.DataContext == this)
@@ -230,6 +302,7 @@ namespace ServiceCenterApp.ViewModels
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 MessageBox.Show($"Ошибка при создании заказа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

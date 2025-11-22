@@ -102,7 +102,6 @@ namespace ServiceCenterApp.ViewModels
             if (SelectedPart == null) return;
 
             var vm = new AddEditSparePartViewModel(_context);
-            // Важно: передаем SelectedPart, но внутри VM мы загрузим его копию из контекста для редактирования
             await vm.LoadDataAsync(SelectedPart);
 
             var window = new AddEditSparePartWindow(vm);

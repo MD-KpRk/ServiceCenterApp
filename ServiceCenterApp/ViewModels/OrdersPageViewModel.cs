@@ -125,7 +125,6 @@ namespace ServiceCenterApp.ViewModels
             if (addOrderWindow.ShowDialog() == true)
             {
                 await LoadAllOrdersListAsync();
-
             }
         }
 
@@ -134,7 +133,7 @@ namespace ServiceCenterApp.ViewModels
             if (!_context.ChangeTracker.HasChanges())
             {
                 _context.ChangeTracker.Clear();
-                return false; 
+                return false;
             }
 
             var result = MessageBox.Show(
@@ -147,14 +146,14 @@ namespace ServiceCenterApp.ViewModels
             {
                 case MessageBoxResult.Yes:
                     SaveAndNavigateAsync(targetOrder);
-                    return true; 
+                    return true;
 
                 case MessageBoxResult.No:
                     _context.ChangeTracker.Clear();
-                    return false; 
+                    return false;
 
                 case MessageBoxResult.Cancel:
-                    return true; 
+                    return true;
             }
 
             return false;
@@ -180,18 +179,28 @@ namespace ServiceCenterApp.ViewModels
             if (await SaveInternalAsync())
             {
                 MessageBox.Show("Изменения успешно сохранены!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                CloseDetails();
+                // Не закрываем детали сразу, пользователь может захотеть продолжить работу
+                // CloseDetails(); 
+
+                // Обновляем сумму в списке, если статус изменился или еще что-то
+                if (SelectedOrderInList != null)
+                {
+                    SelectedOrderInList.RefreshData(SelectedOrderDetails);
+                }
             }
         }
 
+        // Улучшенный метод сохранения с Транзакцией
         private async Task<bool> SaveInternalAsync()
         {
+            if (SelectedOrderDetails == null) return false;
+
+            // Используем транзакцию, так как меняем Order и потенциально SparePart (StockQuantity)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             try
             {
-                if (SelectedOrderDetails == null) return false;
-
-                await _context.SaveChangesAsync();
-
+                // Обновляем навигационные свойства по ID, чтобы EF корректно отследил изменения
                 if (SelectedOrderDetails.StatusId != 0)
                 {
                     SelectedOrderDetails.Status = await _context.OrderStatuses.FindAsync(SelectedOrderDetails.StatusId);
@@ -206,14 +215,20 @@ namespace ServiceCenterApp.ViewModels
                     SelectedOrderDetails.AcceptorEmployee = null;
                 }
 
+                // Сохранение изменений
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
                 if (SelectedOrderInList != null)
                 {
                     SelectedOrderInList.RefreshData(SelectedOrderDetails);
                 }
+
                 return true;
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
@@ -280,6 +295,8 @@ namespace ServiceCenterApp.ViewModels
                 return;
             }
 
+            // Загружаем полные данные для редактирования
+            // Внимание: тут НЕ используем AsNoTracking, так как мы будем редактировать этот объект
             SelectedOrderDetails = await _context.Orders
                 .Include(o => o.CreatorEmployee)
                 .Include(o => o.AcceptorEmployee)
@@ -288,7 +305,7 @@ namespace ServiceCenterApp.ViewModels
                 .Include(o => o.Client)
                 .Include(o => o.Device)
                 .Include(o => o.OrderSpareParts)
-                    .ThenInclude(osp => osp.SparePart)
+                    .ThenInclude(osp => osp.SparePart) // Важно подгрузить запчасть, чтобы знать цену и остаток
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
             if (SelectedOrderDetails != null)
@@ -322,6 +339,8 @@ namespace ServiceCenterApp.ViewModels
         private async void ExecuteAddSparePart()
         {
             var addSparePartWindow = (AddSparePartWindow)_serviceProvider.GetService(typeof(AddSparePartWindow));
+
+            // Считаем, сколько уже добавлено в этом сеансе, чтобы не продать больше, чем есть на складе
             var existingQuantities = new Dictionary<int, int>();
             foreach (var partVm in UsedSpareParts)
             {
@@ -336,18 +355,24 @@ namespace ServiceCenterApp.ViewModels
             if (addSparePartWindow.ShowDialog() == true)
             {
                 var selectedPart = addSparePartWindow.ViewModel.SelectedSparePart;
+
+                // Проверяем, есть ли уже эта запчасть в заказе
                 var existingPartVM = UsedSpareParts.FirstOrDefault(p => p.PartNumber == selectedPart.PartNumber);
 
                 if (existingPartVM != null)
                 {
+                    // Просто увеличиваем количество
                     existingPartVM.Quantity++;
                 }
                 else
                 {
                     var trackedPart = await _context.SpareParts.FindAsync(selectedPart.PartId);
+
                     if (trackedPart != null)
                     {
+                        // Списываем 1 шт сразу
                         trackedPart.StockQuantity -= 1;
+
                         var newOrderSparePart = new OrderSparePart
                         {
                             Order = SelectedOrderDetails,
@@ -356,6 +381,7 @@ namespace ServiceCenterApp.ViewModels
                             PartId = trackedPart.PartId,
                             Quantity = 1
                         };
+
                         SelectedOrderDetails.OrderSpareParts.Add(newOrderSparePart);
                         UsedSpareParts.Add(new UsedSparePartViewModel(newOrderSparePart, CalculateSparePartsTotalSum));
                     }
@@ -368,15 +394,17 @@ namespace ServiceCenterApp.ViewModels
         {
             var selectedStatuses = StatusFilters.Where(f => f.IsChecked).Select(f => f.StatusName).ToHashSet();
             var result = _allOrders.Where(order => selectedStatuses.Contains(order.StatusName));
+
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 string lowerSearchText = SearchText.ToLower();
                 result = result.Where(order =>
-                    order.ClientFullName.ToLower().Contains(lowerSearchText) ||
-                    order.DeviceDescription.ToLower().Contains(lowerSearchText) ||
+                    (order.ClientFullName != null && order.ClientFullName.ToLower().Contains(lowerSearchText)) ||
+                    (order.DeviceDescription != null && order.DeviceDescription.ToLower().Contains(lowerSearchText)) ||
                     order.OrderId.ToString().Contains(lowerSearchText)
                 );
             }
+
             FilteredOrders.Clear();
             foreach (var item in result) { FilteredOrders.Add(item); }
         }
