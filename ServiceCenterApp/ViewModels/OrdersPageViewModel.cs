@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceCenterApp.Data;
 using ServiceCenterApp.Data.Configurations;
 using ServiceCenterApp.Helpers;
@@ -26,6 +27,9 @@ namespace ServiceCenterApp.ViewModels
         private readonly ICurrentUserService _currentUserService; // кто менял
         private readonly IPrintService _printService;
 
+        private bool _isGeneratingDocument = false;
+        private CancellationTokenSource? _loadCancellationTokenSource;
+
         // --- HISTORY ---
         public ObservableCollection<OrderStatusHistory> StatusHistory { get; } = new();
 
@@ -52,7 +56,6 @@ namespace ServiceCenterApp.ViewModels
                 _selectedOrderDetails = value;
                 OnPropertyChanged();
                 UpdateUsedSpareParts();
-                LoadHistoryAsync(value?.OrderId); // Загружаем историю
             }
         }
 
@@ -146,45 +149,58 @@ namespace ServiceCenterApp.ViewModels
 
             _documentService = documentService;
 
-            GenerateReceptionActCommand = new RelayCommand(ExecuteGenerateReceptionAct, CanExecuteSaveChanges);
+            GenerateReceptionActCommand = new RelayCommand(ExecuteGenerateReceptionAct, () => CanExecuteSaveChanges() && !_isGeneratingDocument);
             OpenDocumentCommand = new RelayCommand<string>(ExecuteOpenDocument);
 
             InitializeFilters();
         }
 
-        private async void LoadDocumentsAsync(int? orderId)
+        private async Task LoadDocumentsAsync(int orderId)
         {
-            OrderDocuments.Clear();
-            if (orderId == null) return;
-
-            var docs = await _documentService.GetDocumentsByOrderIdAsync(orderId.Value);
-            foreach (var doc in docs)
+            try
             {
-                OrderDocuments.Add(doc);
+                var docs = await _documentService.GetDocumentsByOrderIdAsync(orderId);
+                OrderDocuments.Clear(); 
+                foreach (var doc in docs)
+                {
+                    OrderDocuments.Add(doc);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Ошибка загрузки документов: " + ex.Message);
             }
         }
 
         private async void ExecuteGenerateReceptionAct()
         {
+            if (_isGeneratingDocument) return;
             if (SelectedOrderDetails == null) return;
 
             try
             {
+                _isGeneratingDocument = true;
+                CommandManager.InvalidateRequerySuggested(); 
+
                 var docFlow = _printService.CreateReceptionDocument(SelectedOrderDetails);
 
-                // 2. Сохраняем на диск и в базу (ID типа документа = 1, см. DocumentTypeConfiguration)
+                // Имитация деятельности xd
+                await Task.Delay(500); 
+
                 await _documentService.CreateAndSaveDocumentAsync(SelectedOrderDetails, 1, docFlow);
 
-                LoadDocumentsAsync(SelectedOrderDetails.OrderId);
-
-                // Сразу предлагаем печать
-                // _printService.PrintReceptionReceipt(SelectedOrderDetails);
+                await LoadDocumentsAsync(SelectedOrderDetails.OrderId);
 
                 MessageBox.Show("Акт приема сформирован и сохранен.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка создания документа: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isGeneratingDocument = false;
+                CommandManager.InvalidateRequerySuggested(); 
             }
         }
 
@@ -207,23 +223,35 @@ namespace ServiceCenterApp.ViewModels
         }
 
         // Загрузка истории
-        private async void LoadHistoryAsync(int? orderId)
+        private async Task LoadHistoryAsync(int orderId)
         {
-            StatusHistory.Clear();
-            if (orderId == null) return;
-
-            var history = await _context.OrderStatusHistories
-                .AsNoTracking()
-                .Where(h => h.OrderId == orderId)
-                .Include(h => h.OldStatus)
-                .Include(h => h.NewStatus)
-                .Include(h => h.Employee)
-                .OrderByDescending(h => h.ChangeDate)
-                .ToListAsync();
-
-            foreach (var item in history)
+            try
             {
-                StatusHistory.Add(item);
+
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                    var history = await context.OrderStatusHistories
+                        .AsNoTracking()
+                        .Where(h => h.OrderId == orderId)
+                        .Include(h => h.OldStatus)
+                        .Include(h => h.NewStatus)
+                        .Include(h => h.Employee)
+                        .OrderByDescending(h => h.ChangeDate)
+                        .ToListAsync();
+
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        StatusHistory.Clear();
+                        foreach (var item in history) StatusHistory.Add(item);
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Ошибка загрузки истории: " + ex.Message);
             }
         }
 
@@ -406,28 +434,65 @@ namespace ServiceCenterApp.ViewModels
 
         private async void LoadOrderDetailsAsync(int? orderId)
         {
+            if (_loadCancellationTokenSource != null)
+            {
+                _loadCancellationTokenSource.Cancel();
+                _loadCancellationTokenSource.Dispose();
+                _loadCancellationTokenSource = null;
+            }
+
+            _loadCancellationTokenSource = new CancellationTokenSource();
+            var token = _loadCancellationTokenSource.Token;
+
+            // Очищаем UI сразу
+            OrderDocuments.Clear();
+            StatusHistory.Clear();
+            UsedSpareParts.Clear();
+
             if (orderId == null)
             {
                 SelectedOrderDetails = null;
                 return;
             }
 
-            SelectedOrderDetails = await _context.Orders
-                .Include(o => o.CreatorEmployee)
-                .Include(o => o.AcceptorEmployee)
-                .Include(o => o.Status)
-                .Include(o => o.Priority)
-                .Include(o => o.Client)
-                .Include(o => o.Device)
-                .Include(o => o.OrderSpareParts)
-                    .ThenInclude(osp => osp.SparePart)
-                .FirstOrDefaultAsync(o => o.OrderId == orderId);
-
-            if (SelectedOrderDetails != null)
+            try
             {
-                SelectedOrderStatus = AllOrderStatuses.FirstOrDefault(s => s.StatusId == SelectedOrderDetails.StatusId);
-                SelectedAcceptorEmployee = AllEmployees.FirstOrDefault(e => e.EmployeeId == SelectedOrderDetails.AcceptorEmployeeId);
-                SelectedPriority = AllPriorities.FirstOrDefault(p => p.PriorityId == SelectedOrderDetails.PriorityId);
+                var order = await _context.Orders
+                    .Include(o => o.CreatorEmployee)
+                    .Include(o => o.AcceptorEmployee)
+                    .Include(o => o.Status)
+                    .Include(o => o.Priority)
+                    .Include(o => o.Client)
+                    .Include(o => o.Device)
+                    .Include(o => o.OrderSpareParts)
+                        .ThenInclude(osp => osp.SparePart)
+                    .FirstOrDefaultAsync(o => o.OrderId == orderId, token);
+
+                if (token.IsCancellationRequested) return;
+
+                SelectedOrderDetails = order;
+
+                if (SelectedOrderDetails != null)
+                {
+                    // Заполняем поля
+                    SelectedOrderStatus = AllOrderStatuses.FirstOrDefault(s => s.StatusId == SelectedOrderDetails.StatusId);
+                    SelectedAcceptorEmployee = AllEmployees.FirstOrDefault(e => e.EmployeeId == SelectedOrderDetails.AcceptorEmployeeId);
+                    SelectedPriority = AllPriorities.FirstOrDefault(p => p.PriorityId == SelectedOrderDetails.PriorityId);
+
+                    UpdateUsedSpareParts();
+
+
+                    await LoadDocumentsAsync(orderId.Value);
+                    await LoadHistoryAsync(orderId.Value);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // отмена
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки заказа: {ex.Message}");
             }
         }
 

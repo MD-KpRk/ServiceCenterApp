@@ -49,6 +49,7 @@ namespace ServiceCenterApp
             services.AddSingleton<IPasswordHasher, PasswordHashService>();
             services.AddScoped<IDatabaseHealthService, DatabaseHealthService>();
             services.AddSingleton<IPrintService, PrintService>();
+            services.AddTransient<IDocumentService, DocumentService>();
 
             // --- VIEWMODELS ---
             services.AddSingleton<MainWindowViewModel>();
