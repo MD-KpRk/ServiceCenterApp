@@ -85,10 +85,11 @@
                         </DataGrid.InputBindings>
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Артикул" Binding="{Binding PartNumber}" Width="120"/>
-                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="2*"/>
+                            <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="Auto"/>
                             <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="2*"/>
                             <DataGridTextColumn Header="Поставщик" Binding="{Binding Supplier.Name}" Width="1.5*"/>
-                            <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat={}{0:C2}}" Width="100"/>
+                            <DataGridTextColumn Header="Цена продажи" Binding="{Binding SellingPrice, StringFormat={}{0:C2}}" Width="130"/>
+                            <DataGridTextColumn Header="Закупка (Ср.)" Binding="{Binding CostPrice, StringFormat={}{0:C2}}" Width="130" Foreground="Gray"/>
                             <DataGridTextColumn Header="Остаток" Binding="{Binding StockQuantity}" Width="100" FontWeight="SemiBold"/>
                         </DataGrid.Columns>
                     </DataGrid>

@@ -6,7 +6,7 @@
         xmlns:helpers="clr-namespace:ServiceCenterApp.Helpers"
         mc:Ignorable="d"
         Language="be-BY"
-        Title="{Binding WindowTitle}" Height="600" Width="500"
+        Title="{Binding WindowTitle}" Height="660" Width="500"
         WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow" ResizeMode="NoResize">
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -22,6 +22,7 @@
                 <TextBlock Text="ОСНОВНАЯ ИНФОРМАЦИЯ" Style="{StaticResource SectionHeaderStyle}"/>
                 <Border Style="{StaticResource InfoBorderStyle}">
                     <StackPanel>
+                        
                         <TextBlock Text="Название детали *"/>
                         <TextBox Text="{Binding Name}" helpers:MaxLengthHelper.Attach="True" Style="{StaticResource EditableTextBoxStyle}"/>
 
@@ -42,13 +43,34 @@
                                 <ColumnDefinition Width="20"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
+
+                            <!-- Левая колонка: Цены -->
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Цена продажи (BYN)"/>
-                                <TextBox Text="{Binding Price}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                <TextBlock Text="Цена закупки (Средняя)"/>
+                                <TextBox Text="{Binding CostPrice, StringFormat=N2}" 
+                                         IsReadOnly="True" Background="#F0F0F0" Foreground="Gray"
+                                         Style="{StaticResource EditableTextBoxStyle}"
+                                         ToolTip="Рассчитывается автоматически при поставке"/>
+
+                                <TextBlock Text="Цена продажи (Клиенту)"/>
+                                <TextBox Text="{Binding SellingPrice}" Style="{StaticResource EditableTextBoxStyle}"/>
                             </StackPanel>
+
+                            <!-- Правая колонка: Склад -->
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Количество на складе"/>
-                                <TextBox Text="{Binding StockQuantity}" Style="{StaticResource EditableTextBoxStyle}"/>
+                                <DockPanel>
+                                    <!-- Кнопка "+" справа от количества -->
+                                    <Button DockPanel.Dock="Right" Content="+ Поставка" 
+                            Command="{Binding SupplyCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" 
+                            FontSize="11" Padding="5,0" Margin="5,3,0,10"/>
+
+                                    <!-- Само количество (Только чтение) -->
+                                    <TextBox Text="{Binding StockQuantity}" 
+                             IsReadOnly="True" Background="#F0F0F0" Foreground="Black" FontWeight="Bold"
+                             Style="{StaticResource EditableTextBoxStyle}"/>
+                                </DockPanel>
                             </StackPanel>
                         </Grid>
 
@@ -69,6 +91,10 @@
                         </Grid>
                     </StackPanel>
                 </Border>
+                
+                
+                
+                
             </StackPanel>
         </ScrollViewer>
 

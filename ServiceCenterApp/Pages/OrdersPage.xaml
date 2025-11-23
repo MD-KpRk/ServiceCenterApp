@@ -10,6 +10,7 @@
       mc:Ignorable="d" 
       Language="be-BY"
       d:DesignHeight="900" d:DesignWidth="1600"
+      x:Name="OrdersPageRoot"
       Title="OrdersPage">
 
     <Page.Resources>
@@ -453,7 +454,7 @@
                                                                 Width="70"
                                                                 Height="30"
                                                                 Style="{StaticResource SecondaryButtonStyle}"
-                                                                Command="{Binding DataContext.OpenDocumentCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                                Command="{Binding DataContext.OpenDocumentCommand, ElementName=OrdersPageRoot}" 
                                                                 CommandParameter="{Binding}"/>
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>

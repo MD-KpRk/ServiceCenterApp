@@ -32,9 +32,9 @@
                   CellStyle="{StaticResource ModernDataGridCellStyle}">
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="4*"/>
+                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="Auto"/>
                 <DataGridTextColumn Header="Артикул" Binding="{Binding PartNumber}" Width="2*"/>
-                <DataGridTextColumn Header="Цена за шт." Binding="{Binding Price, StringFormat={}{0:C0}}" Width="1*"/>
+                <DataGridTextColumn Header="Цена за шт." Binding="{Binding SellingPrice, StringFormat={}{0:C2}}" Width="1*"/>
                 <DataGridTextColumn Header="На складе     " Binding="{Binding StockQuantity}" Width="1*" />
             </DataGrid.Columns>
         </DataGrid>
