@@ -294,7 +294,154 @@ namespace ServiceCenterApp.Services
             return doc;
         }
 
-        // Хелпер для заголовка таблицы (жирный, с рамками)
+        public FlowDocument CreateWarrantyTicketDocument(Order order)
+        {
+            FlowDocument doc = new FlowDocument();
+            doc.FontFamily = new FontFamily("Arial");
+            doc.FontSize = 11; // Шрифт чуть поменьше для компактности
+            doc.TextAlignment = TextAlignment.Left;
+            doc.LineHeight = 1;
+            doc.PageWidth = 793;
+            doc.PageHeight = 560;
+            doc.PagePadding = new Thickness(30, 20, 30, 20); // Поля поменьше
+            doc.ColumnWidth = double.PositiveInfinity;
+
+            Border mainBorder = new Border
+            {
+                BorderBrush = Brushes.Black,
+                BorderThickness = new Thickness(2),
+                Padding = new Thickness(15),
+                Background = Brushes.White
+            };
+
+            StackPanel content = new StackPanel();
+            Grid headerGrid = new Grid();
+            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            var companyBlock = new TextBlock(new Run(_orgSettings.Name))
+            {
+                FontWeight = FontWeights.Bold,
+                FontSize = 14,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            var titleBlock = new TextBlock(new Run("ГАРАНТИЙНЫЙ ТАЛОН"))
+            {
+                FontSize = 18,
+                FontWeight = FontWeights.Black,
+                TextAlignment = TextAlignment.Right,
+                TextDecorations = TextDecorations.Underline,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            Grid.SetColumn(companyBlock, 0);
+            Grid.SetColumn(titleBlock, 1);
+            headerGrid.Children.Add(companyBlock);
+            headerGrid.Children.Add(titleBlock);
+
+            content.Children.Add(headerGrid);
+            content.Children.Add(new Separator { Margin = new Thickness(0, 5, 0, 10), Background = Brushes.Black });
+
+            Grid infoGrid = new Grid();
+            infoGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(140) });
+            infoGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            int row = 0;
+            void AddCompactRow(string label, string value)
+            {
+                infoGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                var lbl = new TextBlock(new Run(label)) { FontWeight = FontWeights.Bold, Margin = new Thickness(0, 2, 0, 2) };
+                var val = new TextBlock(new Run(value)) { Margin = new Thickness(0, 2, 0, 2), TextWrapping = TextWrapping.Wrap };
+
+                var line = new Border { BorderThickness = new Thickness(0, 0, 0, 1), BorderBrush = Brushes.LightGray, Opacity = 0.5 };
+
+                Grid.SetRow(lbl, row); Grid.SetColumn(lbl, 0);
+                Grid.SetRow(val, row); Grid.SetColumn(val, 1);
+                Grid.SetRow(line, row); Grid.SetColumnSpan(line, 2);
+
+                infoGrid.Children.Add(line);
+                infoGrid.Children.Add(lbl);
+                infoGrid.Children.Add(val);
+                row++;
+            }
+
+            AddCompactRow("Талон № / Дата:", $"{order.OrderId} от {DateTime.Now:dd.MM.yyyy}");
+            AddCompactRow("Устройство:", $"{order.Device?.Brand} {order.Device?.Model}");
+            AddCompactRow("Серийный номер:", order.Device?.SerialNumber ?? "-");
+
+            string works = "Ремонт устройства";
+            if (order.OrderServices != null && order.OrderServices.Any())
+                works = string.Join(", ", order.OrderServices.Select(s => s.Service?.Name));
+            AddCompactRow("Выполненные работы:", works);
+
+            content.Children.Add(infoGrid);
+
+            int days = order.WarrantyDays;
+            string dateEnd = days > 0 ? DateTime.Now.AddDays(days).ToString("dd.MM.yyyy") : "—";
+
+            Border warrantyBox = new Border
+            {
+                BorderThickness = new Thickness(2),
+                BorderBrush = Brushes.Black,
+                CornerRadius = new CornerRadius(5),
+                Padding = new Thickness(10),
+                Margin = new Thickness(0, 15, 0, 15),
+                Background = Brushes.WhiteSmoke
+            };
+
+            StackPanel warrantyStack = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center };
+            warrantyStack.Children.Add(new TextBlock(new Run("ГАРАНТИЯ: ")) { FontWeight = FontWeights.Bold, FontSize = 14 });
+            warrantyStack.Children.Add(new TextBlock(new Run($"{days} дней. ")) { FontWeight = FontWeights.Black, FontSize = 14 });
+            if (days > 0)
+            {
+                warrantyStack.Children.Add(new TextBlock(new Run($"Действительна до: {dateEnd}")) { FontSize = 14, Margin = new Thickness(10, 0, 0, 0), TextDecorations = TextDecorations.Underline });
+            }
+
+            warrantyBox.Child = warrantyStack;
+            content.Children.Add(warrantyBox);
+
+            content.Children.Add(new TextBlock(new Run(
+                "1. Гарантия распространяется только на замененные запчасти и выполненные работы.\n" +
+                "2. При попадании влаги, механических повреждениях или вскрытии пломб гарантия аннулируется.\n" +
+                "3. Гарантийный талон действителен только при наличии печати сервисного центра."))
+            { FontSize = 9, FontStyle = FontStyles.Italic, Margin = new Thickness(0, 0, 0, 15) });
+
+            // 5. ПОДПИСИ
+            Grid signGrid = new Grid();
+            signGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            signGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            var stampPlace = new TextBlock(new Run("М.П.")) { FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(20, 0, 0, 0) };
+            var signLine = new TextBlock(new Run("Мастер: __________________")) { HorizontalAlignment = HorizontalAlignment.Right };
+
+            Grid.SetColumn(stampPlace, 0);
+            Grid.SetColumn(signLine, 1);
+            signGrid.Children.Add(stampPlace);
+            signGrid.Children.Add(signLine);
+
+            content.Children.Add(signGrid);
+
+            content.Children.Add(new TextBlock(new Run($"{_orgSettings.Address}, тел. {_orgSettings.Phone}"))
+            {
+                FontSize = 9,
+                Foreground = Brushes.Gray,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 10, 0, 0)
+            });
+
+            mainBorder.Child = content;
+            doc.Blocks.Add(new BlockUIContainer(mainBorder));
+
+            StackPanel cutLinePanel = new StackPanel { Margin = new Thickness(0, 20, 0, 0) };
+
+            doc.Blocks.Add(new BlockUIContainer(cutLinePanel));
+
+            return doc;
+        }
+
+
         private void AddTableHeader(Grid grid, ref int rowIndex, params string[] headers)
         {
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });

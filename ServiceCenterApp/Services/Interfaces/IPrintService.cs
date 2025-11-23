@@ -8,5 +8,6 @@ namespace ServiceCenterApp.Services.Interfaces
         void PrintReceptionReceipt(Order order);
         FlowDocument CreateReceptionDocument(Order order);
         FlowDocument CreateWorkCompletionDocument(Order order);
+        FlowDocument CreateWarrantyTicketDocument(Order order);
     }
 }

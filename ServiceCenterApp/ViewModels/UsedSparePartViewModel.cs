@@ -25,17 +25,27 @@ namespace ServiceCenterApp.ViewModels
             get => _orderSparePart.Quantity;
             set
             {
-                int currentQty = _orderSparePart.Quantity;
+                int currentQty = _orderSparePart.Quantity; 
+                int remainingStock = _orderSparePart.SparePart?.StockQuantity ?? 0;
+
+                int maxAvailable = currentQty + remainingStock;
+
                 int newQty = value;
 
                 if (newQty < 1) newQty = 1;
+                if (newQty > maxAvailable)
+                {
+                    System.Windows.MessageBox.Show($"На складе доступно всего {maxAvailable} шт.", "Ошибка склада", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+
+                    OnPropertyChanged(nameof(Quantity));
+                    return;
+                }
 
                 if (currentQty != newQty)
                 {
                     int diff = newQty - currentQty;
 
                     _orderSparePart.Quantity = newQty;
-
                     if (_orderSparePart.SparePart != null)
                     {
                         _orderSparePart.SparePart.StockQuantity -= diff;
@@ -43,7 +53,7 @@ namespace ServiceCenterApp.ViewModels
 
                     OnPropertyChanged(nameof(Quantity));
                     OnPropertyChanged(nameof(TotalSum));
-                    OnPropertyChanged(nameof(StockQuantity));
+                    OnPropertyChanged(nameof(StockQuantity)); 
 
                     _updateTotalSumCallback?.Invoke();
                 }

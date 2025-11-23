@@ -429,6 +429,12 @@
                                         <Button Content="Сформировать Акт работ" 
                                                 Width="200"
                                                 Command="{Binding DataContext.GenerateWorkActCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                Style="{StaticResource SecondaryButtonStyle}"
+                                                Margin="0,0,10,0"/>
+
+                                        <Button Content="Гарантийный талон" 
+                                                Width="200"
+                                                Command="{Binding DataContext.GenerateWarrantyTicketCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                                 Style="{StaticResource SecondaryButtonStyle}"/>
                                     </StackPanel>
 

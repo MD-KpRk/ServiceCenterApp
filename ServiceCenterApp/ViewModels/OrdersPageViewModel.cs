@@ -81,7 +81,37 @@ namespace ServiceCenterApp.ViewModels
             }
         }
         private Employee _selectedAcceptorEmployee;
-        public Employee SelectedAcceptorEmployee { get => _selectedAcceptorEmployee; set { _selectedAcceptorEmployee = value; OnPropertyChanged(); if (SelectedOrderDetails != null) SelectedOrderDetails.AcceptorEmployeeId = value?.EmployeeId; } }
+        public Employee SelectedAcceptorEmployee
+        {
+            get => _selectedAcceptorEmployee;
+            set
+            {
+                _selectedAcceptorEmployee = value;
+                OnPropertyChanged();
+
+                if (SelectedOrderDetails != null)
+                {
+                    SelectedOrderDetails.AcceptorEmployeeId = value?.EmployeeId;
+
+                    if (value != null && SelectedOrderDetails.StatusId == (int)OrderStatusEnum.New)
+                    {
+
+                        int inProgressId = (int)OrderStatusEnum.InProgress;
+
+                        SelectedOrderDetails.StatusId = inProgressId;
+
+                        SelectedOrderStatus = AllOrderStatuses.FirstOrDefault(s => s.StatusId == inProgressId);
+
+
+                        if (SelectedOrderDetails.StartDate == null)
+                        {
+                            SelectedOrderDetails.StartDate = DateTime.Now;
+                        }
+                    }
+                }
+            }
+        }
+
         private Priority _selectedPriority;
         public Priority SelectedPriority { get => _selectedPriority; set { _selectedPriority = value; OnPropertyChanged(); if (SelectedOrderDetails != null && value != null) SelectedOrderDetails.PriorityId = value.PriorityId; } }
 
@@ -95,6 +125,8 @@ namespace ServiceCenterApp.ViewModels
         public ICommand CreateOrderCommand { get; }
         public ICommand GenerateWorkActCommand { get; }
         public ICommand PrintReceiptCommand { get; } // Команда печати
+        public ICommand GenerateWarrantyTicketCommand { get; }
+
 
         private readonly IDocumentService _documentService; 
 
@@ -156,8 +188,47 @@ namespace ServiceCenterApp.ViewModels
             GenerateWorkActCommand = new RelayCommand(ExecuteGenerateWorkAct, () => CanExecuteSaveChanges() && !_isGeneratingDocument);
             GenerateReceptionActCommand = new RelayCommand(ExecuteGenerateReceptionAct, () => CanExecuteSaveChanges() && !_isGeneratingDocument);
             OpenDocumentCommand = new RelayCommand<Document>(ExecuteOpenDocument);
+            GenerateWarrantyTicketCommand = new RelayCommand(ExecuteGenerateWarrantyTicket, () => CanExecuteSaveChanges() && !_isGeneratingDocument);
 
             InitializeFilters();
+        }
+
+        private async void ExecuteGenerateWarrantyTicket()
+        {
+            if (_isGeneratingDocument) return;
+            if (SelectedOrderDetails == null) return;
+
+            // Проверка на здравый смысл
+            if (SelectedOrderDetails.WarrantyDays <= 0)
+            {
+                MessageBox.Show("В этом заказе указано '0 дней гарантии'. Талон не нужен.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                _isGeneratingDocument = true;
+                CommandManager.InvalidateRequerySuggested();
+
+                // Генерируем ТАЛОН
+                var docFlow = _printService.CreateWarrantyTicketDocument(SelectedOrderDetails);
+
+                // ID типа документа = 3 (Гарантийный талон)
+                await _documentService.CreateAndSaveDocumentAsync(SelectedOrderDetails, 3, docFlow);
+
+                await LoadDocumentsAsync(SelectedOrderDetails.OrderId);
+
+                MessageBox.Show("Гарантийный талон создан.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка");
+            }
+            finally
+            {
+                _isGeneratingDocument = false;
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         private async void ExecuteGenerateWorkAct()
@@ -178,6 +249,20 @@ namespace ServiceCenterApp.ViewModels
 
                 SelectedOrderDetails.WarrantyDays = selectedDays;
 
+                int completedStatusId = (int)OrderStatusEnum.Completed;
+
+                if (SelectedOrderDetails.StatusId != completedStatusId)
+                {
+                    SelectedOrderDetails.StatusId = completedStatusId;
+
+                    SelectedOrderStatus = AllOrderStatuses.FirstOrDefault(s => s.StatusId == completedStatusId);
+
+                    if (SelectedOrderDetails.EndDate == null)
+                    {
+                        SelectedOrderDetails.EndDate = DateTime.Now;
+                    }
+                }
+
                 await _context.SaveChangesAsync();
 
                 var docFlow = _printService.CreateWorkCompletionDocument(SelectedOrderDetails);
@@ -185,8 +270,9 @@ namespace ServiceCenterApp.ViewModels
                 await _documentService.CreateAndSaveDocumentAsync(SelectedOrderDetails, 2, docFlow);
 
                 await LoadDocumentsAsync(SelectedOrderDetails.OrderId);
+                await LoadHistoryAsync(SelectedOrderDetails.OrderId);
 
-                MessageBox.Show($"Акт сформирован. Гарантия: {selectedDays} дн.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Акт сформирован. Статус заказа изменен на 'Выдан'. Гарантия: {selectedDays} дн.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -452,16 +538,20 @@ namespace ServiceCenterApp.ViewModels
 
             try
             {
-                // Логика истории изменений статуса
-                var originalStatusId = (int?)_context.Entry(SelectedOrderDetails).Property(o => o.StatusId).OriginalValue;
+                var dbStatusId = await _context.Orders
+                    .AsNoTracking()
+                    .Where(o => o.OrderId == SelectedOrderDetails.OrderId)
+                    .Select(o => o.StatusId)
+                    .FirstOrDefaultAsync();
+
                 var newStatusId = SelectedOrderDetails.StatusId;
 
-                if (originalStatusId.HasValue && originalStatusId.Value != newStatusId)
+                if (dbStatusId != 0 && dbStatusId != newStatusId)
                 {
                     var historyRecord = new OrderStatusHistory
                     {
                         OrderId = SelectedOrderDetails.OrderId,
-                        OldStatusId = originalStatusId.Value,
+                        OldStatusId = dbStatusId,
                         NewStatusId = newStatusId,
                         EmployeeId = _currentUserService.CurrentUser.EmployeeId,
                         ChangeDate = DateTime.Now
@@ -469,7 +559,6 @@ namespace ServiceCenterApp.ViewModels
                     _context.OrderStatusHistories.Add(historyRecord);
                 }
 
-                // Стандартное сохранение связей
                 if (SelectedOrderDetails.StatusId != 0)
                 {
                     SelectedOrderDetails.Status = await _context.OrderStatuses.FindAsync(SelectedOrderDetails.StatusId);
@@ -487,10 +576,9 @@ namespace ServiceCenterApp.ViewModels
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                // Обновляем UI истории после сохранения
-                if (originalStatusId.HasValue && originalStatusId.Value != newStatusId)
+                if (dbStatusId != 0 && dbStatusId != newStatusId)
                 {
-                    LoadHistoryAsync(SelectedOrderDetails.OrderId);
+                    await LoadHistoryAsync(SelectedOrderDetails.OrderId);
                 }
 
                 if (SelectedOrderInList != null)
@@ -669,6 +757,7 @@ namespace ServiceCenterApp.ViewModels
         private async void ExecuteAddSparePart()
         {
             var addSparePartWindow = (AddSparePartWindow)_serviceProvider.GetService(typeof(AddSparePartWindow));
+
             var existingQuantities = new Dictionary<int, int>();
             foreach (var partVm in UsedSpareParts)
             {
@@ -683,33 +772,50 @@ namespace ServiceCenterApp.ViewModels
             if (addSparePartWindow.ShowDialog() == true)
             {
                 var selectedPart = addSparePartWindow.ViewModel.SelectedSparePart;
+                if (selectedPart == null) return;
                 var existingPartVM = UsedSpareParts.FirstOrDefault(p => p.PartNumber == selectedPart.PartNumber);
 
                 if (existingPartVM != null)
                 {
-                    existingPartVM.Quantity++;
+                    if (existingPartVM.StockQuantity > 0)
+                    {
+                        existingPartVM.Quantity++; 
+                    }
+                    else
+                    {
+                        MessageBox.Show("На складе больше нет этой детали.", "Ошибка склада", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                 }
                 else
                 {
                     var trackedPart = await _context.SpareParts.FindAsync(selectedPart.PartId);
+
                     if (trackedPart != null)
                     {
-                        trackedPart.StockQuantity -= 1;
-
-                        var newOrderSparePart = new OrderSparePart
+                        if (trackedPart.StockQuantity > 0)
                         {
-                            Order = SelectedOrderDetails,
-                            OrderId = SelectedOrderDetails.OrderId,
-                            SparePart = trackedPart,
-                            PartId = trackedPart.PartId,
-                            Quantity = 1,
+                            trackedPart.StockQuantity -= 1;
 
-                            SalePrice = trackedPart.SellingPrice, 
-                            CostPrice = trackedPart.CostPrice  
-                        };
+                            var newOrderSparePart = new OrderSparePart
+                            {
+                                Order = SelectedOrderDetails,
+                                OrderId = SelectedOrderDetails.OrderId,
+                                SparePart = trackedPart,
+                                PartId = trackedPart.PartId,
+                                Quantity = 1,
 
-                        SelectedOrderDetails.OrderSpareParts.Add(newOrderSparePart);
-                        UsedSpareParts.Add(new UsedSparePartViewModel(newOrderSparePart, CalculateTotalSum, RemoveSparePart));
+                                SalePrice = trackedPart.SellingPrice,
+                                CostPrice = trackedPart.CostPrice
+                            };
+
+                            SelectedOrderDetails.OrderSpareParts.Add(newOrderSparePart);
+
+                            UsedSpareParts.Add(new UsedSparePartViewModel(newOrderSparePart, CalculateTotalSum, RemoveSparePart));
+                        }
+                        else
+                        {
+                            MessageBox.Show("К сожалению, деталь только что закончилась.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
                     }
                 }
                 CalculateTotalSum();

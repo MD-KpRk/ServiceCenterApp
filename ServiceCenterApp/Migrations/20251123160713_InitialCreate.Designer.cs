@@ -12,7 +12,7 @@ using ServiceCenterApp.Data;
 namespace ServiceCenterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251123140020_InitialCreate")]
+    [Migration("20251123160713_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -437,23 +437,8 @@ namespace ServiceCenterApp.Migrations
                         },
                         new
                         {
-                            StatusId = 2,
-                            StatusName = "В диагностике"
-                        },
-                        new
-                        {
-                            StatusId = 3,
-                            StatusName = "Ожидает запчасть"
-                        },
-                        new
-                        {
                             StatusId = 4,
                             StatusName = "В работе"
-                        },
-                        new
-                        {
-                            StatusId = 5,
-                            StatusName = "Готов к выдаче"
                         },
                         new
                         {

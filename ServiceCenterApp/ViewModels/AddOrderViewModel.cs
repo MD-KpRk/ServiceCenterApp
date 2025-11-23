@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -19,6 +20,9 @@ namespace ServiceCenterApp.ViewModels
     {
         private readonly ApplicationDbContext _context;
         private readonly ICurrentUserService _currentUserService;
+
+        private readonly IPrintService _printService;
+        private readonly IDocumentService _documentService;
 
         // Для Debounce (задержки поиска)
         private CancellationTokenSource? _searchCancellationTokenSource;
@@ -86,10 +90,17 @@ namespace ServiceCenterApp.ViewModels
 
         private Client _existingClient;
 
-        public AddOrderViewModel(ApplicationDbContext context, ICurrentUserService currentUserService)
+        public AddOrderViewModel(
+            ApplicationDbContext context,
+            ICurrentUserService currentUserService,
+            IPrintService printService,       
+            IDocumentService documentService)
         {
             _context = context;
             _currentUserService = currentUserService;
+            _printService = printService;
+            _documentService = documentService;
+
             SaveCommand = new RelayCommand(ExecuteSave);
         }
 
@@ -105,7 +116,6 @@ namespace ServiceCenterApp.ViewModels
                 SelectedPriority = AllPriorities.FirstOrDefault(p => p.PriorityId == (int)PriorityEnum.Normal);
         }
 
-        // Метод запуска поиска с "Тихим" Debounce (без исключений в консоли)
         private void InitiateClientSearch(string phoneNumber)
         {
             // Отменяем предыдущий поиск
@@ -224,7 +234,6 @@ namespace ServiceCenterApp.ViewModels
                 return;
             }
 
-            // Используем транзакцию для атомарности
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
@@ -283,13 +292,27 @@ namespace ServiceCenterApp.ViewModels
                     AcceptorEmployeeId = SelectedMaster?.EmployeeId
                 };
 
+                if (newOrder.AcceptorEmployeeId.HasValue)
+                {
+                    newOrder.StatusId = (int)OrderStatusEnum.InProgress;
+                }
+
                 _context.Orders.Add(newOrder);
                 await _context.SaveChangesAsync();
 
-                // Если все ок - фиксируем транзакцию
                 await transaction.CommitAsync();
 
-                // Закрытие окна
+
+                try
+                {
+                    FlowDocument docFlow = _printService.CreateReceptionDocument(newOrder);
+                    await _documentService.CreateAndSaveDocumentAsync(newOrder, 1, docFlow);
+                }
+                catch (Exception docEx)
+                {
+                    MessageBox.Show($"Заказ создан, но ошибка при генерации акта: {docEx.Message}");
+                }
+
                 foreach (Window window in Application.Current.Windows)
                 {
                     if (window.DataContext == this)
