@@ -10,7 +10,8 @@ namespace ServiceCenterApp.Data.Configurations
         {
             builder.HasIndex(sp => sp.PartNumber).IsUnique();
 
-            builder.Property(sp => sp.Price).HasColumnType("decimal(10, 2)");
+            builder.Property(sp => sp.CostPrice).HasColumnType("decimal(10, 2)");
+            builder.Property(sp => sp.SellingPrice).HasColumnType("decimal(10, 2)");
 
             builder.Property(sp => sp.StockQuantity).HasDefaultValue(0);
         }

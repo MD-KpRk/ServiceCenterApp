@@ -12,7 +12,7 @@ using ServiceCenterApp.Data;
 namespace ServiceCenterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251122203842_InitialCreate")]
+    [Migration("20251123120128_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -59,10 +59,16 @@ namespace ServiceCenterApp.Migrations
                     b.Property<int>("PartId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("decimal(10, 2)");
+
                     b.Property<int>("Quantity")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(1);
+
+                    b.Property<decimal>("SalePrice")
+                        .HasColumnType("decimal(10, 2)");
 
                     b.HasKey("OrderId", "PartId");
 
@@ -903,6 +909,9 @@ namespace ServiceCenterApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PartId"));
 
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("decimal(10, 2)");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -916,7 +925,7 @@ namespace ServiceCenterApp.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal>("SellingPrice")
                         .HasColumnType("decimal(10, 2)");
 
                     b.Property<int>("StockQuantity")

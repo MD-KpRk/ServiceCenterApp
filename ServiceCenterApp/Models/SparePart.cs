@@ -20,12 +20,18 @@ namespace ServiceCenterApp.Models
 
         public string? Description { get; set; }
 
-        [Column(TypeName = "decimal(10, 2)")]
-        public decimal Price { get; set; }
-
         public int StockQuantity { get; set; }
 
         public int SupplierId { get; set; }
+
+
+        // Цена ЗАКУПКИ (Себестоимость)
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal CostPrice { get; set; }
+
+        // Цена ПРОДАЖИ (Для клиента)
+        [Column(TypeName = "decimal(10, 2)")]
+        public decimal SellingPrice { get; set; } 
 
         // Навигационные свойства
         [ForeignKey("SupplierId")]

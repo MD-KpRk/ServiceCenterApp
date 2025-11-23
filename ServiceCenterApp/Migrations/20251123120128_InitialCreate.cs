@@ -247,9 +247,10 @@ namespace ServiceCenterApp.Migrations
                     Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     PartNumber = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Price = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     StockQuantity = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    SupplierId = table.Column<int>(type: "int", nullable: false)
+                    SupplierId = table.Column<int>(type: "int", nullable: false),
+                    CostPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    SellingPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -419,7 +420,9 @@ namespace ServiceCenterApp.Migrations
                 {
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     PartId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false, defaultValue: 1)
+                    Quantity = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
+                    SalePrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    CostPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false)
                 },
                 constraints: table =>
                 {
