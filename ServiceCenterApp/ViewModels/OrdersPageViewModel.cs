@@ -662,11 +662,13 @@ namespace ServiceCenterApp.ViewModels
                             OrderId = SelectedOrderDetails.OrderId,
                             SparePart = trackedPart,
                             PartId = trackedPart.PartId,
-                            Quantity = 1
-                        };
-                        SelectedOrderDetails.OrderSpareParts.Add(newOrderSparePart);
+                            Quantity = 1,
 
-                        // ОБНОВЛЕНО: передаем RemoveSparePart
+                            SalePrice = trackedPart.SellingPrice, 
+                            CostPrice = trackedPart.CostPrice  
+                        };
+
+                        SelectedOrderDetails.OrderSpareParts.Add(newOrderSparePart);
                         UsedSpareParts.Add(new UsedSparePartViewModel(newOrderSparePart, CalculateTotalSum, RemoveSparePart));
                     }
                 }

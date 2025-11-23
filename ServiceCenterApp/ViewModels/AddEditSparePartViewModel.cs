@@ -19,13 +19,19 @@ namespace ServiceCenterApp.ViewModels
 
         public string WindowTitle => _isEditMode ? "Редактирование детали" : "Новая запчасть";
 
+        private decimal _costPrice;
+        public decimal CostPrice { get => _costPrice; set { _costPrice = value; OnPropertyChanged(); } }
+        public decimal SellingPrice { get; set; }
+
         // Поля
         public int PartId { get; set; }
         public string Name { get; set; }
         public string PartNumber { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
-        public int StockQuantity { get; set; }
+
+        private int _stockQuantity;
+        public int StockQuantity { get => _stockQuantity; set { _stockQuantity = value; OnPropertyChanged(); } }
 
         // Поставщики
         private List<Supplier> _allSuppliers;
@@ -36,20 +42,53 @@ namespace ServiceCenterApp.ViewModels
 
         public ICommand SaveCommand { get; }
         public ICommand AddSupplierCommand { get; }
+        public ICommand SupplyCommand { get; }
+
+
+
 
         public AddEditSparePartViewModel(ApplicationDbContext context)
         {
             _context = context;
             SaveCommand = new RelayCommand(ExecuteSave);
             AddSupplierCommand = new RelayCommand(ExecuteAddSupplier);
+            SupplyCommand = new RelayCommand(ExecuteSupply);
+        }
+
+        private void ExecuteSupply()
+        {
+            SupplyWindow window = new SupplyWindow();
+
+            if (window.ShowDialog() == true)
+            {
+                var vm = window.ViewModel;
+                int incomingQty = vm.IncomingQuantity;
+                decimal incomingPrice = vm.IncomingPrice;
+
+                decimal oldTotalValue = StockQuantity * CostPrice; 
+                decimal newSupplyValue = incomingQty * incomingPrice; 
+
+                int newTotalQty = StockQuantity + incomingQty;
+
+                if (newTotalQty > 0)
+                {
+                    CostPrice = (oldTotalValue + newSupplyValue) / newTotalQty;
+                    CostPrice = Math.Round(CostPrice, 2);
+                }
+                else
+                {
+                    CostPrice = incomingPrice;
+                }
+
+                StockQuantity = newTotalQty;
+            }
         }
 
         public async Task LoadDataAsync(SparePart partToEdit = null)
         {
-            // 1. Загружаем поставщиков
+
             await RefreshSuppliersAsync();
 
-            // 2. Если это режим редактирования, заполняем поля
             if (partToEdit != null)
             {
                 _isEditMode = true;
@@ -57,9 +96,11 @@ namespace ServiceCenterApp.ViewModels
                 Name = partToEdit.Name;
                 PartNumber = partToEdit.PartNumber;
                 Description = partToEdit.Description;
-                Price = partToEdit.Price;
-                StockQuantity = partToEdit.StockQuantity;
 
+                CostPrice = partToEdit.CostPrice;
+                SellingPrice = partToEdit.SellingPrice;
+
+                StockQuantity = partToEdit.StockQuantity;
                 SelectedSupplier = AllSuppliers.FirstOrDefault(s => s.SupplierId == partToEdit.SupplierId);
             }
             else
@@ -127,7 +168,8 @@ namespace ServiceCenterApp.ViewModels
                         part.Name = Name;
                         part.PartNumber = PartNumber;
                         part.Description = Description;
-                        part.Price = Price;
+                        part.CostPrice = CostPrice;
+                        part.SellingPrice = SellingPrice;
                         part.StockQuantity = StockQuantity;
                         part.SupplierId = SelectedSupplier.SupplierId;
 
@@ -142,7 +184,8 @@ namespace ServiceCenterApp.ViewModels
                         Name = Name,
                         PartNumber = PartNumber,
                         Description = Description,
-                        Price = Price,
+                        CostPrice = CostPrice,
+                        SellingPrice = SellingPrice,
                         StockQuantity = StockQuantity,
                         SupplierId = SelectedSupplier.SupplierId
                     };

@@ -14,7 +14,7 @@ namespace ServiceCenterApp.ViewModels
 
         public string Name => _orderSparePart.SparePart?.Name ?? "Неизвестно";
         public string PartNumber => _orderSparePart.SparePart?.PartNumber ?? "—";
-        public decimal Price => _orderSparePart.SparePart?.Price ?? 0;
+        public decimal Price => _orderSparePart.SalePrice;
 
         public int StockQuantity => _orderSparePart.SparePart?.StockQuantity ?? 0;
 
