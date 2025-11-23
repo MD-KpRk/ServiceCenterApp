@@ -420,14 +420,15 @@
                                     <!-- Панель действий -->
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10" Height="30">
                                         <Button Content="Сформировать Акт приема" 
+                                                Width="200"
                                                 Command="{Binding DataContext.GenerateReceptionActCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                                 Style="{StaticResource SecondaryButtonStyle}"
                                                 Margin="0,0,10,0"/>
 
                                         <!-- В будущем можно добавить кнопку "Акт выполненных работ" -->
-                                        <Button Content="Акт выполненных работ" 
-                                                IsEnabled="False" 
-                                                ToolTip="Функционал в разработке"
+                                        <Button Content="Сформировать Акт работ" 
+                                                Width="200"
+                                                Command="{Binding DataContext.GenerateWorkActCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                                 Style="{StaticResource SecondaryButtonStyle}"/>
                                     </StackPanel>
 

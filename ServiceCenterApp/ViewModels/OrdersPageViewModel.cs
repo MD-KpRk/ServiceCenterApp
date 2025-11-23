@@ -93,6 +93,7 @@ namespace ServiceCenterApp.ViewModels
         public ICommand AddSparePartCommand { get; }
         public ICommand CloseDetailsCommand { get; }
         public ICommand CreateOrderCommand { get; }
+        public ICommand GenerateWorkActCommand { get; }
         public ICommand PrintReceiptCommand { get; } // Команда печати
 
         private readonly IDocumentService _documentService; 
@@ -152,10 +153,50 @@ namespace ServiceCenterApp.ViewModels
 
             _documentService = documentService;
 
+            GenerateWorkActCommand = new RelayCommand(ExecuteGenerateWorkAct, () => CanExecuteSaveChanges() && !_isGeneratingDocument);
             GenerateReceptionActCommand = new RelayCommand(ExecuteGenerateReceptionAct, () => CanExecuteSaveChanges() && !_isGeneratingDocument);
             OpenDocumentCommand = new RelayCommand<Document>(ExecuteOpenDocument);
 
             InitializeFilters();
+        }
+
+        private async void ExecuteGenerateWorkAct()
+        {
+            if (_isGeneratingDocument) return;
+            if (SelectedOrderDetails == null) return;
+
+            var settingsWindow = new DocumentSettingsWindow(SelectedOrderDetails.WarrantyDays);
+
+            if (settingsWindow.ShowDialog() != true) return;
+
+            try
+            {
+                _isGeneratingDocument = true;
+                CommandManager.InvalidateRequerySuggested();
+
+                int selectedDays = settingsWindow.ViewModel.SelectedDays;
+
+                SelectedOrderDetails.WarrantyDays = selectedDays;
+
+                await _context.SaveChangesAsync();
+
+                var docFlow = _printService.CreateWorkCompletionDocument(SelectedOrderDetails);
+
+                await _documentService.CreateAndSaveDocumentAsync(SelectedOrderDetails, 2, docFlow);
+
+                await LoadDocumentsAsync(SelectedOrderDetails.OrderId);
+
+                MessageBox.Show($"Акт сформирован. Гарантия: {selectedDays} дн.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isGeneratingDocument = false;
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         private void ExecuteOpenDocument(Document doc)
@@ -164,7 +205,6 @@ namespace ServiceCenterApp.ViewModels
 
             try
             {
-                // Передаем объект документа в сервис
                 _documentService.OpenDocument(doc);
             }
             catch (Exception ex)

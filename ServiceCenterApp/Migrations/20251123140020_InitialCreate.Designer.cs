@@ -12,7 +12,7 @@ using ServiceCenterApp.Data;
 namespace ServiceCenterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251123120128_InitialCreate")]
+    [Migration("20251123140020_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -688,6 +688,9 @@ namespace ServiceCenterApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WarrantyDays")
                         .HasColumnType("int");
 
                     b.HasKey("OrderId");

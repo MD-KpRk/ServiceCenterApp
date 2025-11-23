@@ -48,6 +48,8 @@ namespace ServiceCenterApp.Models
         [ForeignKey("ClientId")]
         public virtual Client? Client { get; set; }
 
+        public int WarrantyDays { get; set; } = 30; 
+
         [ForeignKey("DeviceId")]
         public virtual Device? Device { get; set; }
 

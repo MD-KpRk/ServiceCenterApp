@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceCenterApp.Data;
+using ServiceCenterApp.Models.Config;
 using ServiceCenterApp.Pages;
 using ServiceCenterApp.Services;
 using ServiceCenterApp.Services.Interfaces;
@@ -38,11 +39,24 @@ namespace ServiceCenterApp
             // --- DI CONTAINER INIT ---
             IServiceCollection services = new ServiceCollection();
 
+            services.Configure<OrganizationSettings>(settings =>
+            {
+                IConfigurationSection section = Configuration.GetSection("OrganizationSettings");
+
+                // Вручную перекладываем значения из конфига в класс
+                settings.Name = section["Name"];
+                settings.Address = section["Address"];
+                settings.UNP = section["UNP"];
+                settings.Phone = section["Phone"];
+            });
+
+
             // --- DATABASE REGISTRATION ---
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             }, ServiceLifetime.Transient); // Transient важно для WPF, чтобы избегать проблем с потоками
+
 
             // --- SERVICE REGISTRATION ---
             services.AddSingleton<IAuthenticationService, AuthenticationService>();

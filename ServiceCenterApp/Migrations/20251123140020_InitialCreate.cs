@@ -279,7 +279,8 @@ namespace ServiceCenterApp.Migrations
                     CreatorEmployeeId = table.Column<int>(type: "int", nullable: false),
                     AcceptorEmployeeId = table.Column<int>(type: "int", nullable: true),
                     ClientId = table.Column<int>(type: "int", nullable: false),
-                    DeviceId = table.Column<int>(type: "int", nullable: false)
+                    DeviceId = table.Column<int>(type: "int", nullable: false),
+                    WarrantyDays = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

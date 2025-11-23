@@ -687,6 +687,9 @@ namespace ServiceCenterApp.Migrations
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
+                    b.Property<int>("WarrantyDays")
+                        .HasColumnType("int");
+
                     b.HasKey("OrderId");
 
                     b.HasIndex("AcceptorEmployeeId");
