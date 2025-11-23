@@ -21,6 +21,8 @@ namespace ServiceCenterApp
         private readonly ServiceProvider? _serviceProvider;
         public static IConfiguration? Configuration { get; private set; }
 
+        private bool _isExiting = false;
+
         public App()
         {
             // Глобальная обработка ошибок
@@ -66,24 +68,24 @@ namespace ServiceCenterApp
             services.AddTransient<StorageViewModel>();
             services.AddTransient<AddEditSparePartViewModel>();
             services.AddTransient<AddServiceViewModel>();
-            services.AddTransient<AddEditServiceViewModel>();
+            services.AddTransient<AddEditServiceViewModel>();   
 
             // --- VIEWS ---
-            services.AddSingleton<MainWindow>();            // Window
-            services.AddTransient<AuthPage>();              // Page
-            services.AddTransient<InstallationPage>();      // Page
-            services.AddTransient<MainAdminPage>();         // Page 
-            services.AddTransient<OrdersPage>();            // Page 
-            services.AddTransient<AddSparePartWindow>();    // Window
-            services.AddTransient<AddOrderWindow>();        // Window
-            services.AddTransient<ClientsPage>();           // Page 
-            services.AddTransient<AddClientWindow>();       // Window
-            services.AddTransient<EmployeesPage>();         // Page
-            services.AddTransient<AddEmployeeWindow>();     // Window
-            services.AddTransient<StoragePage>();           // Page
-            services.AddTransient<AddEditSparePartWindow>();// Window
-            services.AddTransient<AddServiceWindow>();      // Window
-            services.AddTransient<AddEditServiceWindow>();  // Window
+            services.AddSingleton<MainWindow>();                // Window
+            services.AddTransient<AuthPage>();                  // Page
+            services.AddTransient<InstallationPage>();          // Page
+            services.AddTransient<MainAdminPage>();             // Page 
+            services.AddTransient<OrdersPage>();                // Page 
+            services.AddTransient<AddSparePartWindow>();        // Window
+            services.AddTransient<AddOrderWindow>();            // Window
+            services.AddTransient<ClientsPage>();               // Page 
+            services.AddTransient<AddClientWindow>();           // Window
+            services.AddTransient<EmployeesPage>();             // Page
+            services.AddTransient<AddEmployeeWindow>();         // Window
+            services.AddTransient<StoragePage>();               // Page
+            services.AddTransient<AddEditSparePartWindow>();    // Window
+            services.AddTransient<AddServiceWindow>();          // Window
+            services.AddTransient<AddEditServiceWindow>();      // Window
 
             _serviceProvider = services.BuildServiceProvider();
             ConfigureNavigation();
@@ -157,9 +159,31 @@ namespace ServiceCenterApp
             base.OnStartup(e);
         }
 
-        // Глобальный перехватчик ошибок
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _isExiting = true;
+            if (_serviceProvider != null)
+            {
+                _serviceProvider.Dispose();
+            }
+
+            base.OnExit(e);
+        }
+
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            if (_isExiting)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (e.Exception is TaskCanceledException)
+            {
+                e.Handled = true;
+                return;
+            }
+
             string errorMsg = $"Произошла непредвиденная ошибка: {e.Exception.Message}\n\n";
             if (e.Exception.InnerException != null)
             {
@@ -167,7 +191,6 @@ namespace ServiceCenterApp
             }
 
             MessageBox.Show(errorMsg, "Ошибка приложения", MessageBoxButton.OK, MessageBoxImage.Error);
-
             e.Handled = true;
         }
     }

@@ -42,6 +42,10 @@ namespace ServiceCenterApp
             ViewModel.IsMenuVisible = !ViewModel.IsMenuVisible;
         }
 
-
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Application.Current.Shutdown();
+        }
     }
 }
