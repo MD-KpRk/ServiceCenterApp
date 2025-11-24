@@ -15,19 +15,29 @@ namespace ServiceCenterApp.ViewModels
 
         private readonly INavigationService _navigationService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IAuthenticationService _authService;
 
+        public ICommand LogoutCommand { get; } 
         public ICommand NavigateCommand { get; }
 
-        public MainWindowViewModel(INavigationService navigationService, ICurrentUserService currentUserService)
+        public MainWindowViewModel(INavigationService navigationService, 
+            ICurrentUserService currentUserService, 
+            IAuthenticationService authService)
         {
             _navigationService = navigationService;
             _currentUserService = currentUserService;
+            _authService = authService;
 
             _currentUserService.AuthenticationStateChanged += OnAuthenticationStateChanged;
 
             NavigateCommand = new RelayCommand<string>(Navigate);
+            LogoutCommand = new RelayCommand(ExecuteLogout);
 
             UpdateMenuAndPermissions();
+        }
+        private void ExecuteLogout()
+        {
+            _authService.Logout();
         }
 
         public void InitializeNavigation(Frame frame)
@@ -71,6 +81,9 @@ namespace ServiceCenterApp.ViewModels
                     break;
                 case "Finance":
                     _navigationService.NavigateTo<FinanceViewModel>();
+                    break;
+                case "Profile":
+                    _navigationService.NavigateTo<ProfileViewModel>();
                     break;
 
             }

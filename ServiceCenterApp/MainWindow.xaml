@@ -89,8 +89,11 @@
             </StackPanel>
 
             <StackPanel VerticalAlignment="Bottom" Margin="0 0 0 10">
-                <Button Content="Профиль" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource UserIcon}" />
-                <Button Content="Выйти" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource ExitIcon}"/>
+                <Button Content="Профиль" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource UserIcon}"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Profile"/>
+                <Button Content="Выйти" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource ExitIcon}"
+                        Command="{Binding LogoutCommand}"/>
 
             </StackPanel>
         </DockPanel>
