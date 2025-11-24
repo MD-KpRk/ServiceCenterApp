@@ -114,21 +114,21 @@ namespace ServiceCenterApp.ViewModels
                 InProgressOrdersCount = await _context.Orders.CountAsync(o => o.Status != null && inProgressStatuses.Contains(o.Status.StatusName));
                 ReadyForPickupCount = await _context.Orders.CountAsync(o => o.Status.StatusName == "Готов к выдаче");
 
-                TotalAmountDue = await _context.Payments
-                    .Where(p => p.PaymentStatus.StatusName == "Ожидает оплаты" && p.Order.Status.StatusName == "Готов к выдаче")
-                    .SumAsync(p => p.Amount);
+                //TotalAmountDue = await _context.Payments
+                //    .Where(p => p.PaymentStatus.StatusName == "Ожидает оплаты" && p.Order.Status.StatusName == "Готов к выдаче")
+                //    .SumAsync(p => p.Amount);
 
-                EarnedToday = await _context.Payments
-                    .Where(p => p.PaymentStatus.StatusName == "Оплачен" && p.PaymentDate.Date == today)
-                    .SumAsync(p => p.Amount);
+                //EarnedToday = await _context.Payments
+                //    .Where(p => p.PaymentStatus.StatusName == "Оплачен" && p.PaymentDate.Date == today)
+                //    .SumAsync(p => p.Amount);
 
-                EarnedThisMonth = await _context.Payments
-                    .Where(p => p.PaymentStatus.StatusName == "Оплачен" && p.PaymentDate >= startOfMonth)
-                    .SumAsync(p => p.Amount);
+                //EarnedThisMonth = await _context.Payments
+                //    .Where(p => p.PaymentStatus.StatusName == "Оплачен" && p.PaymentDate >= startOfMonth)
+                //    .SumAsync(p => p.Amount);
 
-                TotalRevenue = await _context.Payments
-                    .Where(p => p.PaymentStatus.StatusName == "Оплачен")
-                    .SumAsync(p => p.Amount);
+                //TotalRevenue = await _context.Payments
+                //    .Where(p => p.PaymentStatus.StatusName == "Оплачен")
+                //    .SumAsync(p => p.Amount);
 
                 EmployeePerformanceData.Clear();
                 var employeeData = await _context.Employees

@@ -19,12 +19,13 @@ namespace ServiceCenterApp.Data
         public DbSet<SparePart> SpareParts { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<DiagnosticReport> DiagnosticReports { get; set; }
-        public DbSet<Payment> Payments { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<Position> Positions { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
+        public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
+        public DbSet<TransactionCategory> TransactionCategories { get; set; }
 
         // --- Association Helper Tables ---
         public DbSet<OrderSparePart> OrderSpareParts { get; set; }
@@ -35,8 +36,6 @@ namespace ServiceCenterApp.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<OrderStatus> OrderStatuses { get; set; }
         public DbSet<Priority> Priorities { get; set; }
-        public DbSet<PaymentType> PaymentTypes { get; set; }
-        public DbSet<PaymentStatus> PaymentStatuses { get; set; }
         public DbSet<DocumentType> DocumentTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

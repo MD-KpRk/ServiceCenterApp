@@ -81,6 +81,25 @@ namespace ServiceCenterApp.ViewModels
                 }
 
                 StockQuantity = newTotalQty;
+
+                try
+                {
+                    var transaction = new FinancialTransaction
+                    {
+                        Date = DateTime.Now,
+                        Amount = newSupplyValue, 
+                        Type = TransactionType.Expense,
+                        CategoryId = 3, 
+                        PaymentMethod = PaymentMethod.Cash, 
+                        Description = $"Поставка товара: {Name} ({incomingQty} шт.)"
+                    };
+
+                    _context.FinancialTransactions.Add(transaction);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Не удалось создать фин. запись: " + ex.Message);
+                }
             }
         }
 

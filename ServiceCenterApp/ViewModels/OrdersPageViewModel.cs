@@ -37,6 +37,12 @@ namespace ServiceCenterApp.ViewModels
         private decimal _grandTotalSum;
         public decimal GrandTotalSum { get => _grandTotalSum; set { _grandTotalSum = value; OnPropertyChanged(); } }
 
+        private decimal _paidSum;
+        public decimal PaidSum { get => _paidSum; set { _paidSum = value; OnPropertyChanged(); OnPropertyChanged(nameof(DebtSum)); } }
+        public decimal DebtSum => GrandTotalSum - PaidSum; // Долг = Итого - Оплачено
+
+        public ICommand AcceptPaymentCommand { get; }
+
         private List<OrderListItemViewModel> _allOrders = new();
         public ObservableCollection<OrderListItemViewModel> FilteredOrders { get; }
         public ObservableCollection<StatusFilterViewModel> StatusFilters { get; }
@@ -182,6 +188,7 @@ namespace ServiceCenterApp.ViewModels
             CreateOrderCommand = new RelayCommand(ExecuteCreateOrder);
             PrintReceiptCommand = new RelayCommand(ExecutePrintReceipt, CanExecuteSaveChanges); 
             AddServiceCommand = new RelayCommand(ExecuteAddService, CanExecuteSaveChanges);
+            AcceptPaymentCommand = new RelayCommand(ExecuteAcceptPayment, CanExecuteSaveChanges);
 
             _documentService = documentService;
 
@@ -698,6 +705,7 @@ namespace ServiceCenterApp.ViewModels
 
                     await LoadDocumentsAsync(orderId.Value);
                     await LoadHistoryAsync(orderId.Value);
+                    await LoadPaymentsAsync(orderId.Value);
                 }
             }
             catch (OperationCanceledException)
@@ -707,6 +715,36 @@ namespace ServiceCenterApp.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Ошибка загрузки заказа: {ex.Message}");
+            }
+        }
+
+        private async Task LoadPaymentsAsync(int orderId)
+        {
+            var payments = await _context.FinancialTransactions
+                .AsNoTracking()
+                .Where(t => t.RelatedOrderId == orderId && t.Type == TransactionType.Income)
+                .SumAsync(t => t.Amount);
+
+            PaidSum = payments;
+        }
+
+        private async void ExecuteAcceptPayment()
+        {
+            if (SelectedOrderDetails == null) return;
+
+            var vm = new AddTransactionViewModel(_context);
+
+            // Income
+            await vm.InitializeAsync(TransactionType.Income);
+
+            vm.Amount = DebtSum > 0 ? DebtSum : 0;
+            vm.Description = $"Оплата заказа №{SelectedOrderDetails.OrderId}";
+            vm.RelatedOrderId = SelectedOrderDetails.OrderId; 
+
+            var window = new AddTransactionWindow(vm);
+            if (window.ShowDialog() == true)
+            {
+                await LoadPaymentsAsync(SelectedOrderDetails.OrderId);
             }
         }
 
@@ -788,7 +826,7 @@ namespace ServiceCenterApp.ViewModels
                 }
                 else
                 {
-                    var trackedPart = await _context.SpareParts.FindAsync(selectedPart.PartId);
+                    SparePart? trackedPart = await _context.SpareParts.FindAsync(selectedPart.PartId);
 
                     if (trackedPart != null)
                     {

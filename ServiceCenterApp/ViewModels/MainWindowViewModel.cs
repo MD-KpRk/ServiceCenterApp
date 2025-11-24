@@ -69,9 +69,10 @@ namespace ServiceCenterApp.ViewModels
                 case "Storage": 
                     _navigationService.NavigateTo<StorageViewModel>(); 
                     break;
+                case "Finance":
+                    _navigationService.NavigateTo<FinanceViewModel>();
+                    break;
 
-                    //TODO:
-                    // Сюда можно добавить другие кейсы: "Clients", "Employees" и т.д.
             }
         }
 
