@@ -121,7 +121,8 @@ namespace ServiceCenterApp.Services
 
         public void Logout()
         {
-            throw new NotImplementedException();
+            _currentUserService.ClearCurrentUser();
+            _navigationService.NavigateTo<AuthPageViewModel>();
         }
     }
 }

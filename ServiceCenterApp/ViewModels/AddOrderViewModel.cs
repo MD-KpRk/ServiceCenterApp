@@ -134,22 +134,18 @@ namespace ServiceCenterApp.ViewModels
                 {
                     await Task.Delay(500);
 
-                    // Проверяем отмену вручную ПОСЛЕ задержки
                     if (token.IsCancellationRequested) return;
 
-                    // Выполняем поиск в UI потоке
                     Application.Current.Dispatcher.Invoke(() => TryFindClient(phoneNumber, token));
                 }
                 catch (Exception)
                 {
-                    // Игнорируем любые ошибки потока, чтобы не крашить приложение
                 }
             });
         }
 
         private async void TryFindClient(string phoneNumber, CancellationToken token)
         {
-            // Дополнительная проверка перед началом тяжелой работы
             if (token.IsCancellationRequested) return;
 
             if (string.IsNullOrWhiteSpace(phoneNumber) || phoneNumber.Length < 4)
@@ -166,7 +162,6 @@ namespace ServiceCenterApp.ViewModels
 
             try
             {
-                // Передаем токен в запрос БД, чтобы отменить сам SQL запрос, если пользователь быстро печатает
                 var client = await _context.Clients
                     .FirstOrDefaultAsync(c => c.PhoneNumber.Contains(phoneNumber), token);
 
@@ -196,7 +191,6 @@ namespace ServiceCenterApp.ViewModels
             }
             catch (OperationCanceledException)
             {
-                // Нормальная ситуация при отмене запроса к БД, игнорируем
             }
             catch (Exception)
             {
@@ -237,8 +231,6 @@ namespace ServiceCenterApp.ViewModels
             try
             {
                 Client clientToUse = _existingClient;
-
-                // 1. Обработка Клиента
                 if (clientToUse == null)
                 {
                     clientToUse = new Client
