@@ -75,32 +75,6 @@ namespace ServiceCenterApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PaymentStatuses",
-                columns: table => new
-                {
-                    PaymentStatusId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StatusName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentStatuses", x => x.PaymentStatusId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PaymentTypes",
-                columns: table => new
-                {
-                    PaymentTypeId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TypeName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentTypes", x => x.PaymentTypeId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Permissions",
                 columns: table => new
                 {
@@ -184,6 +158,20 @@ namespace ServiceCenterApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TransactionCategories",
+                columns: table => new
+                {
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    IsExpense = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransactionCategories", x => x.CategoryId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Employees",
                 columns: table => new
                 {
@@ -260,6 +248,31 @@ namespace ServiceCenterApp.Migrations
                         column: x => x.SupplierId,
                         principalTable: "Suppliers",
                         principalColumn: "SupplierId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FinancialTransactions",
+                columns: table => new
+                {
+                    TransactionId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    PaymentMethod = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    RelatedOrderId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FinancialTransactions", x => x.TransactionId);
+                    table.ForeignKey(
+                        name: "FK_FinancialTransactions_TransactionCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "TransactionCategories",
+                        principalColumn: "CategoryId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -412,7 +425,7 @@ namespace ServiceCenterApp.Migrations
                         column: x => x.ServiceId,
                         principalTable: "Services",
                         principalColumn: "ServiceId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -483,41 +496,6 @@ namespace ServiceCenterApp.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Payments",
-                columns: table => new
-                {
-                    PaymentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
-                    PaymentTypeId = table.Column<int>(type: "int", nullable: false),
-                    PaymentStatusId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Payments", x => x.PaymentId);
-                    table.ForeignKey(
-                        name: "FK_Payments_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
-                        principalColumn: "OrderId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Payments_PaymentStatuses_PaymentStatusId",
-                        column: x => x.PaymentStatusId,
-                        principalTable: "PaymentStatuses",
-                        principalColumn: "PaymentStatusId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Payments_PaymentTypes_PaymentTypeId",
-                        column: x => x.PaymentTypeId,
-                        principalTable: "PaymentTypes",
-                        principalColumn: "PaymentTypeId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.InsertData(
                 table: "DocumentTypes",
                 columns: new[] { "DocumentTypeId", "TypeName" },
@@ -537,25 +515,6 @@ namespace ServiceCenterApp.Migrations
                     { 4, "В работе" },
                     { 6, "Выдан" },
                     { 7, "Отменен" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "PaymentStatuses",
-                columns: new[] { "PaymentStatusId", "StatusName" },
-                values: new object[,]
-                {
-                    { 1, "Ожидает оплаты" },
-                    { 2, "Оплачен" },
-                    { 3, "Отменён" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "PaymentTypes",
-                columns: new[] { "PaymentTypeId", "TypeName" },
-                values: new object[,]
-                {
-                    { 1, "Наличный" },
-                    { 2, "Безналичный" }
                 });
 
             migrationBuilder.InsertData(
@@ -602,6 +561,21 @@ namespace ServiceCenterApp.Migrations
                     { 3, 50m, "Чистка от пыли + Термопаста" },
                     { 4, 45m, "Установка Windows + Драйверы" },
                     { 5, 100m, "Пайка (Сложный ремонт)" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "TransactionCategories",
+                columns: new[] { "CategoryId", "IsExpense", "Name" },
+                values: new object[,]
+                {
+                    { 1, false, "Оплата заказа" },
+                    { 2, false, "Прочий доход" },
+                    { 3, true, "Закупка запчастей" },
+                    { 4, true, "Аренда" },
+                    { 5, true, "Реклама" },
+                    { 6, true, "Налоги" },
+                    { 7, true, "Хоз. нужды" },
+                    { 8, true, "Прочее" }
                 });
 
             migrationBuilder.InsertData(
@@ -692,6 +666,11 @@ namespace ServiceCenterApp.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FinancialTransactions_CategoryId",
+                table: "FinancialTransactions",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_AcceptorEmployeeId",
                 table: "Orders",
                 column: "AcceptorEmployeeId");
@@ -763,33 +742,6 @@ namespace ServiceCenterApp.Migrations
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payments_OrderId",
-                table: "Payments",
-                column: "OrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Payments_PaymentStatusId",
-                table: "Payments",
-                column: "PaymentStatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Payments_PaymentTypeId",
-                table: "Payments",
-                column: "PaymentTypeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PaymentStatuses_StatusName",
-                table: "PaymentStatuses",
-                column: "StatusName",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PaymentTypes_TypeName",
-                table: "PaymentTypes",
-                column: "TypeName",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Permissions_PermissionKey",
                 table: "Permissions",
                 column: "PermissionKey",
@@ -852,6 +804,9 @@ namespace ServiceCenterApp.Migrations
                 name: "Documents");
 
             migrationBuilder.DropTable(
+                name: "FinancialTransactions");
+
+            migrationBuilder.DropTable(
                 name: "OrderServices");
 
             migrationBuilder.DropTable(
@@ -861,13 +816,13 @@ namespace ServiceCenterApp.Migrations
                 name: "OrderStatusHistories");
 
             migrationBuilder.DropTable(
-                name: "Payments");
-
-            migrationBuilder.DropTable(
                 name: "RolePermissions");
 
             migrationBuilder.DropTable(
                 name: "DocumentTypes");
+
+            migrationBuilder.DropTable(
+                name: "TransactionCategories");
 
             migrationBuilder.DropTable(
                 name: "Services");
@@ -877,12 +832,6 @@ namespace ServiceCenterApp.Migrations
 
             migrationBuilder.DropTable(
                 name: "Orders");
-
-            migrationBuilder.DropTable(
-                name: "PaymentStatuses");
-
-            migrationBuilder.DropTable(
-                name: "PaymentTypes");
 
             migrationBuilder.DropTable(
                 name: "Permissions");

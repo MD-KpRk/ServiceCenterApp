@@ -368,6 +368,44 @@ namespace ServiceCenterApp.Migrations
                     b.ToTable("Employees");
                 });
 
+            modelBuilder.Entity("ServiceCenterApp.Models.FinancialTransaction", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(10, 2)");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RelatedOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("FinancialTransactions");
+                });
+
             modelBuilder.Entity("ServiceCenterApp.Models.Lookup.DocumentType", b =>
                 {
                     b.Property<int>("DocumentTypeId")
@@ -446,77 +484,6 @@ namespace ServiceCenterApp.Migrations
                         {
                             StatusId = 7,
                             StatusName = "Отменен"
-                        });
-                });
-
-            modelBuilder.Entity("ServiceCenterApp.Models.Lookup.PaymentStatus", b =>
-                {
-                    b.Property<int>("PaymentStatusId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentStatusId"));
-
-                    b.Property<string>("StatusName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("PaymentStatusId");
-
-                    b.HasIndex("StatusName")
-                        .IsUnique();
-
-                    b.ToTable("PaymentStatuses");
-
-                    b.HasData(
-                        new
-                        {
-                            PaymentStatusId = 1,
-                            StatusName = "Ожидает оплаты"
-                        },
-                        new
-                        {
-                            PaymentStatusId = 2,
-                            StatusName = "Оплачен"
-                        },
-                        new
-                        {
-                            PaymentStatusId = 3,
-                            StatusName = "Отменён"
-                        });
-                });
-
-            modelBuilder.Entity("ServiceCenterApp.Models.Lookup.PaymentType", b =>
-                {
-                    b.Property<int>("PaymentTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentTypeId"));
-
-                    b.Property<string>("TypeName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("PaymentTypeId");
-
-                    b.HasIndex("TypeName")
-                        .IsUnique();
-
-                    b.ToTable("PaymentTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            PaymentTypeId = 1,
-                            TypeName = "Наличный"
-                        },
-                        new
-                        {
-                            PaymentTypeId = 2,
-                            TypeName = "Безналичный"
                         });
                 });
 
@@ -728,42 +695,6 @@ namespace ServiceCenterApp.Migrations
                     b.ToTable("OrderStatusHistories");
                 });
 
-            modelBuilder.Entity("ServiceCenterApp.Models.Payment", b =>
-                {
-                    b.Property<int>("PaymentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(10, 2)");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("PaymentDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<int>("PaymentStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PaymentTypeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PaymentId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("PaymentStatusId");
-
-                    b.HasIndex("PaymentTypeId");
-
-                    b.ToTable("Payments");
-                });
-
             modelBuilder.Entity("ServiceCenterApp.Models.Position", b =>
                 {
                     b.Property<int>("PositionId")
@@ -961,6 +892,77 @@ namespace ServiceCenterApp.Migrations
                     b.ToTable("Suppliers");
                 });
 
+            modelBuilder.Entity("ServiceCenterApp.Models.TransactionCategory", b =>
+                {
+                    b.Property<int>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+
+                    b.Property<bool>("IsExpense")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("CategoryId");
+
+                    b.ToTable("TransactionCategories");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoryId = 1,
+                            IsExpense = false,
+                            Name = "Оплата заказа"
+                        },
+                        new
+                        {
+                            CategoryId = 2,
+                            IsExpense = false,
+                            Name = "Прочий доход"
+                        },
+                        new
+                        {
+                            CategoryId = 3,
+                            IsExpense = true,
+                            Name = "Закупка запчастей"
+                        },
+                        new
+                        {
+                            CategoryId = 4,
+                            IsExpense = true,
+                            Name = "Аренда"
+                        },
+                        new
+                        {
+                            CategoryId = 5,
+                            IsExpense = true,
+                            Name = "Реклама"
+                        },
+                        new
+                        {
+                            CategoryId = 6,
+                            IsExpense = true,
+                            Name = "Налоги"
+                        },
+                        new
+                        {
+                            CategoryId = 7,
+                            IsExpense = true,
+                            Name = "Хоз. нужды"
+                        },
+                        new
+                        {
+                            CategoryId = 8,
+                            IsExpense = true,
+                            Name = "Прочее"
+                        });
+                });
+
             modelBuilder.Entity("ServiceCenterApp.Models.Associations.OrderService", b =>
                 {
                     b.HasOne("ServiceCenterApp.Models.Order", "Order")
@@ -972,7 +974,7 @@ namespace ServiceCenterApp.Migrations
                     b.HasOne("ServiceCenterApp.Models.Service", "Service")
                         .WithMany("OrderServices")
                         .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
@@ -1083,6 +1085,17 @@ namespace ServiceCenterApp.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("ServiceCenterApp.Models.FinancialTransaction", b =>
+                {
+                    b.HasOne("ServiceCenterApp.Models.TransactionCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("ServiceCenterApp.Models.Order", b =>
                 {
                     b.HasOne("ServiceCenterApp.Models.Employee", "AcceptorEmployee")
@@ -1168,33 +1181,6 @@ namespace ServiceCenterApp.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("ServiceCenterApp.Models.Payment", b =>
-                {
-                    b.HasOne("ServiceCenterApp.Models.Order", "Order")
-                        .WithMany("Payments")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ServiceCenterApp.Models.Lookup.PaymentStatus", "PaymentStatus")
-                        .WithMany()
-                        .HasForeignKey("PaymentStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ServiceCenterApp.Models.Lookup.PaymentType", "PaymentType")
-                        .WithMany()
-                        .HasForeignKey("PaymentTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("PaymentStatus");
-
-                    b.Navigation("PaymentType");
-                });
-
             modelBuilder.Entity("ServiceCenterApp.Models.SparePart", b =>
                 {
                     b.HasOne("ServiceCenterApp.Models.Supplier", "Supplier")
@@ -1236,8 +1222,6 @@ namespace ServiceCenterApp.Migrations
                     b.Navigation("OrderServices");
 
                     b.Navigation("OrderSpareParts");
-
-                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Position", b =>

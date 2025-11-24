@@ -27,6 +27,7 @@ namespace ServiceCenterApp.Data.Configurations
                    .WithMany(c => c.Orders)
                    .HasForeignKey(o => o.ClientId)
                    .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }
