@@ -82,7 +82,10 @@
                         Command="{Binding NavigateCommand}"
                         CommandParameter="Storage"
                         Visibility="{Binding StorageVisibility}"/>
-                <Button Content="Финансы" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource FinanceIcon}" Visibility="{Binding FinanceVisibility}"/>
+                <Button Content="Финансы" Margin="5" Style="{StaticResource MenuButtonStyle}" Tag="{StaticResource FinanceIcon}" 
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Finance"
+                        Visibility="{Binding FinanceVisibility}"/>
             </StackPanel>
 
             <StackPanel VerticalAlignment="Bottom" Margin="0 0 0 10">

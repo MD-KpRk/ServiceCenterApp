@@ -82,7 +82,9 @@ namespace ServiceCenterApp
             services.AddTransient<StorageViewModel>();
             services.AddTransient<AddEditSparePartViewModel>();
             services.AddTransient<AddServiceViewModel>();
-            services.AddTransient<AddEditServiceViewModel>();   
+            services.AddTransient<AddEditServiceViewModel>();
+            services.AddTransient<FinanceViewModel>();
+            services.AddTransient<AddTransactionViewModel>();
 
             // --- VIEWS ---
             services.AddSingleton<MainWindow>();                // Window
@@ -100,6 +102,8 @@ namespace ServiceCenterApp
             services.AddTransient<AddEditSparePartWindow>();    // Window
             services.AddTransient<AddServiceWindow>();          // Window
             services.AddTransient<AddEditServiceWindow>();      // Window
+            services.AddTransient<FinancePage>();               // Page
+            services.AddTransient<AddTransactionWindow>();      // Window
 
             _serviceProvider = services.BuildServiceProvider();
             ConfigureNavigation();
@@ -117,6 +121,8 @@ namespace ServiceCenterApp
             navService.Configure<ClientsViewModel, ClientsPage>();
             navService.Configure<EmployeesViewModel, EmployeesPage>();
             navService.Configure<StorageViewModel, StoragePage>();
+            // === НОВАЯ НАВИГАЦИЯ ===
+            navService.Configure<FinanceViewModel, FinancePage>();
         }
 
         protected override async void OnStartup(StartupEventArgs e)

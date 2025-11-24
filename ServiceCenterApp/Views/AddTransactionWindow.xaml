@@ -1,0 +1,31 @@
+﻿<Window x:Class="ServiceCenterApp.Views.AddTransactionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Внести расход" Height="480" Width="400"
+        WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow">
+    <Grid Margin="20">
+        <StackPanel>
+            <TextBlock Text="НОВЫЙ РАСХОД" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" Margin="0,0,0,20" Foreground="#D32F2F"/>
+
+            <TextBlock Text="Сумма (BYN) *" Style="{StaticResource SectionHeaderStyle}"/>
+            <TextBox Text="{Binding Amount}" Style="{StaticResource EditableTextBoxStyle}"/>
+
+            <TextBlock Text="Категория *" Style="{StaticResource SectionHeaderStyle}"/>
+            <ComboBox ItemsSource="{Binding AvailableCategories}" 
+                      SelectedItem="{Binding SelectedCategory}" 
+                      DisplayMemberPath="Name" 
+                      Style="{StaticResource PageComboBoxStyle}"/>
+
+            <TextBlock Text="Способ оплаты *" Style="{StaticResource SectionHeaderStyle}"/>
+            <ComboBox ItemsSource="{Binding PaymentMethods}" SelectedValue="{Binding SelectedMethod}" SelectedValuePath="Value" Style="{StaticResource PageComboBoxStyle}"/>
+
+            <TextBlock Text="Описание / Комментарий *" Style="{StaticResource SectionHeaderStyle}"/>
+            <TextBox Text="{Binding Description}" TextWrapping="Wrap" Height="60" Style="{StaticResource EditableTextBoxStyle}"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="Отмена" IsCancel="True" Style="{StaticResource SecondaryButtonStyle}" Width="100" Margin="0,0,10,0"/>
+                <Button Content="Списать" Command="{Binding SaveCommand}" Style="{StaticResource AccentButtonStyle}" Background="#D32F2F" Width="120"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
