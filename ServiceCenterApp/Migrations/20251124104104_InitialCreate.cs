@@ -252,31 +252,6 @@ namespace ServiceCenterApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FinancialTransactions",
-                columns: table => new
-                {
-                    TransactionId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    PaymentMethod = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
-                    RelatedOrderId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FinancialTransactions", x => x.TransactionId);
-                    table.ForeignKey(
-                        name: "FK_FinancialTransactions_TransactionCategories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "TransactionCategories",
-                        principalColumn: "CategoryId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Orders",
                 columns: table => new
                 {
@@ -398,6 +373,36 @@ namespace ServiceCenterApp.Migrations
                         column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "OrderId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FinancialTransactions",
+                columns: table => new
+                {
+                    TransactionId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    PaymentMethod = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    RelatedOrderId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FinancialTransactions", x => x.TransactionId);
+                    table.ForeignKey(
+                        name: "FK_FinancialTransactions_Orders_RelatedOrderId",
+                        column: x => x.RelatedOrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId");
+                    table.ForeignKey(
+                        name: "FK_FinancialTransactions_TransactionCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "TransactionCategories",
+                        principalColumn: "CategoryId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -669,6 +674,11 @@ namespace ServiceCenterApp.Migrations
                 name: "IX_FinancialTransactions_CategoryId",
                 table: "FinancialTransactions",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FinancialTransactions_RelatedOrderId",
+                table: "FinancialTransactions",
+                column: "RelatedOrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_AcceptorEmployeeId",

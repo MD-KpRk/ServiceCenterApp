@@ -132,8 +132,6 @@ namespace ServiceCenterApp.ViewModels
             {
                 try
                 {
-                    // Ждем 500мс БЕЗ передачи токена в Delay.
-                    // Это предотвращает выброс TaskCanceledException в консоль Visual Studio.
                     await Task.Delay(500);
 
                     // Проверяем отмену вручную ПОСЛЕ задержки
@@ -255,7 +253,6 @@ namespace ServiceCenterApp.ViewModels
                 }
                 else
                 {
-                    // Обновляем данные существующего клиента, если они изменились
                     clientToUse.FirstName = ClientFirstName;
                     clientToUse.SurName = ClientSurname;
                     clientToUse.Patronymic = ClientPatronymic;
@@ -265,7 +262,6 @@ namespace ServiceCenterApp.ViewModels
 
                 await _context.SaveChangesAsync();
 
-                // 2. Обработка Устройства
                 var newDevice = new Device
                 {
                     DeviceType = DeviceType,
@@ -276,32 +272,55 @@ namespace ServiceCenterApp.ViewModels
                 _context.Devices.Add(newDevice);
                 await _context.SaveChangesAsync();
 
-                // 3. Создание Заказа
-                int newStatusId = (int)OrderStatusEnum.New;
+                int statusNewId = (int)OrderStatusEnum.New;
+                int statusInProgressId = (int)OrderStatusEnum.InProgress;
+                int currentEmployeeId = _currentUserService.CurrentUser.EmployeeId;
+                DateTime now = DateTime.Now;
 
                 var newOrder = new Order
                 {
-                    RegistrationDate = DateTime.Now,
+                    RegistrationDate = now,
                     ClientId = clientToUse.ClientId,
                     DeviceId = newDevice.DeviceId,
-                    StatusId = newStatusId,
+                    StatusId = statusNewId, 
                     PriorityId = SelectedPriority.PriorityId,
                     ProblemDescription = ProblemDescription,
                     Comment = Comment,
-                    CreatorEmployeeId = _currentUserService.CurrentUser.EmployeeId,
-                    AcceptorEmployeeId = SelectedMaster?.EmployeeId
+                    CreatorEmployeeId = currentEmployeeId,
+                    AcceptorEmployeeId = null
                 };
 
-                if (newOrder.AcceptorEmployeeId.HasValue)
+                var historyNew = new OrderStatusHistory
                 {
-                    newOrder.StatusId = (int)OrderStatusEnum.InProgress;
+                    Order = newOrder, 
+                    OldStatusId = statusNewId, 
+                    NewStatusId = statusNewId,
+                    EmployeeId = currentEmployeeId,
+                    ChangeDate = now
+                };
+                _context.OrderStatusHistories.Add(historyNew);
+
+                if (SelectedMaster != null)
+                {
+                    newOrder.AcceptorEmployeeId = SelectedMaster.EmployeeId;
+                    newOrder.StatusId = statusInProgressId;
+                    newOrder.StartDate = now; 
+
+                    var historyProgress = new OrderStatusHistory
+                    {
+                        Order = newOrder,
+                        OldStatusId = statusNewId,        
+                        NewStatusId = statusInProgressId, 
+                        EmployeeId = currentEmployeeId,
+                        ChangeDate = now.AddSeconds(1)
+                    };
+                    _context.OrderStatusHistories.Add(historyProgress);
                 }
 
                 _context.Orders.Add(newOrder);
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
-
 
                 try
                 {

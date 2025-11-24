@@ -403,6 +403,8 @@ namespace ServiceCenterApp.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("RelatedOrderId");
+
                     b.ToTable("FinancialTransactions");
                 });
 
@@ -1093,7 +1095,13 @@ namespace ServiceCenterApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ServiceCenterApp.Models.Order", "RelatedOrder")
+                        .WithMany()
+                        .HasForeignKey("RelatedOrderId");
+
                     b.Navigation("Category");
+
+                    b.Navigation("RelatedOrder");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Order", b =>

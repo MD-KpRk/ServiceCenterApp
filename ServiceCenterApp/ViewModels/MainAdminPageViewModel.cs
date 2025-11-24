@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ServiceCenterApp.Data;
+using ServiceCenterApp.Data.Configurations; // Для OrderStatusEnum
 using ServiceCenterApp.Services.Interfaces;
+using ServiceCenterApp.Models; // Для TransactionType
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -21,71 +23,33 @@ namespace ServiceCenterApp.ViewModels
     {
         private readonly ApplicationDbContext _context;
 
-        #region Order KPI Properties
-
+        #region KPI Properties
         private int _totalOrdersCount;
-        public int TotalOrdersCount
-        {
-            get => _totalOrdersCount;
-            set { _totalOrdersCount = value; OnPropertyChanged(); }
-        }
+        public int TotalOrdersCount { get => _totalOrdersCount; set { _totalOrdersCount = value; OnPropertyChanged(); } }
 
         private int _newOrdersCount;
-        public int NewOrdersCount
-        {
-            get => _newOrdersCount;
-            set { _newOrdersCount = value; OnPropertyChanged(); }
-        }
+        public int NewOrdersCount { get => _newOrdersCount; set { _newOrdersCount = value; OnPropertyChanged(); } }
 
         private int _inProgressOrdersCount;
-        public int InProgressOrdersCount
-        {
-            get => _inProgressOrdersCount;
-            set { _inProgressOrdersCount = value; OnPropertyChanged(); }
-        }
+        public int InProgressOrdersCount { get => _inProgressOrdersCount; set { _inProgressOrdersCount = value; OnPropertyChanged(); } }
 
         private int _readyForPickupCount;
-        public int ReadyForPickupCount
-        {
-            get => _readyForPickupCount;
-            set { _readyForPickupCount = value; OnPropertyChanged(); }
-        }
-
-        #endregion
-
-        #region Financial KPI Properties
+        public int ReadyForPickupCount { get => _readyForPickupCount; set { _readyForPickupCount = value; OnPropertyChanged(); } }
 
         private decimal _totalAmountDue;
-        public decimal TotalAmountDue
-        {
-            get => _totalAmountDue;
-            set { _totalAmountDue = value; OnPropertyChanged(); }
-        }
+        public decimal TotalAmountDue { get => _totalAmountDue; set { _totalAmountDue = value; OnPropertyChanged(); } }
 
         private decimal _earnedToday;
-        public decimal EarnedToday
-        {
-            get => _earnedToday;
-            set { _earnedToday = value; OnPropertyChanged(); }
-        }
+        public decimal EarnedToday { get => _earnedToday; set { _earnedToday = value; OnPropertyChanged(); } }
 
         private decimal _earnedThisMonth;
-        public decimal EarnedThisMonth
-        {
-            get => _earnedThisMonth;
-            set { _earnedThisMonth = value; OnPropertyChanged(); }
-        }
+        public decimal EarnedThisMonth { get => _earnedThisMonth; set { _earnedThisMonth = value; OnPropertyChanged(); } }
 
         private decimal _totalRevenue;
         public decimal TotalRevenue { get => _totalRevenue; set { _totalRevenue = value; OnPropertyChanged(); } }
-
         #endregion
-
-        #region Employee Performance Properties
 
         public ObservableCollection<EmployeePerformanceViewModel> EmployeePerformanceData { get; set; }
-
-        #endregion
 
         public MainAdminPageViewModel(ApplicationDbContext context)
         {
@@ -99,8 +63,6 @@ namespace ServiceCenterApp.ViewModels
             await LoadDashboardDataAsync();
         }
 
-
-        // TODO. REWORK IT. HARDCODE ATTENTION
         public async Task LoadDashboardDataAsync()
         {
             try
@@ -108,40 +70,72 @@ namespace ServiceCenterApp.ViewModels
                 var today = DateTime.Today;
                 var startOfMonth = new DateTime(today.Year, today.Month, 1);
 
-                TotalOrdersCount = await _context.Orders.CountAsync();
-                NewOrdersCount = await _context.Orders.CountAsync(o => o.Status.StatusName == "Новая");
-                var inProgressStatuses = new[] { "В диагностике", "Ожидает запчасть", "В работе" };
-                InProgressOrdersCount = await _context.Orders.CountAsync(o => o.Status != null && inProgressStatuses.Contains(o.Status.StatusName));
-                ReadyForPickupCount = await _context.Orders.CountAsync(o => o.Status.StatusName == "Готов к выдаче");
+                // Загружаем заказы для счетчиков
+                var orders = await _context.Orders.AsNoTracking().Include(o => o.Status).ToListAsync();
 
-                //TotalAmountDue = await _context.Payments
-                //    .Where(p => p.PaymentStatus.StatusName == "Ожидает оплаты" && p.Order.Status.StatusName == "Готов к выдаче")
-                //    .SumAsync(p => p.Amount);
+                TotalOrdersCount = orders.Count;
+                NewOrdersCount = orders.Count(o => o.StatusId == (int)OrderStatusEnum.New);
 
-                //EarnedToday = await _context.Payments
-                //    .Where(p => p.PaymentStatus.StatusName == "Оплачен" && p.PaymentDate.Date == today)
-                //    .SumAsync(p => p.Amount);
+                // В работе (4) и другие промежуточные статусы, если добавите
+                InProgressOrdersCount = orders.Count(o => o.StatusId == (int)OrderStatusEnum.InProgress);
 
-                //EarnedThisMonth = await _context.Payments
-                //    .Where(p => p.PaymentStatus.StatusName == "Оплачен" && p.PaymentDate >= startOfMonth)
-                //    .SumAsync(p => p.Amount);
+                // Готовы к выдаче (Если такого статуса нет в Enum, используем логику. 
+                // Но у нас Completed = 6 - это уже выдан. 
+                // Если "Готов к выдаче" убран, то это поле можно убрать или переделать на Completed).
+                // Допустим, ReadyForPickupCount теперь показывает "Выданные".
+                ReadyForPickupCount = orders.Count(o => o.StatusId == (int)OrderStatusEnum.Completed);
 
-                //TotalRevenue = await _context.Payments
-                //    .Where(p => p.PaymentStatus.StatusName == "Оплачен")
-                //    .SumAsync(p => p.Amount);
 
+                // === ФИНАНСЫ (НОВАЯ ЛОГИКА) ===
+                // Грузим транзакции с привязкой к заказу
+                var transactions = await _context.FinancialTransactions
+                    .AsNoTracking()
+                    .Include(t => t.RelatedOrder)
+                    .Where(t => t.Type == TransactionType.Income) // Только доходы
+                    .ToListAsync();
+
+                // Фильтруем: Считаем доход ТОЛЬКО если Заказ завершен (StatusId == 6)
+                // ИЛИ если транзакция не привязана к заказу (RelatedOrderId == null)
+                var completedTransactions = transactions.Where(t =>
+                    t.RelatedOrderId == null ||
+                    (t.RelatedOrder != null && t.RelatedOrder.StatusId == (int)OrderStatusEnum.Completed)
+                ).ToList();
+
+                // 1. Выручка сегодня (только по закрытым заказам)
+                EarnedToday = completedTransactions
+                    .Where(t => t.Date.Date == today)
+                    .Sum(t => t.Amount);
+
+                // 2. Выручка за месяц
+                EarnedThisMonth = completedTransactions
+                    .Where(t => t.Date >= startOfMonth)
+                    .Sum(t => t.Amount);
+
+                // 3. Общая выручка
+                TotalRevenue = completedTransactions.Sum(t => t.Amount);
+
+                // 4. Долги клиентов (Сумма заказов, которые ВЫДАНЫ, но НЕ ОПЛАЧЕНЫ полностью)
+                // Это сложнее посчитать точно без перебора всех заказов, пока можно оставить 0 или упростить.
+                TotalAmountDue = 0;
+
+
+                // === KPI СОТРУДНИКОВ ===
                 EmployeePerformanceData.Clear();
                 var employeeData = await _context.Employees
                     .Where(e => e.AcceptedOrders.Any())
                     .Include(e => e.Position)
                     .Include(e => e.AcceptedOrders)
-                        .ThenInclude(o => o.Status)
                     .Select(e => new EmployeePerformanceViewModel
                     {
                         FullName = $"{e.SurName} {e.FirstName}",
                         Position = e.Position.PositionName,
-                        InProgressOrdersCount = e.AcceptedOrders.Count(o => o.Status != null && inProgressStatuses.Contains(o.Status.StatusName)),
-                        CompletedThisMonthCount = e.AcceptedOrders.Count(o => o.Status.StatusName == "Выдан" && o.EndDate.HasValue && o.EndDate.Value >= startOfMonth)
+                        // В работе
+                        InProgressOrdersCount = e.AcceptedOrders.Count(o => o.StatusId == (int)OrderStatusEnum.InProgress),
+                        // Завершено в этом месяце (StatusId == 6)
+                        CompletedThisMonthCount = e.AcceptedOrders.Count(o =>
+                            o.StatusId == (int)OrderStatusEnum.Completed &&
+                            o.EndDate.HasValue &&
+                            o.EndDate.Value >= startOfMonth)
                     })
                     .OrderByDescending(e => e.InProgressOrdersCount)
                     .ToListAsync();

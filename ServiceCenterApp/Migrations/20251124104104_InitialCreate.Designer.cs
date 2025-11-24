@@ -12,7 +12,7 @@ using ServiceCenterApp.Data;
 namespace ServiceCenterApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251124102308_InitialCreate")]
+    [Migration("20251124104104_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -405,6 +405,8 @@ namespace ServiceCenterApp.Migrations
                     b.HasKey("TransactionId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("RelatedOrderId");
 
                     b.ToTable("FinancialTransactions");
                 });
@@ -1096,7 +1098,13 @@ namespace ServiceCenterApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ServiceCenterApp.Models.Order", "RelatedOrder")
+                        .WithMany()
+                        .HasForeignKey("RelatedOrderId");
+
                     b.Navigation("Category");
+
+                    b.Navigation("RelatedOrder");
                 });
 
             modelBuilder.Entity("ServiceCenterApp.Models.Order", b =>

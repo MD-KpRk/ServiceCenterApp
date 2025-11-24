@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ServiceCenterApp.Data;
+using ServiceCenterApp.Data.Configurations; // Для OrderStatusEnum
 using ServiceCenterApp.Models;
 using ServiceCenterApp.Services.Interfaces;
 using ServiceCenterApp.Views;
@@ -47,9 +48,11 @@ namespace ServiceCenterApp.ViewModels
             var now = DateTime.Now;
             var startOfMonth = new DateTime(now.Year, now.Month, 1);
 
+            // 1. Загружаем транзакции + Статус связанного заказа
             var list = await _context.FinancialTransactions
                 .AsNoTracking()
                 .Include(t => t.Category)
+                .Include(t => t.RelatedOrder) // <--- ВАЖНО: Грузим заказ, чтобы проверить статус
                 .OrderByDescending(t => t.Date)
                 .ToListAsync();
 
@@ -60,19 +63,25 @@ namespace ServiceCenterApp.ViewModels
             var totalExpense = list.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
             CurrentBalance = totalIncome - totalExpense;
 
-            IncomeThisMonth = list.Where(t => t.Type == TransactionType.Income && t.Date >= startOfMonth).Sum(t => t.Amount);
-            ExpenseThisMonth = list.Where(t => t.Type == TransactionType.Expense && t.Date >= startOfMonth).Sum(t => t.Amount);
+            IncomeThisMonth = list
+                .Where(t =>
+                    t.Type == TransactionType.Income &&
+                    t.Date >= startOfMonth &&
+                    (t.RelatedOrder == null || t.RelatedOrder.StatusId == (int)OrderStatusEnum.Completed) // <--- УСЛОВИЕ
+                )
+                .Sum(t => t.Amount);
+
+            ExpenseThisMonth = list
+                .Where(t => t.Type == TransactionType.Expense && t.Date >= startOfMonth)
+                .Sum(t => t.Amount);
         }
 
         private async void ExecuteAddExpense()
         {
             var vm = new AddTransactionViewModel(_context);
-
-            // Инициализируем как РАСХОД
             await vm.InitializeAsync(TransactionType.Expense);
 
             var window = new AddTransactionWindow(vm);
-
             if (window.ShowDialog() == true)
             {
                 _ = LoadDataAsync();

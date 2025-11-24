@@ -244,7 +244,6 @@ namespace ServiceCenterApp.ViewModels
             if (SelectedOrderDetails == null) return;
 
             var settingsWindow = new DocumentSettingsWindow(SelectedOrderDetails.WarrantyDays);
-
             if (settingsWindow.ShowDialog() != true) return;
 
             try
@@ -253,33 +252,13 @@ namespace ServiceCenterApp.ViewModels
                 CommandManager.InvalidateRequerySuggested();
 
                 int selectedDays = settingsWindow.ViewModel.SelectedDays;
-
                 SelectedOrderDetails.WarrantyDays = selectedDays;
-
-                int completedStatusId = (int)OrderStatusEnum.Completed;
-
-                if (SelectedOrderDetails.StatusId != completedStatusId)
-                {
-                    SelectedOrderDetails.StatusId = completedStatusId;
-
-                    SelectedOrderStatus = AllOrderStatuses.FirstOrDefault(s => s.StatusId == completedStatusId);
-
-                    if (SelectedOrderDetails.EndDate == null)
-                    {
-                        SelectedOrderDetails.EndDate = DateTime.Now;
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-
+                await SaveInternalAsync();
                 var docFlow = _printService.CreateWorkCompletionDocument(SelectedOrderDetails);
-
                 await _documentService.CreateAndSaveDocumentAsync(SelectedOrderDetails, 2, docFlow);
-
                 await LoadDocumentsAsync(SelectedOrderDetails.OrderId);
-                await LoadHistoryAsync(SelectedOrderDetails.OrderId);
 
-                MessageBox.Show($"Акт сформирован. Статус заказа изменен на 'Выдан'. Гарантия: {selectedDays} дн.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Акт выполненных работ сформирован.\nГарантия: {selectedDays} дн.", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -291,6 +270,7 @@ namespace ServiceCenterApp.ViewModels
                 CommandManager.InvalidateRequerySuggested();
             }
         }
+
 
         private void ExecuteOpenDocument(Document doc)
         {
@@ -552,6 +532,7 @@ namespace ServiceCenterApp.ViewModels
                     .FirstOrDefaultAsync();
 
                 var newStatusId = SelectedOrderDetails.StatusId;
+                int completedStatusId = (int)OrderStatusEnum.Completed; // ID = 6
 
                 if (dbStatusId != 0 && dbStatusId != newStatusId)
                 {
@@ -564,21 +545,48 @@ namespace ServiceCenterApp.ViewModels
                         ChangeDate = DateTime.Now
                     };
                     _context.OrderStatusHistories.Add(historyRecord);
+
+                    if (newStatusId == completedStatusId)
+                    {
+                        if (SelectedOrderDetails.EndDate == null)
+                        {
+                            SelectedOrderDetails.EndDate = DateTime.Now;
+                        }
+
+                        CalculateTotalSum();
+                        var alreadyPaid = await _context.FinancialTransactions
+                            .Where(t => t.RelatedOrderId == SelectedOrderDetails.OrderId && t.Type == TransactionType.Income)
+                            .SumAsync(t => t.Amount);
+
+                        decimal debtToPay = GrandTotalSum - alreadyPaid;
+
+                        if (debtToPay > 0)
+                        {
+                            var autoPayment = new FinancialTransaction
+                            {
+                                Date = DateTime.Now,
+                                Amount = debtToPay,
+                                Type = TransactionType.Income,
+                                CategoryId = 1,
+                                PaymentMethod = PaymentMethod.Cash, 
+                                Description = $"Закрытие заказа №{SelectedOrderDetails.OrderId} (Авто-оплата долга)",
+                                RelatedOrderId = SelectedOrderDetails.OrderId
+                            };
+
+                            _context.FinancialTransactions.Add(autoPayment);
+
+                            PaidSum += debtToPay;
+                        }
+                    }
                 }
 
                 if (SelectedOrderDetails.StatusId != 0)
-                {
                     SelectedOrderDetails.Status = await _context.OrderStatuses.FindAsync(SelectedOrderDetails.StatusId);
-                }
 
                 if (SelectedOrderDetails.AcceptorEmployeeId.HasValue)
-                {
                     SelectedOrderDetails.AcceptorEmployee = await _context.Employees.FindAsync(SelectedOrderDetails.AcceptorEmployeeId);
-                }
                 else
-                {
                     SelectedOrderDetails.AcceptorEmployee = null;
-                }
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -586,6 +594,10 @@ namespace ServiceCenterApp.ViewModels
                 if (dbStatusId != 0 && dbStatusId != newStatusId)
                 {
                     await LoadHistoryAsync(SelectedOrderDetails.OrderId);
+                    if (newStatusId == completedStatusId)
+                    {
+                        await LoadPaymentsAsync(SelectedOrderDetails.OrderId);
+                    }
                 }
 
                 if (SelectedOrderInList != null)
